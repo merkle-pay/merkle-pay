@@ -1,0 +1,32 @@
+{
+  "name": "merkle-pay",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.6.4",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 8888",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@solana/kit": "catalog:pay",
+    "@solana/pay": "catalog:pay",
+    "next": "catalog:pay",
+    "react": "catalog:pay",
+    "react-dom": "catalog:pay",
+    "react-aria-components": "catalog:pay"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "catalog:pay",
+    "@types/node": "catalog:pay",
+    "@types/react": "catalog:pay",
+    "@types/react-dom": "catalog:pay",
+    "eslint": "catalog:pay",
+    "eslint-config-next": "catalog:pay",
+    "typescript": "catalog:pay",
+    "sass": "catalog:pay",
+    "zod": "catalog:pay",
+    "zod-validation-error": "catalog:pay"
+  }
+}
