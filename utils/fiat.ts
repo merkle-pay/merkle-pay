@@ -1,14 +1,4 @@
-export type Currency =
-  | "USD"
-  | "CAD"
-  | "EUR"
-  | "CNY"
-  | "KRW"
-  | "JPY"
-  | "HKD"
-  | "SGD"
-  | "AUD"
-  | "GBP";
+import { FiatCurrency } from "../types/currency";
 
 export const FIAT_CURRENCIES = [
   {
@@ -51,4 +41,4 @@ export const FIAT_CURRENCIES = [
     label: "GBP (British Pound)",
     value: "GBP",
   },
-] as const satisfies Array<{ label: string; value: Currency }>;
+] as const satisfies Array<{ label: string; value: FiatCurrency }>;
