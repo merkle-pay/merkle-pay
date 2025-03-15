@@ -1,15 +1,13 @@
-import { FiatCurrency, StableCoin } from "./currency";
+import { StableCoin } from "./currency";
 
 export type Order = {
   orderId: string;
   blockchain: string;
-  receiver_address: string;
   payer_name: string;
   payer_email: string;
-  stable_coin: StableCoin;
-  stable_coin_amount: string;
-  fiat_currency: FiatCurrency;
-  fiat_amount: string;
+  receiver_address: string;
+  crypto_currency: StableCoin; // only stable coin is supported for now
+  crypto_amount: string;
   status:
     | "initiated"
     | "pending"
