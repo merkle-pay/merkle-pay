@@ -11,3 +11,7 @@ build:
 lint:
 	pnpm --filter merkle-pay lint
 	pnpm --filter merkle-dashboard lint
+
+clean:
+	rm -rf node_modules
+	rm -rf apps/merkle-pay/node_modules
