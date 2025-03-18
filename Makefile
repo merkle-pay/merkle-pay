@@ -1,14 +1,13 @@
-.PHONY: dev build start lint
-
+.PHONY: dev build lint
 
 dev:
-	npm run dev
+	pnpm --filter merkle-pay dev
+	pnpm --filter merkle-dashboard dev
 
 build:
-	npm run build
-
-start:
-	npm run start
+	pnpm --filter merkle-pay build && \
+	pnpm --filter merkle-dashboard build
 
 lint:
-	npm run lint
+	pnpm --filter merkle-pay lint
+	pnpm --filter merkle-dashboard lint
