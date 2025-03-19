@@ -1,8 +1,7 @@
 .PHONY: dev build lint
 
 dev:
-	pnpm --filter merkle-pay dev
-	pnpm --filter merkle-dashboard dev
+	pnpm dev
 
 build:
 	pnpm --filter merkle-pay build && \
