@@ -1,4 +1,4 @@
-.PHONY: dev build lint
+.PHONY: dev-pay dev-dashboard dev build lint
 
 dev:
 	$(MAKE) -j2 dev-pay dev-dashboard
