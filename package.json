@@ -8,11 +8,5 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "scripts": {
-    "dev": "concurrently \"pnpm --filter merkle-pay dev\" \"pnpm --filter merkle-dashboard dev\""
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2"
-  }
+  ]
 }
