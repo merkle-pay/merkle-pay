@@ -1,3 +1,5 @@
+import { Link } from "react-aria-components";
+
 export default function Home() {
   return (
     <div className="flex flex-col">
@@ -6,7 +8,7 @@ export default function Home() {
         Merkle Pay is a payment protocol for the blockchain. It allows users to
         send and receive payments using stablecoins, such as USDC and USDT.
       </p>
-      <button>Pay</button>
+      <Link href="/pay">Pay</Link>
     </div>
   );
 }

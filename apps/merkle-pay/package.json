@@ -14,7 +14,8 @@
     "@solana/pay": "catalog:pay",
     "next": "catalog:pay",
     "react": "catalog:pay",
-    "react-dom": "catalog:pay"
+    "react-dom": "catalog:pay",
+    "react-aria-components": "catalog:pay"
   },
   "devDependencies": {
     "@eslint/eslintrc": "catalog:pay",
@@ -25,6 +26,9 @@
     "eslint": "catalog:pay",
     "eslint-config-next": "catalog:pay",
     "tailwindcss": "catalog:pay",
-    "typescript": "catalog:pay"
+    "typescript": "catalog:pay",
+    "sass": "catalog:pay",
+    "zod": "catalog:pay",
+    "zod-validation-error": "catalog:pay"
   }
 }

@@ -1,4 +1,7 @@
-.PHONY: dev-pay dev-dashboard dev build lint
+.PHONY: i dev-pay dev-dashboard dev build lint
+
+i:
+	pnpm install
 
 dev:
 	$(MAKE) -j2 dev-pay dev-dashboard
