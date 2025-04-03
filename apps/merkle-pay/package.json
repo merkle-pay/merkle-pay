@@ -27,6 +27,8 @@
     "typescript": "catalog:pay",
     "sass": "catalog:pay",
     "zod": "catalog:pay",
-    "zod-validation-error": "catalog:pay"
+    "zod-validation-error": "catalog:pay",
+    "@tailwindcss/postcss": "catalog:pay",
+    "tailwindcss": "catalog:pay"
   }
 }
