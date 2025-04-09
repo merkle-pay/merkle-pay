@@ -3,7 +3,7 @@ import { Layout as ArcoLayout, Link, Typography } from "@arco-design/web-react";
 import { RecipientWallet } from "../../../types/recipient";
 import { useEffect } from "react";
 import { usePaymentStore } from "src/store/payment-store";
-
+import Image from "next/image";
 export const Layout = ({
   children,
   solanaWallets,
@@ -25,7 +25,10 @@ export const Layout = ({
 
   return (
     <ArcoLayout className={styles.layout}>
-      <ArcoLayout.Header className={styles.header}>Header</ArcoLayout.Header>
+      <ArcoLayout.Header className={styles.header}>
+        <Image src="/logo.png" alt="logo" width={32} height={32} />
+        <Typography.Title heading={5}>Merkle Pay</Typography.Title>
+      </ArcoLayout.Header>
       <ArcoLayout.Content className={styles.content}>
         {children}
       </ArcoLayout.Content>
