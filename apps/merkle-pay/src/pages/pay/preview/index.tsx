@@ -1,4 +1,9 @@
-import { Button } from "@arco-design/web-react";
+import {
+  Button,
+  Descriptions,
+  Space,
+  Typography,
+} from "@arco-design/web-react";
 import { usePaymentContext } from "../../../context/PaymentContext";
 import { useRouter } from "next/router";
 import { paymentSchema } from "../../../../types/payment";
@@ -18,11 +23,13 @@ export default function PayPreviewPage() {
   if (!success) {
     // You can either redirect or show a message
     return (
-      <div>
-        <p>Payment data is invalid. Please return to the payment page.</p>
-        <p>{fromError(error).message}</p>
-        <button onClick={() => router.push("/pay")}>Back to Payment</button>
-      </div>
+      <Space direction="vertical" size={16}>
+        <Typography.Title>Payment data is invalid</Typography.Title>
+        <Typography.Text>{fromError(error).message}</Typography.Text>
+        <Button type="outline" onClick={() => router.push("/pay")}>
+          Back to Payment
+        </Button>
+      </Space>
     );
   }
 
@@ -32,17 +39,48 @@ export default function PayPreviewPage() {
   };
 
   return (
-    <div>
+    <Space direction="vertical" size={16}>
       <h1>Payment Preview</h1>
-      <p>
-        Amount: {payment.amount} {payment.token}
-      </p>
-      <p>Blockchain: {payment.blockchain}</p>
-      <p>Recipient: {payment.recipient_address}</p>
-      <p>Order ID: {payment.orderId}</p>
+      <Descriptions
+        column={1}
+        data={[
+          {
+            label: "Payer",
+            value: payment.payer,
+          },
+          {
+            label: "App ID",
+            value: payment.appId,
+          },
+          {
+            label: "Blockchain",
+            value: payment.blockchain,
+          },
+          {
+            label: "Amount",
+            value: `${payment.amount} ${payment.token}`,
+          },
+          {
+            label: "Recipient",
+            value: payment.recipient_address,
+          },
 
-      <Button onClick={() => router.push("/pay")}>Back</Button>
-      <Button onClick={handleConfirmPayment}>Confirm Payment</Button>
-    </div>
+          {
+            label: "Order ID",
+            value: payment.orderId,
+          },
+        ]}
+        size={"medium"}
+      />
+
+      <Space size={16}>
+        <Button type="outline" onClick={() => router.push("/pay")}>
+          Back
+        </Button>
+        <Button type="primary" onClick={handleConfirmPayment}>
+          Confirm Payment
+        </Button>
+      </Space>
+    </Space>
   );
 }

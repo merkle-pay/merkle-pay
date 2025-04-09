@@ -81,7 +81,7 @@ export const paymentSchema = z.object({
   orderId: z.string(),
   returnUrl: z.string().optional(),
   appId: z.string(),
-  sender: z.string(),
+  payer: z.string(),
 });
 
 export type Payment = z.infer<typeof paymentSchema>;

@@ -12,7 +12,7 @@ const PaymentContext = createContext<PaymentContextValue>({
     orderId: "",
     returnUrl: "",
     appId: "",
-    sender: "",
+    payer: "",
   } satisfies Payment,
   setPayment: () => {},
   solanaWallets: [],
@@ -43,7 +43,7 @@ export const PaymentProvider = ({
     orderId: "",
     returnUrl: "",
     appId: "",
-    sender: "",
+    payer: "",
   });
 
   return (

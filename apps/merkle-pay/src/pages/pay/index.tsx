@@ -4,6 +4,8 @@ import {
   Button,
   Select,
   InputNumber,
+  Typography,
+  Space,
 } from "@arco-design/web-react";
 import { useRouter } from "next/router";
 import { PayPageQuery, paymentSchema } from "../../../types/payment";
@@ -12,6 +14,7 @@ import { fromError } from "zod-validation-error";
 import { usePaymentContext } from "../../context/PaymentContext";
 import { RecipientWallet } from "../../../types/recipient";
 import styles from "./index.module.scss";
+import { useEffect, useState } from "react";
 
 // import { GetServerSidePropsContext } from "next/types";
 
@@ -28,6 +31,7 @@ import styles from "./index.module.scss";
 export default function PayPage() {
   const [form] = Form.useForm();
   const router = useRouter();
+  const [isFormInitialized, setIsFormInitialized] = useState(false);
 
   // allow empty values
   // blockchain here is only for confirm the blockchain type,
@@ -51,6 +55,33 @@ export default function PayPage() {
     tokenOptions,
   } = usePaymentContext();
 
+  useEffect(() => {
+    const initialValues = {
+      payer,
+      blockchain,
+      token,
+      recipient_address,
+      amount: amount ? Number(amount) : undefined,
+      orderId,
+      returnUrl: returnUrl || "/pay/status",
+      appId: appIdFromContext ?? appId,
+    };
+
+    form.setFieldsValue(initialValues);
+    setIsFormInitialized(true);
+  }, [
+    payer,
+    blockchain,
+    token,
+    recipient_address,
+    amount,
+    orderId,
+    returnUrl,
+    appId,
+    appIdFromContext,
+    form,
+  ]);
+
   // Protection for empty solanaWallets
   const isWalletsConfigured = solanaWallets?.length > 0;
   // Protection for empty blockchain
@@ -60,20 +91,49 @@ export default function PayPage() {
 
   if (!isWalletsConfigured || !isBlockchainSupported) {
     return (
-      <div className={styles.errorContainer}>
-        <h2>Configuration Error</h2>
+      <Space direction="vertical" size={16}>
+        <Typography.Title>Configuration Error</Typography.Title>
         {!isWalletsConfigured && (
-          <p>No wallet addresses have been configured.</p>
+          <Typography.Text>
+            No wallet addresses have been configured.
+          </Typography.Text>
         )}
         {!isBlockchainSupported && (
-          <p>No wallet addresses have been configured for this blockchain.</p>
+          <Typography.Text>
+            No wallet addresses have been configured for this blockchain.
+          </Typography.Text>
         )}
-        <p>
+        <Typography.Text>
           Please contact the administrator to set up receiving wallet addresses.
-        </p>
-      </div>
+        </Typography.Text>
+      </Space>
     );
   }
+  const updateQueryParam = (values: {
+    key: keyof PayPageQuery;
+    value: string | number;
+  }) => {
+    const nextQuery = new URLSearchParams();
+    Object.entries(router.query).forEach(([key, value]) => {
+      nextQuery.set(key, value?.toString() ?? "");
+    });
+    Object.entries(values).forEach(([key, value]) => {
+      if (value) {
+        nextQuery.set(key, value?.toString() ?? "");
+      } else {
+        nextQuery.delete(key);
+      }
+    });
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: Object.fromEntries(nextQuery),
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const goToPreview = () => {
     // Save all payment data to context
@@ -100,24 +160,13 @@ export default function PayPage() {
     router.push("/pay/preview");
   };
 
-  const updateQueryParam = (values: {
-    key: keyof PayPageQuery;
-    value: string | number;
-  }) => {
-    router.push({
-      pathname: router.pathname,
-      query: { ...router.query, ...values },
-    });
-  };
-
-  console.log("token", token);
-
   return (
     <Form
       className={styles.form}
       form={form}
       layout="vertical"
-      onValuesChange={(_, allValues) => {
+      onValuesChange={(changedValues, allValues) => {
+        if (!isFormInitialized) return;
         updateQueryParam(
           allValues as {
             key: keyof PayPageQuery;
@@ -128,7 +177,6 @@ export default function PayPage() {
     >
       <Form.Item label="App Id" field="appId" required>
         <Input
-          value={appIdFromContext ?? appId}
           readOnly={
             !!appIdFromContext /* when appIdFromContext is set in the env, it's not editable */
           }
@@ -139,13 +187,13 @@ export default function PayPage() {
         label="Payer"
         field="payer"
         required
-        extra={`Dear ${payer ?? "customer"}, you are paying for the following order:`}
+        extra={`Dear ${payer || "customer"}, you are paying for the following order:`}
       >
-        <Input value={payer} />
+        <Input />
       </Form.Item>
 
       <Form.Item label="Blockchain" field="blockchain" required>
-        <Select value={blockchain} placeholder="Select blockchain">
+        <Select placeholder="Select blockchain">
           {solanaWallets.map((option: RecipientWallet) => (
             <Select.Option key={option.blockchain} value={option.blockchain}>
               {option.blockchain}
@@ -154,7 +202,7 @@ export default function PayPage() {
         </Select>
       </Form.Item>
       <Form.Item label="Token" field="token" required>
-        <Select value={token} placeholder="Select token symbol">
+        <Select placeholder="Select token symbol">
           {tokenOptions.map((option) => (
             <Select.Option key={option} value={option}>
               {option}
@@ -164,18 +212,15 @@ export default function PayPage() {
       </Form.Item>
 
       <Form.Item label="Amount" field="amount" required>
-        <InputNumber value={amount} />
+        <InputNumber />
       </Form.Item>
 
       <Form.Item label="Order Id" field="orderId" required>
-        <Input value={orderId} />
+        <Input />
       </Form.Item>
 
       <Form.Item label="Recipient" field="recipient_address" required>
-        <Select
-          value={recipient_address}
-          placeholder="Select recipient's wallet address"
-        >
+        <Select placeholder="Select recipient's wallet address">
           {solanaWallets.map((option: RecipientWallet) => (
             <Select.Option key={option.address} value={option.address}>
               {option.address}
@@ -185,7 +230,7 @@ export default function PayPage() {
       </Form.Item>
 
       <Form.Item label="Return Url" field="returnUrl" required>
-        <Input value={returnUrl ?? "/pay/status"} />
+        <Input />
       </Form.Item>
 
       <Button
