@@ -5,7 +5,7 @@ import { RecipientWallet } from "../../types/recipient";
 // Create the context with default values
 const PaymentContext = createContext<PaymentContextValue>({
   payment: {
-    recipientAddress: "",
+    recipient_address: "",
     amount: 0,
     token: "",
     blockchain: "",
@@ -16,6 +16,8 @@ const PaymentContext = createContext<PaymentContextValue>({
   } satisfies Payment,
   setPayment: () => {},
   solanaWallets: [],
+  appId: "",
+  tokenOptions: [],
 });
 
 // Custom hook to use the context
@@ -25,12 +27,16 @@ export const usePaymentContext = () => useContext(PaymentContext);
 export const PaymentProvider = ({
   children,
   solanaWallets,
+  appId,
+  tokenOptions,
 }: {
   children: ReactNode;
   solanaWallets: RecipientWallet[];
+  appId: string | undefined;
+  tokenOptions: string[];
 }) => {
   const [payment, setPayment] = useState<Payment>({
-    recipientAddress: "",
+    recipient_address: "",
     amount: 0,
     token: "",
     blockchain: "",
@@ -41,7 +47,9 @@ export const PaymentProvider = ({
   });
 
   return (
-    <PaymentContext.Provider value={{ solanaWallets, payment, setPayment }}>
+    <PaymentContext.Provider
+      value={{ solanaWallets, payment, setPayment, appId, tokenOptions }}
+    >
       {children}
     </PaymentContext.Provider>
   );

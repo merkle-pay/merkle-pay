@@ -19,6 +19,7 @@ export const payPageQuerySchema = z.object({
       return undefined;
     }, z.string().optional())
     .default("USDT"),
+  recipient_address: z.string().optional(),
   amount: z.preprocess(
     // Convert to number if it's a string, handle arrays by taking first value
     (val) => {
@@ -34,6 +35,10 @@ export const payPageQuerySchema = z.object({
 });
 
 export type PayPageQuery = z.infer<typeof payPageQuerySchema>;
+
+export const paymentPreviewSchema = payPageQuerySchema.extend({
+  sender: z.string(),
+});
 
 export type Order = {
   orderId: string;
@@ -69,8 +74,8 @@ export type OrderStep =
 //       &memo=<memo></memo>
 
 export const paymentSchema = z.object({
-  recipientAddress: z.string(),
-  amount: z.number(),
+  recipient_address: z.string(),
+  amount: z.number().positive(),
   token: z.string(),
   blockchain: z.string(),
   orderId: z.string(),
@@ -85,4 +90,6 @@ export type PaymentContextValue = {
   payment: Payment;
   setPayment: (payment: Payment) => void;
   solanaWallets: RecipientWallet[];
+  appId: string | undefined;
+  tokenOptions: string[];
 };

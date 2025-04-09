@@ -1,4 +1,4 @@
-import { Button } from "react-aria-components";
+import { Button } from "@arco-design/web-react";
 import { usePaymentContext } from "../../../context/PaymentContext";
 import { useRouter } from "next/router";
 import { paymentSchema } from "../../../../types/payment";
@@ -38,11 +38,11 @@ export default function PayPreviewPage() {
         Amount: {payment.amount} {payment.token}
       </p>
       <p>Blockchain: {payment.blockchain}</p>
-      <p>Recipient: {payment.recipientAddress}</p>
+      <p>Recipient: {payment.recipient_address}</p>
       <p>Order ID: {payment.orderId}</p>
 
-      <Button onPress={() => router.push("/pay")}>Back</Button>
-      <Button onPress={handleConfirmPayment}>Confirm Payment</Button>
+      <Button onClick={() => router.push("/pay")}>Back</Button>
+      <Button onClick={handleConfirmPayment}>Confirm Payment</Button>
     </div>
   );
 }

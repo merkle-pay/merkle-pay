@@ -1,4 +1,4 @@
-import { Link } from "react-aria-components";
+import { Link } from "@arco-design/web-react";
 
 export default function Home() {
   return (
