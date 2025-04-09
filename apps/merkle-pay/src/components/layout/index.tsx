@@ -31,7 +31,10 @@ export const Layout = ({
       </ArcoLayout.Content>
       <ArcoLayout.Footer className={styles.footer}>
         <Typography.Title heading={5}>
-          Powered by <a href="https://merklepay.io">Merkle Pay</a>
+          Powered by{" "}
+          <a href="https://merklepay.io" target="_blank">
+            Merkle Pay
+          </a>
         </Typography.Title>
       </ArcoLayout.Footer>
     </ArcoLayout>
