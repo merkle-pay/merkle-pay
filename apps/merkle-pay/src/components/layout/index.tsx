@@ -27,7 +27,9 @@ export const Layout = ({
     <ArcoLayout className={styles.layout}>
       <ArcoLayout.Header className={styles.header}>
         <Image src="/logo.png" alt="logo" width={32} height={32} />
-        <Typography.Title heading={5}>Merkle Pay</Typography.Title>
+        <Typography.Title heading={5} className={styles.title}>
+          Merkle Pay
+        </Typography.Title>
       </ArcoLayout.Header>
       <ArcoLayout.Content className={styles.content}>
         {children}
