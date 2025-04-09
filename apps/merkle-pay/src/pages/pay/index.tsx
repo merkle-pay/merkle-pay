@@ -15,6 +15,7 @@ import { usePaymentStore } from "../../store/payment-store";
 import { RecipientWallet } from "../../../types/recipient";
 import styles from "./index.module.scss";
 import { useEffect, useState } from "react";
+import clsx from "clsx";
 
 // import { GetServerSidePropsContext } from "next/types";
 
@@ -133,97 +134,136 @@ export default function PayPage() {
   };
 
   return (
-    <Form
-      className={styles.form}
-      form={form}
-      layout="vertical"
-      onValuesChange={() => {
-        updateQueryParam();
-      }}
-    >
-      <Form.Item label="App Id" field="appId" required>
-        <Input
-          readOnly={
-            !!appIdFromContext /* when appIdFromContext is set in the env, it's not editable */
+    <>
+      <h1 className={styles.title}>Pay</h1>
+      <Typography.Text>
+        Dear {router.query.payer || "customer"}, you are paying for the
+        following order:
+      </Typography.Text>
+      <Form
+        className={styles.form}
+        form={form}
+        layout="vertical"
+        onValuesChange={() => {
+          updateQueryParam();
+        }}
+      >
+        <Form.Item
+          label="App Id"
+          field="appId"
+          required
+          className={styles.formItem}
+        >
+          <Input
+            readOnly={
+              !!appIdFromContext /* when appIdFromContext is set in the env, it's not editable */
+            }
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Payer"
+          field="payer"
+          required
+          className={styles.formItem}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="Blockchain"
+          field="blockchain"
+          required
+          className={styles.formItem}
+        >
+          <Select placeholder="Select blockchain">
+            {solanaWallets.map((option: RecipientWallet) => (
+              <Select.Option key={option.blockchain} value={option.blockchain}>
+                {option.blockchain}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+        <Form.Item
+          label="Token"
+          field="token"
+          required
+          className={styles.formItem}
+        >
+          <Select placeholder="Select token symbol">
+            {tokenOptions.map((option) => (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          label="Amount"
+          field="amount"
+          required
+          className={styles.formItem}
+          validateStatus={
+            Number(router.query.amount) > 0 || router.query.amount === undefined
+              ? undefined
+              : "error"
           }
-        />
-      </Form.Item>
+          help={
+            Number(router.query.amount) > 0 || router.query.amount === undefined
+              ? undefined
+              : "Amount must be greater than 0"
+          }
+        >
+          <InputNumber />
+        </Form.Item>
+        <Form.Item
+          label="Order Id"
+          field="orderId"
+          required
+          className={styles.formItem}
+        >
+          <Input />
+        </Form.Item>
 
-      <Form.Item
-        label="Payer"
-        field="payer"
-        required
-        extra={`Dear ${router.query.payer || "customer"}, you are paying for the following order:`}
-      >
-        <Input />
-      </Form.Item>
+        <Form.Item
+          label="Recipient"
+          field="recipient_address"
+          required
+          className={clsx(styles.formItem, styles.fullWidth)}
+        >
+          <Select placeholder="Select recipient's wallet address">
+            {solanaWallets.map((option: RecipientWallet) => (
+              <Select.Option key={option.address} value={option.address}>
+                {option.address}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
 
-      <Form.Item label="Blockchain" field="blockchain" required>
-        <Select placeholder="Select blockchain">
-          {solanaWallets.map((option: RecipientWallet) => (
-            <Select.Option key={option.blockchain} value={option.blockchain}>
-              {option.blockchain}
-            </Select.Option>
-          ))}
-        </Select>
-      </Form.Item>
-      <Form.Item label="Token" field="token" required>
-        <Select placeholder="Select token symbol">
-          {tokenOptions.map((option) => (
-            <Select.Option key={option} value={option}>
-              {option}
-            </Select.Option>
-          ))}
-        </Select>
-      </Form.Item>
+        <Form.Item
+          label="Return Url"
+          field="returnUrl"
+          required
+          className={clsx(styles.formItem, styles.fullWidth)}
+        >
+          <Input />
+        </Form.Item>
 
-      <Form.Item
-        label="Amount"
-        field="amount"
-        required
-        validateStatus={
-          Number(router.query.amount) > 0 || router.query.amount === undefined
-            ? undefined
-            : "error"
-        }
-        help={
-          Number(router.query.amount) > 0 || router.query.amount === undefined
-            ? undefined
-            : "Amount must be greater than 0"
-        }
-      >
-        <InputNumber />
-      </Form.Item>
-      <Form.Item label="Order Id" field="orderId" required>
-        <Input />
-      </Form.Item>
-
-      <Form.Item label="Recipient" field="recipient_address" required>
-        <Select placeholder="Select recipient's wallet address">
-          {solanaWallets.map((option: RecipientWallet) => (
-            <Select.Option key={option.address} value={option.address}>
-              {option.address}
-            </Select.Option>
-          ))}
-        </Select>
-      </Form.Item>
-
-      <Form.Item label="Return Url" field="returnUrl" required>
-        <Input />
-      </Form.Item>
-
-      <Button
-        onClick={goToPreview}
-        disabled={
-          !form.getFieldValue("blockchain") ||
-          !form.getFieldValue("token") ||
-          !form.getFieldValue("amount") ||
-          !form.getFieldValue("orderId") ||
-          !form.getFieldValue("recipient_address")
-        }
-      >
-        Preview
-      </Button>
-    </Form>
+        <Button
+          onClick={goToPreview}
+          type="outline"
+          disabled={
+            !form.getFieldValue("blockchain") ||
+            !form.getFieldValue("token") ||
+            !form.getFieldValue("amount") ||
+            !form.getFieldValue("orderId") ||
+            !form.getFieldValue("recipient_address")
+          }
+        >
+          Preview
+        </Button>
+      </Form>
+    </>
   );
 }

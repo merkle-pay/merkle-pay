@@ -1,7 +1,41 @@
 .form {
+  margin-top: 16px;
+
   display: flex;
   flex-direction: column;
+  flex-wrap: nowrap;
   gap: 16px;
-
   max-width: 600px;
+  width: 100%;
+
+  @media screen and (min-width: 640px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+.title {
+  margin: 0;
+}
+
+.formItem {
+  max-width: 600px;
+  width: 100%;
+  @media screen and (min-width: 640px) {
+    max-width: 300px;
+    width: calc(50% - 8px);
+
+    &.fullWidth {
+      flex-grow: 1;
+      flex-basis: 100%;
+      max-width: 600px;
+      width: 100%;
+    }
+  }
+  &.fullWidth {
+    flex-grow: 1;
+    flex-basis: 100%;
+    max-width: 600px;
+    width: 100%;
+  }
 }

@@ -1,5 +1,5 @@
 import styles from "./index.module.scss";
-import { Layout as ArcoLayout } from "@arco-design/web-react";
+import { Layout as ArcoLayout, Typography } from "@arco-design/web-react";
 import { RecipientWallet } from "../../../types/recipient";
 import { useEffect } from "react";
 import { usePaymentStore } from "src/store/payment-store";
@@ -25,12 +25,15 @@ export const Layout = ({
 
   return (
     <ArcoLayout className={styles.layout}>
-      <ArcoLayout.Header className={styles.header}>
-        <h1 className={styles.title}>Merkle Pay TODO</h1>
-      </ArcoLayout.Header>
+      <ArcoLayout.Header className={styles.header}>Header</ArcoLayout.Header>
       <ArcoLayout.Content className={styles.content}>
         {children}
       </ArcoLayout.Content>
+      <ArcoLayout.Footer className={styles.footer}>
+        <Typography.Title heading={5}>
+          Powered by <a href="https://merklepay.io">Merkle Pay</a>
+        </Typography.Title>
+      </ArcoLayout.Footer>
     </ArcoLayout>
   );
 };
