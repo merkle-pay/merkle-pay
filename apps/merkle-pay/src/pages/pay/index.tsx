@@ -48,7 +48,6 @@ export default function PayPage() {
     form.setFieldsValue({
       ...router.query,
       amount: router.query.amount ? Number(router.query.amount) : undefined,
-      returnUrl: router.query.returnUrl || "/pay/status",
       appId: appIdFromContext ?? router.query.appId,
     });
     setIsFormInitialized(true);

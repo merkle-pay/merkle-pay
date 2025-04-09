@@ -79,7 +79,7 @@ export const paymentSchema = z.object({
   token: z.string(),
   blockchain: z.string(),
   orderId: z.string(),
-  returnUrl: z.string().optional(),
+  returnUrl: z.string(),
   appId: z.string(),
   payer: z.string(),
 });
