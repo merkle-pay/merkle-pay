@@ -247,6 +247,7 @@ export default function PayPage() {
 
         <Button
           onClick={goToPreview}
+          className={styles.previewButton}
           type="outline"
           disabled={
             !form.getFieldValue("blockchain") ||
