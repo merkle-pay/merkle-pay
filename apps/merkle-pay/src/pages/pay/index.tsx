@@ -134,7 +134,7 @@ export default function PayPage() {
 
   return (
     <>
-      <h1 className={styles.title}>Pay</h1>
+      <h1>Pay</h1>
       <Form
         className={styles.form}
         form={form}
