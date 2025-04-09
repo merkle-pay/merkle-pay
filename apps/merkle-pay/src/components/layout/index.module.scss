@@ -5,6 +5,13 @@
   min-height: 100vh;
 }
 
+.header,
+.content,
+.footer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .header {
   height: 3rem;
 }
