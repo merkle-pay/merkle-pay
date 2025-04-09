@@ -135,10 +135,6 @@ export default function PayPage() {
   return (
     <>
       <h1 className={styles.title}>Pay</h1>
-      <Typography.Text>
-        Dear {router.query.payer || "customer"}, you are paying for the
-        following order:
-      </Typography.Text>
       <Form
         className={styles.form}
         form={form}
