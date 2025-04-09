@@ -8,10 +8,10 @@ import {
   Space,
 } from "@arco-design/web-react";
 import { useRouter } from "next/router";
-import { PayPageQuery, paymentSchema } from "../../../types/payment";
+import { paymentSchema } from "../../../types/payment";
 import { fromError } from "zod-validation-error";
 
-import { usePaymentContext } from "../../context/PaymentContext";
+import { usePaymentStore } from "../../store/payment-store";
 import { RecipientWallet } from "../../../types/recipient";
 import styles from "./index.module.scss";
 import { useEffect, useState } from "react";
@@ -31,62 +31,38 @@ import { useEffect, useState } from "react";
 export default function PayPage() {
   const [form] = Form.useForm();
   const router = useRouter();
-  const [isFormInitialized, setIsFormInitialized] = useState(false);
-
-  // allow empty values
-  // blockchain here is only for confirm the blockchain type,
-  // if it's not in the blockchainsFromContext, there will be an error
-  // if it's empty, its value will be determined by the wallet selected
-  const {
-    payer,
-    blockchain,
-    token,
-    recipient_address,
-    amount,
-    orderId,
-    returnUrl,
-    appId,
-  } = router.query as unknown as PayPageQuery;
 
   const {
     solanaWallets,
     setPayment,
     appId: appIdFromContext,
     tokenOptions,
-  } = usePaymentContext();
+    setBackUrl,
+  } = usePaymentStore();
+
+  const [isFormInitialized, setIsFormInitialized] = useState(false);
 
   useEffect(() => {
-    const initialValues = {
-      payer,
-      blockchain,
-      token,
-      recipient_address,
-      amount: amount ? Number(amount) : undefined,
-      orderId,
-      returnUrl: returnUrl || "/pay/status",
-      appId: appIdFromContext ?? appId,
-    };
-
-    form.setFieldsValue(initialValues);
+    if (!router.isReady) return;
+    form.setFieldsValue({
+      ...router.query,
+      amount: router.query.amount ? Number(router.query.amount) : undefined,
+      returnUrl: router.query.returnUrl || "/pay/status",
+      appId: appIdFromContext ?? router.query.appId,
+    });
     setIsFormInitialized(true);
-  }, [
-    payer,
-    blockchain,
-    token,
-    recipient_address,
-    amount,
-    orderId,
-    returnUrl,
-    appId,
-    appIdFromContext,
-    form,
-  ]);
+  }, [router.isReady, router.query, form, appIdFromContext]);
 
-  // Protection for empty solanaWallets
+  // allow empty values in router.query
+  // blockchain here is only for confirm the blockchain type,
+  // if it's not in the blockchainsFromContext, there will be an error
+  // if it's empty, its value will be determined by the wallet selected
   const isWalletsConfigured = solanaWallets?.length > 0;
   // Protection for empty blockchain
-  const isBlockchainSupported = blockchain
-    ? [...solanaWallets].find((wallet) => wallet.blockchain === blockchain)
+  const isBlockchainSupported = router.query.blockchain
+    ? [...solanaWallets].find(
+        (wallet) => wallet.blockchain === router.query.blockchain
+      )
     : true;
 
   if (!isWalletsConfigured || !isBlockchainSupported) {
@@ -109,26 +85,23 @@ export default function PayPage() {
       </Space>
     );
   }
-  const updateQueryParam = (values: {
-    key: keyof PayPageQuery;
-    value: string | number;
-  }) => {
-    const nextQuery = new URLSearchParams();
-    Object.entries(router.query).forEach(([key, value]) => {
-      nextQuery.set(key, value?.toString() ?? "");
-    });
-    Object.entries(values).forEach(([key, value]) => {
-      if (value) {
-        nextQuery.set(key, value?.toString() ?? "");
+  const updateQueryParam = () => {
+    if (!isFormInitialized) return;
+    const formValues = form.getFieldsValue();
+    const _searchParams = new URLSearchParams(
+      router.query as unknown as Record<string, string>
+    );
+    Object.entries(formValues).forEach(([key, value]) => {
+      if (value === undefined || value === "") {
+        _searchParams.delete(key);
       } else {
-        nextQuery.delete(key);
+        _searchParams.set(key, value.toString());
       }
     });
-
     router.push(
       {
         pathname: router.pathname,
-        query: Object.fromEntries(nextQuery),
+        query: Object.fromEntries(_searchParams),
       },
       undefined,
       { shallow: true }
@@ -138,15 +111,13 @@ export default function PayPage() {
   const goToPreview = () => {
     // Save all payment data to context
     const parsedPayment = paymentSchema.safeParse({
-      amount: typeof amount === "string" ? Number(amount) : amount,
-      token, // token is the coin, e.g. USDC, USDT, etc, on the blockchain
-      blockchain,
-      recipient_address,
-      orderId,
-      sender: payer ?? "",
-      returnUrl,
-      appId: appIdFromContext ?? appId,
-      payer,
+      ...router.query,
+      amount:
+        typeof router.query.amount === "string"
+          ? Number(router.query.amount)
+          : router.query.amount,
+      payer: router.query.payer ?? "",
+      appId: appIdFromContext ?? router.query.appId,
     });
 
     if (!parsedPayment.success) {
@@ -155,9 +126,10 @@ export default function PayPage() {
     }
 
     setPayment(parsedPayment.data);
+    setBackUrl(router.asPath);
 
     // Navigate to preview
-    router.push("/pay/preview");
+    router.push("/pay/preview", undefined, { shallow: true });
   };
 
   return (
@@ -165,14 +137,8 @@ export default function PayPage() {
       className={styles.form}
       form={form}
       layout="vertical"
-      onValuesChange={(changedValues, allValues) => {
-        if (!isFormInitialized) return;
-        updateQueryParam(
-          allValues as {
-            key: keyof PayPageQuery;
-            value: string | number;
-          }
-        );
+      onValuesChange={() => {
+        updateQueryParam();
       }}
     >
       <Form.Item label="App Id" field="appId" required>
@@ -187,7 +153,7 @@ export default function PayPage() {
         label="Payer"
         field="payer"
         required
-        extra={`Dear ${payer || "customer"}, you are paying for the following order:`}
+        extra={`Dear ${router.query.payer || "customer"}, you are paying for the following order:`}
       >
         <Input />
       </Form.Item>
@@ -211,10 +177,23 @@ export default function PayPage() {
         </Select>
       </Form.Item>
 
-      <Form.Item label="Amount" field="amount" required>
+      <Form.Item
+        label="Amount"
+        field="amount"
+        required
+        validateStatus={
+          Number(router.query.amount) > 0 || router.query.amount === undefined
+            ? undefined
+            : "error"
+        }
+        help={
+          Number(router.query.amount) > 0 || router.query.amount === undefined
+            ? undefined
+            : "Amount must be greater than 0"
+        }
+      >
         <InputNumber />
       </Form.Item>
-
       <Form.Item label="Order Id" field="orderId" required>
         <Input />
       </Form.Item>
@@ -236,7 +215,11 @@ export default function PayPage() {
       <Button
         onClick={goToPreview}
         disabled={
-          !blockchain || !token || !amount || !orderId || !recipient_address
+          !form.getFieldValue("blockchain") ||
+          !form.getFieldValue("token") ||
+          !form.getFieldValue("amount") ||
+          !form.getFieldValue("orderId") ||
+          !form.getFieldValue("recipient_address")
         }
       >
         Preview

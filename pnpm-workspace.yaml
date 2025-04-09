@@ -20,6 +20,7 @@ catalogs:
     "typescript": "^5"
     "zod": "^3.23.8"
     "zod-validation-error": "^3.4.0"
+    "zustand": "^5.0.3"
   dashboard:
     "@hookform/resolvers": "^3.9.1"
     "@radix-ui/react-alert-dialog": "^1.1.2"

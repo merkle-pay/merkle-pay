@@ -86,10 +86,20 @@ export const paymentSchema = z.object({
 
 export type Payment = z.infer<typeof paymentSchema>;
 
-export type PaymentContextValue = {
+export type PaymentState = {
   payment: Payment;
-  setPayment: (payment: Payment) => void;
   solanaWallets: RecipientWallet[];
   appId: string | undefined;
   tokenOptions: string[];
+  backUrl: string;
 };
+
+export type PaymentActions = {
+  setPayment: (payment: Payment) => void;
+  setBackUrl: (url: string) => void;
+  setSolanaWallets: (wallets: RecipientWallet[]) => void;
+  setAppId: (id: string) => void;
+  setTokenOptions: (options: string[]) => void;
+};
+
+export type PaymentStore = PaymentState & PaymentActions;

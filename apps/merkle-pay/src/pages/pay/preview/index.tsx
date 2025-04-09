@@ -4,20 +4,20 @@ import {
   Space,
   Typography,
 } from "@arco-design/web-react";
-import { usePaymentContext } from "../../../context/PaymentContext";
+import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import { paymentSchema } from "../../../../types/payment";
 import { fromError } from "zod-validation-error";
 
 export default function PayPreviewPage() {
-  const { payment: paymentValueFromContext } = usePaymentContext();
+  const { payment: paymentValueFromStore, backUrl } = usePaymentStore();
   const router = useRouter();
 
   const {
     success,
     error,
     data: payment,
-  } = paymentSchema.safeParse(paymentValueFromContext);
+  } = paymentSchema.safeParse(paymentValueFromStore);
 
   // If there's no payment data, redirect back to the payment page
   if (!success) {
@@ -74,7 +74,7 @@ export default function PayPreviewPage() {
       />
 
       <Space size={16}>
-        <Button type="outline" onClick={() => router.push("/pay")}>
+        <Button type="outline" onClick={() => router.push(backUrl)}>
           Back
         </Button>
         <Button type="primary" onClick={handleConfirmPayment}>

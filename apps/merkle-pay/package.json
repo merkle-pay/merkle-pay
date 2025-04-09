@@ -15,7 +15,8 @@
     "next": "catalog:pay",
     "react": "catalog:pay",
     "react-dom": "catalog:pay",
-    "@arco-design/web-react": "catalog:pay"
+    "@arco-design/web-react": "catalog:pay",
+    "zustand": "catalog:pay"
   },
   "devDependencies": {
     "@eslint/eslintrc": "catalog:pay",
