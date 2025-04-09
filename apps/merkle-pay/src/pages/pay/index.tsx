@@ -129,7 +129,7 @@ export default function PayPage() {
     setBackUrl(router.asPath);
 
     // Navigate to preview
-    router.push("/pay/preview", undefined, { shallow: true });
+    router.push("/pay/preview");
   };
 
   return (
@@ -257,7 +257,9 @@ export default function PayPage() {
             !form.getFieldValue("token") ||
             !form.getFieldValue("amount") ||
             !form.getFieldValue("orderId") ||
-            !form.getFieldValue("recipient_address")
+            !form.getFieldValue("recipient_address") ||
+            !form.getFieldValue("returnUrl") ||
+            !form.getFieldValue("appId")
           }
         >
           Preview
