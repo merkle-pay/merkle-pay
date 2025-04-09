@@ -1,4 +1,10 @@
-import { Form, Input, Button, Select } from "@arco-design/web-react";
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  InputNumber,
+} from "@arco-design/web-react";
 import { useRouter } from "next/router";
 import { PayPageQuery, paymentSchema } from "../../../types/payment";
 import { fromError } from "zod-validation-error";
@@ -72,7 +78,7 @@ export default function PayPage() {
   const goToPreview = () => {
     // Save all payment data to context
     const parsedPayment = paymentSchema.safeParse({
-      amount: Number(amount),
+      amount: typeof amount === "string" ? Number(amount) : amount,
       token, // token is the coin, e.g. USDC, USDT, etc, on the blockchain
       blockchain,
       recipient_address,
@@ -80,6 +86,7 @@ export default function PayPage() {
       sender: payer ?? "",
       returnUrl,
       appId: appIdFromContext ?? appId,
+      payer,
     });
 
     if (!parsedPayment.success) {
@@ -93,44 +100,52 @@ export default function PayPage() {
     router.push("/pay/preview");
   };
 
-  const updateQueryParam = (
-    key: keyof PayPageQuery,
-    value: string | number
-  ) => {
+  const updateQueryParam = (values: {
+    key: keyof PayPageQuery;
+    value: string | number;
+  }) => {
     router.push({
       pathname: router.pathname,
-      query: { ...router.query, [key]: value },
+      query: { ...router.query, ...values },
     });
   };
+
+  console.log("token", token);
 
   return (
     <Form
       className={styles.form}
       form={form}
       layout="vertical"
-      onChange={(values) => {
-        console.log(values);
+      onValuesChange={(_, allValues) => {
+        updateQueryParam(
+          allValues as {
+            key: keyof PayPageQuery;
+            value: string | number;
+          }
+        );
       }}
     >
-      <Form.Item label="App Id" required>
+      <Form.Item label="App Id" field="appId" required>
         <Input
           value={appIdFromContext ?? appId}
           readOnly={
             !!appIdFromContext /* when appIdFromContext is set in the env, it's not editable */
           }
-          onChange={(value) => {
-            updateQueryParam("appId", value);
-          }}
         />
       </Form.Item>
-      <Form.Item label="Blockchain" required>
-        <Select
-          value={blockchain}
-          placeholder="Select blockchain"
-          onChange={(value) => {
-            updateQueryParam("blockchain", value);
-          }}
-        >
+
+      <Form.Item
+        label="Payer"
+        field="payer"
+        required
+        extra={`Dear ${payer ?? "customer"}, you are paying for the following order:`}
+      >
+        <Input value={payer} />
+      </Form.Item>
+
+      <Form.Item label="Blockchain" field="blockchain" required>
+        <Select value={blockchain} placeholder="Select blockchain">
           {solanaWallets.map((option: RecipientWallet) => (
             <Select.Option key={option.blockchain} value={option.blockchain}>
               {option.blockchain}
@@ -138,14 +153,8 @@ export default function PayPage() {
           ))}
         </Select>
       </Form.Item>
-      <Form.Item label="Token" required>
-        <Select
-          value={token}
-          placeholder="Select token symbol"
-          onChange={(value) => {
-            updateQueryParam("token", value);
-          }}
-        >
+      <Form.Item label="Token" field="token" required>
+        <Select value={token} placeholder="Select token symbol">
           {tokenOptions.map((option) => (
             <Select.Option key={option} value={option}>
               {option}
@@ -153,30 +162,19 @@ export default function PayPage() {
           ))}
         </Select>
       </Form.Item>
-      <Form.Item label="Amount" required>
-        <Input
-          value={amount?.toString()}
-          onChange={(value) => {
-            updateQueryParam("amount", value);
-          }}
-        />
+
+      <Form.Item label="Amount" field="amount" required>
+        <InputNumber value={amount} />
       </Form.Item>
 
-      <Form.Item label="Order Id" required>
-        <Input
-          value={orderId}
-          onChange={(value) => {
-            updateQueryParam("orderId", value);
-          }}
-        />
+      <Form.Item label="Order Id" field="orderId" required>
+        <Input value={orderId} />
       </Form.Item>
-      <Form.Item label="Recipient" required>
+
+      <Form.Item label="Recipient" field="recipient_address" required>
         <Select
           value={recipient_address}
           placeholder="Select recipient's wallet address"
-          onChange={(value) => {
-            updateQueryParam("recipient_address", value);
-          }}
         >
           {solanaWallets.map((option: RecipientWallet) => (
             <Select.Option key={option.address} value={option.address}>
@@ -185,9 +183,11 @@ export default function PayPage() {
           ))}
         </Select>
       </Form.Item>
-      <Form.Item label="Return Url" required>
-        <Input value={returnUrl ?? "/pay/status"} readOnly />
+
+      <Form.Item label="Return Url" field="returnUrl" required>
+        <Input value={returnUrl ?? "/pay/status"} />
       </Form.Item>
+
       <Button
         onClick={goToPreview}
         disabled={
