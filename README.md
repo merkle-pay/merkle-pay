@@ -3,7 +3,7 @@
 **Accept payments in stable coins on Solana with ease—built for creators and businesses.**
 
 - Merkle Pay is a web platform that lets creators and small business owners set up a payment page in minutes to receive stable coins such as USDT and USDC on Solana.
-- With lightning-fast transactions (~400ms), low fees (~$0.01), and a smooth experience (button for mobile, QR for desktop), it’s designed to simplify crypto payments.
+- With lightning-fast transactions (~400ms), low fees (~$0.0005), and a smooth experience (button for mobile, QR for desktop), it's designed to simplify crypto payments.
 - Merkle Pay is fully open sourced under the [MIT license](LICNESE)
 
 ---
@@ -34,7 +34,10 @@
 - **PNPM**: v10
 - **Docker**: For containerized deployment (optional).
 - **Solana Wallet**: Phantom or Solflare with USDT (devnet for testing).
-- **MySQL**: Local or hosted DB.
+- **MongoDB**: Local or hosted DB.
+  - **Schema Flexibility**: MongoDB's schemaless nature simplifies development by eliminating the need for complex schema migrations when data models evolve.
+  - **Easy Customization**: New fields or data structures can be added easily without altering existing records, providing flexibility for future features or customizations.
+  - **Faster Iteration**: Reduced overhead from schema management allows developers to iterate more quickly on features involving data persistence.
 
 ### Installation
 

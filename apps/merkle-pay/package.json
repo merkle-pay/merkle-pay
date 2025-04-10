@@ -12,6 +12,7 @@
   "dependencies": {
     "@solana/kit": "catalog:pay",
     "@solana/pay": "catalog:pay",
+    "bignumber.js": "catalog:pay",
     "clsx": "catalog:pay",
     "next": "catalog:pay",
     "react": "catalog:pay",

@@ -223,6 +223,9 @@ catalogs:
     '@types/react-dom':
       specifier: ^19
       version: 19.0.4
+    bignumber.js:
+      specifier: ^9.2.1
+      version: 9.2.1
     clsx:
       specifier: ^2.1.1
       version: 2.1.1
@@ -471,6 +474,9 @@ importers:
       '@solana/pay':
         specifier: catalog:pay
         version: 0.2.5(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.2)(utf-8-validate@5.0.10)
+      bignumber.js:
+        specifier: catalog:pay
+        version: 9.2.1
       clsx:
         specifier: catalog:pay
         version: 2.1.1
@@ -2627,8 +2633,8 @@ packages:
     resolution: {integrity: sha512-trfYco6AoZ+rKhKnxA0hgX0HAbVP/s808/EuDSe2JDzUnCp/xAsli35Orvk67UrTEcwuxZqYZDmfA2RXJgxVvA==}
     engines: {node: '>= 10.0.0'}
 
-  bignumber.js@9.1.2:
-    resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
+  bignumber.js@9.2.1:
+    resolution: {integrity: sha512-+NzaKgOUvInq9TIUZ1+DRspzf/HApkCwD4btfuasFTdrfnOxqx853TgDpMolp+uv4RpRp7bPcEU2zKr9+fRmyw==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -5900,7 +5906,7 @@ snapshots:
       '@solana/buffer-layout': 4.0.1
       '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       bigint-buffer: 1.1.5
-      bignumber.js: 9.1.2
+      bignumber.js: 9.2.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -6072,7 +6078,7 @@ snapshots:
       '@solana/qr-code-styling': 1.6.0
       '@solana/spl-token': 0.3.11(@solana/web3.js@1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.2)(utf-8-validate@5.0.10)
       '@solana/web3.js': 1.98.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      bignumber.js: 9.1.2
+      bignumber.js: 9.2.1
       cross-fetch: 3.2.0
       js-base64: 3.7.7
       tweetnacl: 1.0.3
@@ -7008,7 +7014,7 @@ snapshots:
     dependencies:
       bindings: 1.5.0
 
-  bignumber.js@9.1.2: {}
+  bignumber.js@9.2.1: {}
 
   binary-extensions@2.3.0: {}
 
