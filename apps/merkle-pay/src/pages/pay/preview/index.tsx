@@ -53,6 +53,10 @@ export default function PaymentPreviewPage() {
             value: payment.businessName,
           },
           {
+            label: "Order ID",
+            value: payment.orderId,
+          },
+          {
             label: "Blockchain",
             value: payment.blockchain,
           },
@@ -64,10 +68,13 @@ export default function PaymentPreviewPage() {
             label: "Recipient",
             value: payment.recipient_address,
           },
-
           {
-            label: "Order ID",
-            value: payment.orderId,
+            label: "Message",
+            value: payment.message,
+          },
+          {
+            label: "Return URL",
+            value: payment.returnUrl,
           },
         ]}
         size={"medium"}

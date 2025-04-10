@@ -53,38 +53,6 @@ export default function PayPage() {
     setIsFormInitialized(true);
   }, [router.isReady, router.query, form, businessNameFromContext]);
 
-  // allow empty values in router.query
-  // blockchain here is only for confirm the blockchain type,
-  // if it's not in the blockchainsFromContext, there will be an error
-  // if it's empty, its value will be determined by the wallet selected
-  const isWalletsConfigured = solanaWallets?.length > 0;
-  // Protection for empty blockchain
-  const isBlockchainSupported = router.query.blockchain
-    ? [...solanaWallets].find(
-        (wallet) => wallet.blockchain === router.query.blockchain
-      )
-    : true;
-
-  if (!isWalletsConfigured || !isBlockchainSupported) {
-    return (
-      <Space direction="vertical" size={16}>
-        <Typography.Title>Configuration Error</Typography.Title>
-        {!isWalletsConfigured && (
-          <Typography.Text>
-            No wallet addresses have been configured.
-          </Typography.Text>
-        )}
-        {!isBlockchainSupported && (
-          <Typography.Text>
-            No wallet addresses have been configured for this blockchain.
-          </Typography.Text>
-        )}
-        <Typography.Text>
-          Please contact the administrator to set up receiving wallet addresses.
-        </Typography.Text>
-      </Space>
-    );
-  }
   const updateQueryParam = () => {
     if (!isFormInitialized) return;
     const formValues = form.getFieldsValue();
@@ -131,6 +99,51 @@ export default function PayPage() {
     // Navigate to preview
     router.push("/pay/preview");
   };
+
+  const isPreviewButtonActive =
+    form.getFieldValue("blockchain") &&
+    form.getFieldValue("token") &&
+    form.getFieldValue("amount") &&
+    form.getFieldValue("orderId") &&
+    form.getFieldValue("recipient_address") &&
+    form.getFieldValue("returnUrl") &&
+    form.getFieldValue("businessName") &&
+    (!form.getFieldValue("message") ||
+      (form.getFieldValue("message") &&
+        form.getFieldValue("message").length <= 40));
+
+  // allow empty values in router.query
+  // blockchain here is only for confirm the blockchain type,
+  // if it's not in the blockchainsFromContext, there will be an error
+  // if it's empty, its value will be determined by the wallet selected
+  const isWalletsConfigured = solanaWallets?.length > 0;
+  // Protection for empty blockchain
+  const isBlockchainSupported = router.query.blockchain
+    ? [...solanaWallets].find(
+        (wallet) => wallet.blockchain === router.query.blockchain
+      )
+    : true;
+
+  if (!isWalletsConfigured || !isBlockchainSupported) {
+    return (
+      <Space direction="vertical" size={16}>
+        <Typography.Title>Configuration Error</Typography.Title>
+        {!isWalletsConfigured && (
+          <Typography.Text>
+            No wallet addresses have been configured.
+          </Typography.Text>
+        )}
+        {!isBlockchainSupported && (
+          <Typography.Text>
+            No wallet addresses have been configured for this blockchain.
+          </Typography.Text>
+        )}
+        <Typography.Text>
+          Please contact the administrator to set up receiving wallet addresses.
+        </Typography.Text>
+      </Space>
+    );
+  }
 
   return (
     <>
@@ -222,6 +235,31 @@ export default function PayPage() {
         </Form.Item>
 
         <Form.Item
+          label="Message"
+          field="message"
+          extra="Optional"
+          className={clsx(styles.formItem, styles.fullWidth)}
+          validateStatus={
+            router.query.message === undefined ||
+            router.query.message === null ||
+            router.query.message.length === 0 ||
+            router.query.message.length <= 40
+              ? undefined
+              : "error"
+          }
+          help={
+            router.query.message === undefined ||
+            router.query.message === null ||
+            router.query.message.length === 0 ||
+            router.query.message.length <= 40
+              ? undefined
+              : "Message must be less than 40 characters"
+          }
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
           label="Recipient"
           field="recipient_address"
           required
@@ -248,15 +286,7 @@ export default function PayPage() {
         <Button
           onClick={goToPreview}
           type="outline"
-          disabled={
-            !form.getFieldValue("blockchain") ||
-            !form.getFieldValue("token") ||
-            !form.getFieldValue("amount") ||
-            !form.getFieldValue("orderId") ||
-            !form.getFieldValue("recipient_address") ||
-            !form.getFieldValue("returnUrl") ||
-            !form.getFieldValue("businessName")
-          }
+          disabled={!isPreviewButtonActive}
         >
           Preview
         </Button>

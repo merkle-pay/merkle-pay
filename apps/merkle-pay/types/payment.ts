@@ -82,6 +82,7 @@ export const paymentSchema = z.object({
   returnUrl: z.string(),
   businessName: z.string(),
   payer: z.string(),
+  message: z.string().optional(),
 });
 
 export type Payment = z.infer<typeof paymentSchema>;
