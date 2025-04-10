@@ -1,9 +1,11 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { encodeURL, createQR } from "@solana/pay";
+import { encodeURL, createQROptions } from "@solana/pay";
 import BigNumber from "bignumber.js";
 import { Payment } from "../types/payment";
 import { establishConnection, SplTokens } from "../utils/solana";
 import { useEffect, useMemo, useRef } from "react";
+import { logoSvg } from "../utils/logo";
+import QRCodeStyling from "@solana/qr-code-styling";
 
 export const useSolanaQR = (payment: Payment) => {
   const connection = establishConnection("mainnet-beta");
@@ -37,7 +39,12 @@ export const useSolanaQR = (payment: Payment) => {
       ),
     });
 
-    return createQR(url, 300);
+    const logoDataUri = `data:image/svg+xml;base64,${btoa(logoSvg)}`;
+
+    const options = createQROptions(url, 300);
+    options.image = logoDataUri;
+
+    return new QRCodeStyling(options);
   }, [payment]);
 
   // Use useEffect to append the QR code after the component mounts
