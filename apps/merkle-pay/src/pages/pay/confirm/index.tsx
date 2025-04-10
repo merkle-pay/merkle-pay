@@ -25,7 +25,7 @@ export default function PaymentConfirmPage() {
         Please scan the QR code with your Phantom or Solflare wallet
       </Typography.Title>
       <div id="qr-code" ref={qrCodeRef} />
-      <Space size={8}>
+      <Space size={8} className={styles.buttons}>
         <Button type="outline" onClick={() => router.push(paymentFormUrl)}>
           Back to Payment Form
         </Button>
