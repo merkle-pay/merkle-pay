@@ -32,6 +32,7 @@
   justify-content: center;
   flex-grow: 1;
   padding: 0 1rem 6rem 1rem;
+  box-sizing: border-box;
 
   @media screen and (min-width: 640px) {
     padding: 0;
