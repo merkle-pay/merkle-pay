@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { RecipientWallet } from "../../types/recipient";
 
 const initialState: PaymentState = {
+  // payment will be saved into the database
   payment: {
     recipient_address: "",
     amount: 0,
@@ -14,9 +15,9 @@ const initialState: PaymentState = {
     businessName: "",
     payer: "",
   } satisfies Payment,
-  solanaWallets: [],
-  businessName: "",
-  tokenOptions: [],
+  solanaWallets: [], // configurable
+  businessName: "", // configurable
+  tokenOptions: [], // configurable
   backUrl: "",
 };
 
