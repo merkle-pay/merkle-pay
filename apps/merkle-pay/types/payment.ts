@@ -91,12 +91,12 @@ export type PaymentState = {
   solanaWallets: RecipientWallet[];
   businessName: string | undefined;
   tokenOptions: string[];
-  backUrl: string;
+  paymentFormUrl: string;
 };
 
 export type PaymentActions = {
   setPayment: (payment: Payment) => void;
-  setBackUrl: (url: string) => void;
+  setPaymentFormUrl: (url: string) => void;
   setSolanaWallets: (wallets: RecipientWallet[]) => void;
   setBusinessName: (name: string) => void;
   setTokenOptions: (options: string[]) => void;

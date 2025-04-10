@@ -18,14 +18,14 @@ const initialState: PaymentState = {
   solanaWallets: [], // configurable
   businessName: "", // configurable
   tokenOptions: [], // configurable
-  backUrl: "",
+  paymentFormUrl: "",
 };
 
 // Custom hook to use the context
 export const usePaymentStore = create<PaymentStore>((set) => ({
   ...initialState,
   setPayment: (payment: Payment) => set({ payment }),
-  setBackUrl: (url: string) => set({ backUrl: url }),
+  setPaymentFormUrl: (url: string) => set({ paymentFormUrl: url }),
   setSolanaWallets: (wallets: RecipientWallet[]) =>
     set({ solanaWallets: wallets }),
   setBusinessName: (name: string) => set({ businessName: name }),

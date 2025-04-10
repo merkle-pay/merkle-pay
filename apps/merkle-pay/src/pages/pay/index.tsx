@@ -38,7 +38,7 @@ export default function PayPage() {
     setPayment,
     businessName: businessNameFromContext,
     tokenOptions,
-    setBackUrl,
+    setPaymentFormUrl,
   } = usePaymentStore();
 
   const [isFormInitialized, setIsFormInitialized] = useState(false);
@@ -126,7 +126,7 @@ export default function PayPage() {
     }
 
     setPayment(parsedPayment.data);
-    setBackUrl(router.asPath);
+    setPaymentFormUrl(router.asPath);
 
     // Navigate to preview
     router.push("/pay/preview");

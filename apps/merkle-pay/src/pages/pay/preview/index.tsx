@@ -8,9 +8,10 @@ import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import { paymentSchema } from "../../../../types/payment";
 import { fromError } from "zod-validation-error";
+import styles from "./index.module.scss";
 
-export default function PayPreviewPage() {
-  const { payment: paymentValueFromStore, backUrl } = usePaymentStore();
+export default function PaymentPreviewPage() {
+  const { payment: paymentValueFromStore, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
   const {
@@ -34,12 +35,11 @@ export default function PayPreviewPage() {
   }
 
   const handleConfirmPayment = () => {
-    // TODO: Implement payment confirmation
-    console.log("Payment confirmed");
+    router.push("/pay/confirm");
   };
 
   return (
-    <Space direction="vertical" size={16}>
+    <Space direction="vertical" size={16} className={styles.container}>
       <h1>Payment Preview</h1>
       <Descriptions
         column={1}
@@ -74,7 +74,7 @@ export default function PayPreviewPage() {
       />
 
       <Space size={16}>
-        <Button type="outline" onClick={() => router.push(backUrl)}>
+        <Button type="outline" onClick={() => router.push(paymentFormUrl)}>
           Back
         </Button>
         <Button type="primary" onClick={handleConfirmPayment}>
