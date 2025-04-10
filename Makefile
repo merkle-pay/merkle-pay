@@ -24,3 +24,9 @@ clean:
 	rm -rf node_modules
 	rm -rf apps/merkle-pay/node_modules
 	rm -rf apps/merkle-dashboard/node_modules
+
+tag:
+	git tag $(TAG)
+
+tags:
+	git push --tags
