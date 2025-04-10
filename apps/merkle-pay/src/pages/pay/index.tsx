@@ -7,6 +7,7 @@ import {
   Typography,
   Space,
 } from "@arco-design/web-react";
+import { IconArrowRight } from "@arco-design/web-react/icon";
 import { useRouter } from "next/router";
 import { paymentSchema } from "../../../types/payment";
 import { fromError } from "zod-validation-error";
@@ -292,6 +293,8 @@ export default function PayPage() {
           onClick={goToPreview}
           type="outline"
           disabled={!isPreviewButtonActive}
+          icon={<IconArrowRight />}
+          className={styles.previewButton}
         >
           Preview
         </Button>

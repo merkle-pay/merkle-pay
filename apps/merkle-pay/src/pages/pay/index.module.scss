@@ -42,3 +42,16 @@
     }
   }
 }
+
+.previewButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  flex-direction: row-reverse;
+
+  span {
+    margin-left: 0 !important;
+  }
+}

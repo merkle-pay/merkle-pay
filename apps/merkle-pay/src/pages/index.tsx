@@ -2,8 +2,8 @@ import styles from "./index.module.scss";
 import { LuNetwork } from "react-icons/lu";
 import { FcFlashOn } from "react-icons/fc";
 import { FcDataProtection } from "react-icons/fc";
-import { IconArrowRight } from "@arco-design/web-react/icon";
 import { Button, Space, Typography } from "@arco-design/web-react";
+import { GiChemicalArrow } from "react-icons/gi";
 
 export default function Home() {
   return (
@@ -22,7 +22,7 @@ export default function Home() {
           href="/pay"
         >
           Get Started
-          <IconArrowRight className="w-4 h-4 ml-2" />
+          <GiChemicalArrow size={24} />
         </Button>
       </div>
 

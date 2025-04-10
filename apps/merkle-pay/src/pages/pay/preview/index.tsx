@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { paymentSchema } from "../../../../types/payment";
 import { fromError } from "zod-validation-error";
 import styles from "./index.module.scss";
+import { IconArrowLeft } from "@arco-design/web-react/icon";
 
 export default function PaymentPreviewPage() {
   const { payment: paymentValueFromStore, paymentFormUrl } = usePaymentStore();
@@ -81,7 +82,11 @@ export default function PaymentPreviewPage() {
       />
 
       <Space size={16}>
-        <Button type="outline" onClick={() => router.push(paymentFormUrl)}>
+        <Button
+          type="outline"
+          icon={<IconArrowLeft />}
+          onClick={() => router.push(paymentFormUrl)}
+        >
           Back
         </Button>
         <Button type="primary" onClick={handleConfirmPayment}>

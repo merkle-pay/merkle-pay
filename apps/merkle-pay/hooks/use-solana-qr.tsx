@@ -31,6 +31,7 @@ export const useSolanaQR = (payment: Payment) => {
       reference: new Keypair().publicKey,
       label: payment.businessName,
       memo: payment.orderId,
+      message: payment.message,
       splToken: new PublicKey(
         SplTokens[payment.token as keyof typeof SplTokens]
       ),

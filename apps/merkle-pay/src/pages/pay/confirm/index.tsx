@@ -6,6 +6,7 @@ import styles from "./index.module.scss";
 
 // import { useState } from "react";
 import { useSolanaQR } from "../../../../hooks/use-solana-qr";
+import { IconArrowLeft } from "@arco-design/web-react/icon";
 
 export default function PaymentConfirmPage() {
   const { payment, paymentFormUrl } = usePaymentStore();
@@ -26,7 +27,11 @@ export default function PaymentConfirmPage() {
       </Typography.Title>
       <div id="qr-code" ref={qrCodeRef} />
       <Space size={8} className={styles.buttons}>
-        <Button type="outline" onClick={() => router.push(paymentFormUrl)}>
+        <Button
+          type="outline"
+          icon={<IconArrowLeft />}
+          onClick={() => router.push(paymentFormUrl)}
+        >
           Back to Payment Form
         </Button>
         <Button
