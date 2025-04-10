@@ -1,14 +1,65 @@
-import { Link } from "@arco-design/web-react";
+import styles from "./index.module.scss";
+import { LuNetwork } from "react-icons/lu";
+import { FcFlashOn } from "react-icons/fc";
+import { FcDataProtection } from "react-icons/fc";
+import { IconArrowRight } from "@arco-design/web-react/icon";
+import { Button, Space, Typography } from "@arco-design/web-react";
 
 export default function Home() {
   return (
-    <div className="flex flex-col">
-      <h1>Merkle Pay</h1>
-      <p>
-        Merkle Pay is a payment protocol for the blockchain. It allows users to
-        send and receive payments using stablecoins, such as USDC and USDT.
-      </p>
-      <Link href="/pay">Pay</Link>
-    </div>
+    <main className={styles.container}>
+      <div className={styles.hero}>
+        <Typography.Title className={styles.heroTitle}>
+          The Future of Crypto Payments
+        </Typography.Title>
+        <Typography.Title heading={6} className={styles.heroSubtitle}>
+          Fast, secure, and decentralized payments across multiple blockchains
+        </Typography.Title>
+        <Button
+          size="large"
+          type="primary"
+          className={styles.ctaButton}
+          href="/pay"
+        >
+          Get Started
+          <IconArrowRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
+
+      <Space direction="vertical" size={16} className={styles.features}>
+        <Space direction="vertical" size={8} className={styles.feature}>
+          <Space size={8} className={styles.featureTitle}>
+            <LuNetwork size={32} className={styles.featureIcon} />
+            <Typography.Title heading={3}>Multi-Chain Support</Typography.Title>
+          </Space>
+          <Typography.Paragraph>
+            Process payments on Solana, Polygon, Arbitrum One, and zkSync Era
+            with on-chain transaction records
+          </Typography.Paragraph>
+        </Space>
+
+        <Space direction="vertical" size={8} className={styles.feature}>
+          <Space size={8} className={styles.featureTitle}>
+            <FcDataProtection size={32} className={styles.featureIcon} />
+            <Typography.Title heading={3}>On-Chain Security</Typography.Title>
+          </Space>
+          <Typography.Paragraph>
+            All transactions are permanently recorded on the blockchain for
+            maximum transparency and verification
+          </Typography.Paragraph>
+        </Space>
+
+        <Space direction="vertical" size={8} className={styles.feature}>
+          <Space size={8} className={styles.featureTitle}>
+            <FcFlashOn size={32} className={styles.featureIcon} />
+            <Typography.Title heading={3}>Lightning Fast</Typography.Title>
+          </Space>
+          <Typography.Paragraph>
+            Process transactions in milliseconds with minimal fees across all
+            supported networks
+          </Typography.Paragraph>
+        </Space>
+      </Space>
+    </main>
   );
 }

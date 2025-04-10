@@ -11,6 +11,7 @@ catalogs:
     "next": "15.2.3"
     "react": "^19.0.0"
     "react-dom": "^19.0.0"
+    "react-icons": "^5.5.0"
     "@arco-design/web-react": "^2.66.1"
     "@eslint/eslintrc": "^3"
     "@types/node": "^20"

@@ -17,6 +17,7 @@
     "next": "catalog:pay",
     "react": "catalog:pay",
     "react-dom": "catalog:pay",
+    "react-icons": "catalog:pay",
     "@arco-design/web-react": "catalog:pay",
     "zustand": "catalog:pay"
   },
