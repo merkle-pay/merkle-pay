@@ -27,7 +27,7 @@ export default function PaymentConfirmPage() {
       <div id="qr-code" ref={qrCodeRef} />
       <Space size={8}>
         <Button type="outline" onClick={() => router.push(paymentFormUrl)}>
-          Back to Payment
+          Back to Payment Form
         </Button>
         <Button
           type="primary"

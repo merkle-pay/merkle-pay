@@ -11,13 +11,15 @@ const initialState: PaymentState = {
     token: "",
     blockchain: "",
     orderId: "",
-    returnUrl: "",
+    returnUrl: "/pay/status",
     businessName: "",
     payer: "",
+    message: "",
   } satisfies Payment,
   solanaWallets: [], // configurable
   businessName: "", // configurable
   tokenOptions: [], // configurable
+  returnUrl: "", // configurable
   paymentFormUrl: "",
 };
 
@@ -30,4 +32,5 @@ export const usePaymentStore = create<PaymentStore>((set) => ({
     set({ solanaWallets: wallets }),
   setBusinessName: (name: string) => set({ businessName: name }),
   setTokenOptions: (options: string[]) => set({ tokenOptions: options }),
+  setReturnUrl: (url: string) => set({ returnUrl: url }),
 }));

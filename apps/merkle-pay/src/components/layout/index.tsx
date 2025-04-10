@@ -9,19 +9,22 @@ export const Layout = ({
   solanaWallets,
   businessName,
   tokenOptions,
+  returnUrl,
 }: {
   children: React.ReactNode;
   solanaWallets: RecipientWallet[];
   businessName: string;
   tokenOptions: string[];
+  returnUrl: string;
 }) => {
-  const { setSolanaWallets, setBusinessName, setTokenOptions } =
+  const { setSolanaWallets, setBusinessName, setTokenOptions, setReturnUrl } =
     usePaymentStore();
 
   useEffect(() => {
     setSolanaWallets(solanaWallets);
     setBusinessName(businessName);
     setTokenOptions(tokenOptions);
+    setReturnUrl(returnUrl);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

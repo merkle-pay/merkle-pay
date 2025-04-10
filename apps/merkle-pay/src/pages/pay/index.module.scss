@@ -25,6 +25,10 @@
     width: 100%;
   }
 
+  input[readonly] {
+    cursor: not-allowed;
+  }
+
   @media screen and (min-width: 640px) {
     max-width: 300px;
     width: calc(50% - 8px);

@@ -36,9 +36,10 @@ export default function PayPage() {
   const {
     solanaWallets,
     setPayment,
-    businessName: businessNameFromContext,
+    businessName: businessNameFromStore,
     tokenOptions,
     setPaymentFormUrl,
+    returnUrl: returnUrlFromStore,
   } = usePaymentStore();
 
   const [isFormInitialized, setIsFormInitialized] = useState(false);
@@ -48,10 +49,17 @@ export default function PayPage() {
     form.setFieldsValue({
       ...router.query,
       amount: router.query.amount ? Number(router.query.amount) : undefined,
-      businessName: businessNameFromContext ?? router.query.businessName,
+      businessName: businessNameFromStore ?? router.query.businessName,
+      returnUrl: router.query.returnUrl ?? returnUrlFromStore,
     });
     setIsFormInitialized(true);
-  }, [router.isReady, router.query, form, businessNameFromContext]);
+  }, [
+    router.isReady,
+    router.query,
+    form,
+    businessNameFromStore,
+    returnUrlFromStore,
+  ]);
 
   const updateQueryParam = () => {
     if (!isFormInitialized) return;
@@ -85,7 +93,7 @@ export default function PayPage() {
           ? Number(router.query.amount)
           : router.query.amount,
       payer: router.query.payer ?? "",
-      businessName: businessNameFromContext ?? router.query.businessName,
+      businessName: businessNameFromStore ?? router.query.businessName,
     });
 
     if (!parsedPayment.success) {
@@ -162,11 +170,7 @@ export default function PayPage() {
           required
           className={styles.formItem}
         >
-          <Input
-            readOnly={
-              !!businessNameFromContext /* when businessNameFromContext is set in the env, it's not editable */
-            }
-          />
+          <Input readOnly />
         </Form.Item>
 
         <Form.Item
@@ -279,8 +283,9 @@ export default function PayPage() {
           field="returnUrl"
           required
           className={clsx(styles.formItem, styles.fullWidth)}
+          extra="Override this value in the environment variable NEXT_PUBLIC_RETURN_URL or provide it in the url"
         >
-          <Input />
+          <Input readOnly />
         </Form.Item>
 
         <Button

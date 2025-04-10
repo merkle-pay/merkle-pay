@@ -18,12 +18,14 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const businessName = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? "";
   const tokenOptions = process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.split(",") ?? [];
+  const returnUrl = process.env.NEXT_PUBLIC_RETURN_URL ?? "/pay/status";
 
   return (
     <Layout
       solanaWallets={solanaWallets}
       businessName={businessName}
       tokenOptions={tokenOptions}
+      returnUrl={returnUrl}
     >
       <Component {...pageProps} />
     </Layout>
