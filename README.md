@@ -4,7 +4,7 @@
 
 - Merkle Pay is a web platform that lets creators and small business owners set up a payment page in minutes to receive stable coins such as USDT and USDC on Solana.
 - With lightning-fast transactions (~400ms), low fees (~$0.01), and a smooth experience (button for mobile, QR for desktop), it’s designed to simplify crypto payments.
-- Merkle Pay is fully open sourced under the MIT license
+- Merkle Pay is fully open sourced under the [MIT license](LICNESE)
 
 ---
 
