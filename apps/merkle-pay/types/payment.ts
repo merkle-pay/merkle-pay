@@ -31,7 +31,7 @@ export const payPageQuerySchema = z.object({
   orderId: z.string(),
   payer: z.string().optional(),
   returnUrl: z.string(),
-  appId: z.string(),
+  businessName: z.string(),
 });
 
 export type PayPageQuery = z.infer<typeof payPageQuerySchema>;
@@ -80,7 +80,7 @@ export const paymentSchema = z.object({
   blockchain: z.string(),
   orderId: z.string(),
   returnUrl: z.string(),
-  appId: z.string(),
+  businessName: z.string(),
   payer: z.string(),
 });
 
@@ -89,7 +89,7 @@ export type Payment = z.infer<typeof paymentSchema>;
 export type PaymentState = {
   payment: Payment;
   solanaWallets: RecipientWallet[];
-  appId: string | undefined;
+  businessName: string | undefined;
   tokenOptions: string[];
   backUrl: string;
 };
@@ -98,7 +98,7 @@ export type PaymentActions = {
   setPayment: (payment: Payment) => void;
   setBackUrl: (url: string) => void;
   setSolanaWallets: (wallets: RecipientWallet[]) => void;
-  setAppId: (id: string) => void;
+  setBusinessName: (name: string) => void;
   setTokenOptions: (options: string[]) => void;
 };
 

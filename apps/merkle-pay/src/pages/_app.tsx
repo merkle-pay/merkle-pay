@@ -16,13 +16,13 @@ export default function App({ Component, pageProps }: AppProps) {
     })
   );
 
-  const appId = process.env.NEXT_PUBLIC_APP_ID ?? "";
+  const businessName = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? "";
   const tokenOptions = process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.split(",") ?? [];
 
   return (
     <Layout
       solanaWallets={solanaWallets}
-      appId={appId}
+      businessName={businessName}
       tokenOptions={tokenOptions}
     >
       <Component {...pageProps} />

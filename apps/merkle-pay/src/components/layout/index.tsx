@@ -7,19 +7,20 @@ import Image from "next/image";
 export const Layout = ({
   children,
   solanaWallets,
-  appId,
+  businessName,
   tokenOptions,
 }: {
   children: React.ReactNode;
   solanaWallets: RecipientWallet[];
-  appId: string;
+  businessName: string;
   tokenOptions: string[];
 }) => {
-  const { setSolanaWallets, setAppId, setTokenOptions } = usePaymentStore();
+  const { setSolanaWallets, setBusinessName, setTokenOptions } =
+    usePaymentStore();
 
   useEffect(() => {
     setSolanaWallets(solanaWallets);
-    setAppId(appId);
+    setBusinessName(businessName);
     setTokenOptions(tokenOptions);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

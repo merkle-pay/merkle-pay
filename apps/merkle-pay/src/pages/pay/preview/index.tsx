@@ -49,8 +49,8 @@ export default function PayPreviewPage() {
             value: payment.payer,
           },
           {
-            label: "App ID",
-            value: payment.appId,
+            label: "Business Name",
+            value: payment.businessName,
           },
           {
             label: "Blockchain",

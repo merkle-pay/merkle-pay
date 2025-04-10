@@ -36,7 +36,7 @@ export default function PayPage() {
   const {
     solanaWallets,
     setPayment,
-    appId: appIdFromContext,
+    businessName: businessNameFromContext,
     tokenOptions,
     setBackUrl,
   } = usePaymentStore();
@@ -48,10 +48,10 @@ export default function PayPage() {
     form.setFieldsValue({
       ...router.query,
       amount: router.query.amount ? Number(router.query.amount) : undefined,
-      appId: appIdFromContext ?? router.query.appId,
+      businessName: businessNameFromContext ?? router.query.businessName,
     });
     setIsFormInitialized(true);
-  }, [router.isReady, router.query, form, appIdFromContext]);
+  }, [router.isReady, router.query, form, businessNameFromContext]);
 
   // allow empty values in router.query
   // blockchain here is only for confirm the blockchain type,
@@ -117,7 +117,7 @@ export default function PayPage() {
           ? Number(router.query.amount)
           : router.query.amount,
       payer: router.query.payer ?? "",
-      appId: appIdFromContext ?? router.query.appId,
+      businessName: businessNameFromContext ?? router.query.businessName,
     });
 
     if (!parsedPayment.success) {
@@ -144,14 +144,14 @@ export default function PayPage() {
         }}
       >
         <Form.Item
-          label="App Id"
-          field="appId"
+          label="Business Name"
+          field="businessName"
           required
           className={styles.formItem}
         >
           <Input
             readOnly={
-              !!appIdFromContext /* when appIdFromContext is set in the env, it's not editable */
+              !!businessNameFromContext /* when businessNameFromContext is set in the env, it's not editable */
             }
           />
         </Form.Item>
@@ -256,7 +256,7 @@ export default function PayPage() {
             !form.getFieldValue("orderId") ||
             !form.getFieldValue("recipient_address") ||
             !form.getFieldValue("returnUrl") ||
-            !form.getFieldValue("appId")
+            !form.getFieldValue("businessName")
           }
         >
           Preview
