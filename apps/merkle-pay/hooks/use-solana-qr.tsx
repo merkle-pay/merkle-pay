@@ -3,7 +3,7 @@ import { encodeURL, createQR } from "@solana/pay";
 import BigNumber from "bignumber.js";
 import { Payment } from "../types/payment";
 import { establishConnection, SplTokens } from "../utils/solana";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 export const useSolanaQR = (payment: Payment) => {
   const connection = establishConnection("mainnet-beta");
@@ -23,16 +23,21 @@ export const useSolanaQR = (payment: Payment) => {
   // const label = 'Jungle Cats store';
   // const message = 'Jungle Cats store - your order - #001234';
   // const memo = 'JC#4098';
-  const url = encodeURL({
-    recipient: new PublicKey(payment.recipient_address),
-    amount: new BigNumber(payment.amount),
-    reference: new Keypair().publicKey,
-    label: payment.businessName,
-    memo: payment.orderId,
-    splToken: new PublicKey(SplTokens[payment.token as keyof typeof SplTokens]),
-  });
 
-  const qrCode = createQR(url, 300);
+  const qrCode = useMemo(() => {
+    const url = encodeURL({
+      recipient: new PublicKey(payment.recipient_address),
+      amount: new BigNumber(payment.amount),
+      reference: new Keypair().publicKey,
+      label: payment.businessName,
+      memo: payment.orderId,
+      splToken: new PublicKey(
+        SplTokens[payment.token as keyof typeof SplTokens]
+      ),
+    });
+
+    return createQR(url, 300);
+  }, [payment]);
 
   // Use useEffect to append the QR code after the component mounts
   useEffect(() => {
