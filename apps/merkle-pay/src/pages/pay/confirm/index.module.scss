@@ -1,0 +1,13 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  margin-top: 10%;
+}
+
+.title,
+.subtitle {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
