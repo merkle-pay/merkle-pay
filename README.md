@@ -1,28 +1,50 @@
 # Merkle Pay
 
-**Accept payments in stable coins on Solana with ease—built for creators and businesses.**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-- Merkle Pay is a web platform that lets creators and small business owners set up a payment page in minutes to receive stable coins such as USDT and USDC on Solana.
-- With lightning-fast transactions (~400ms), low fees (~$0.0005), and a smooth experience (button for mobile, QR for desktop), it's designed to simplify crypto payments.
-- Merkle Pay is fully open sourced under the [MIT license](LICNESE)
+**Accept stablecoin payments on Solana, Polygon, Arbitrum, and zkSync with ease—built for creators, indie hackers, and small businesses.**
+
+Merkle Pay is a non-custodial web platform enabling users to quickly set up payment pages for receiving stablecoins like USDT and USDC directly to their own wallets on **multiple blockchains**.
+
+Leveraging native blockchain payment standards (like Solana Pay and EIP-681), it offers fast transactions, extremely low network fees, and a smooth user experience across all supported chains.
+
+Merkle Pay is fully open-source under the [MIT license](LICENSE).
 
 ---
 
+## Supported Blockchains (v1)
+
+Merkle Pay aims to provide a seamless payment experience across high-throughput, low-fee networks:
+
+- ✅ **Solana**
+- ✅ **Polygon PoS** _(Coming Soon)_
+- ✅ **Arbitrum One** _(Coming Soon)_
+- ✅ **zkSync Era** _(Coming Soon)_
+
+_(Support for additional chains may be added in the future.)_
+
+---
+
+## Supported Wallets (v1 - Solana Focus)
+
+Wallet compatibility ensures a smooth payment experience for your customers.
+
+- ✅ **Phantom**: Recommended for both desktop (via QR code) and mobile (via deeplinking). Excellent Solana Pay support.
+- ✅ **Solflare**: Recommended for both desktop and mobile. Strong Solana Pay support.
+- **Other Solana Wallets**: Wallets implementing the Solana Pay standard _should_ be compatible, but Phantom and Solflare are the primary tested wallets for v1.
+- **EVM Wallets (MetaMask, etc.)**: Support for EVM wallets will be detailed as Polygon, Arbitrum, and zkSync integration is completed.
+
 ## Features (v1)
 
-- **Quick Setup**:
-  - Enter your Solana address and business name—get a payment page instantly.
-- **Smart Delivery**:
-  - Mobile (iPhone/Android): Click a button to pay via `Phantom`.
-  - Desktop: Scan a QR code with your `Phantom` wallet.
-- **Order Tracking**:
-  - Unique `orderId` and memo (`Merkle Pay: <orderId>`)—no payment mix-ups.
-- **Status Check**:
-  - Buyers verify payments with a secure token.
-- **Solana-Powered**:
-  - Fast, cheap USDT payments—buyer covers ~$0.01 SOL fee.
-- **Open-Source**:
-  - Self-host with Dockern or self-deploy to `Vercel`
+- **Multi-Chain Support**: Accept payments on Solana and leading Ethereum Layer 2 networks (Polygon, Arbitrum, zkSync Era).
+- **Instant Setup**: Enter your wallet address(es) and business name—get a payment page ready in minutes.
+- **Non-Custodial**: Payments go directly from the payer's wallet to your specified wallet address. Merkle Pay never holds your funds.
+- **Native Payment Standards**: Uses Solana Pay for Solana and EIP-681 URI schemes for EVM chains (Polygon, Arbitrum, zkSync).
+- **Smart Display**: Generates QR codes and clickable payment links compatible with popular wallets on each supported chain (e.g., Phantom, MetaMask).
+- **Reliable Tracking**: Uses unique on-chain identifiers (`reference` key on Solana, potentially event emission via contracts on EVM) for robust backend verification. Includes optional `orderId` mapping.
+- **Real-time Status**: Payment status page with real-time updates (WebSocket recommended).
+- **Stablecoin Focus**: Designed primarily for USDT, USDC, and other major stablecoins native to or bridged across the supported chains.
+- **Open-Source & Self-Hostable**: Deploy using Docker or manually deploy to platforms like Vercel.
 
 ---
 
@@ -30,53 +52,112 @@
 
 ### Prerequisites
 
-- **Node.js**: v22+
-- **PNPM**: v10
-- **Docker**: For containerized deployment (optional).
-- **Solana Wallet**: Phantom or Solflare with USDT (devnet for testing).
-- **MongoDB**: Local or hosted DB.
-  - **Schema Flexibility**: MongoDB's schemaless nature simplifies development by eliminating the need for complex schema migrations when data models evolve.
-  - **Easy Customization**: New fields or data structures can be added easily without altering existing records, providing flexibility for future features or customizations.
-  - **Faster Iteration**: Reduced overhead from schema management allows developers to iterate more quickly on features involving data persistence.
+- **Node.js**: v22+ recommended
+- **PNPM**: v9+ recommended (or npm/yarn)
+- **Docker**: Required for the easiest local setup and deployment using the provided `docker-compose.yml`.
+- **PostgreSQL**: A running instance (local or hosted). Needed for storing merchant and payment request data.
+- **Web3 Wallet**:
+  - **Solana:** Phantom, Solflare, etc.
+  - **EVM (Polygon/Arbitrum/zkSync):** MetaMask, Rabby, Frame, etc.
 
-### Installation
+### Why PostgreSQL?
 
-1. **Clone the Repo**
-   ```bash
-   git clone https://github.com/yourusername/merkle-pay.git
-   cd merkle-pay
-   ```
-2. **Install Dependencies**
+- **Data Integrity**: Relational structure and constraints (like Foreign Keys) ensure data consistency, crucial for linking payments to merchants accurately across different chains.
+- **Transactional Reliability (ACID)**: Guarantees that operations (like updating payment status) complete fully or not at all, vital for financial applications.
+- **Structured Querying**: SQL provides powerful and standard ways to query and analyze payment data as the platform grows.
+- **Mature Ecosystem**: Excellent tooling and ORM support (e.g., Prisma) in the Node.js/TypeScript ecosystem.
 
-   ```bash
-   make i
-   ```
+### Installation & Setup
 
-3. **Config environment**
+1.  **Clone the Repository**
 
-- for merkle-pay
+    ```bash
+    git clone https://github.com/yourusername/merkle-pay.git
+    cd merkle-pay
+    ```
 
-  ```bash
-  touch apps/merkle-pay/.env
+2.  **Install Dependencies**
+    _(Using PNPM is recommended if you have a monorepo structure)_
 
-  NEXT_PUBLIC_SOLANA=address1,address2
-  NEXT_PUBLIC_APP_ID="Merkle Pay Demo"
-  NEXT_PUBLIC_TOKEN_OPTIONS=USDC,USDT
-  ```
+    ```bash
+    # Using make (if defined in Makefile)
+    make i
+    # Or manually with pnpm
+    pnpm install
+    ```
 
-- for merkle-dashboard
+3.  **Configure Environment Variables**
 
-  ```bash
-  touch apps/merkle-dashbard/.env
+    - Copy the example environment files:
+      ```bash
+      # Adjust paths based on your project structure (e.g., if using apps/*)
+      cp .env.example .env
+      # If using separate apps in a monorepo:
+      # cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+      # cp apps/merkle-dashboard/.env.example apps/merkle-dashboard/.env
+      ```
+    - **Edit `.env`** (or the specific app `.env` files) and set the following:
+
+      ```dotenv
+      # Example .env content - Adjust based on .env.example
+
+      # Database Connection String
+      DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+
+      # RPC Node URLs (Essential for backend monitoring!)
+      # Use reliable providers like Alchemy, QuickNode, Infura, Helius, etc.
+      # DO NOT rely solely on public RPCs for production.
+      SOLANA_RPC_URL="https://your_solana_rpc_endpoint"
+      POLYGON_RPC_URL="https://your_polygon_rpc_endpoint"
+      ARBITRUM_RPC_URL="https://your_arbitrum_rpc_endpoint"
+      ZKSYNC_ERA_RPC_URL="https://your_zksync_rpc_endpoint"
 
 
-  NEXT_PUBLIC_SOLANA=address1,address2
-  NEXT_PUBLIC_APP_ID="Merkle Pay Demo"
-  NEXT_PUBLIC_TOKEN_OPTIONS=USDC,USDT
-  ```
+      # Add any other required variables (API keys, JWT secrets, etc.)
+      # ...
+      ```
 
-4. **Run it locally**
+    - Ensure your PostgreSQL server is running and accessible with the credentials provided in `DATABASE_URL`.
 
-   ```bash
-   make dev
-   ```
+4.  **Database Migration (if using an ORM like Prisma)**
+
+    - _(Assuming Prisma)_ Apply the database schema:
+      ```bash
+      # In the package/app where Prisma schema is defined
+      pnpm prisma migrate dev
+      ```
+
+5.  **Run Locally**
+    - **Using Docker (Recommended for easy DB setup):**
+      _(Ensure you have a `docker-compose.yml` that sets up the app and a PostgreSQL container)_
+      ```bash
+      docker compose up --build
+      ```
+    - **Running Manually:**
+      _(Start your PostgreSQL server separately first)_
+      ```bash
+      # Using make (if defined)
+      make dev
+      # Or manually with pnpm (adjust based on your package.json scripts)
+      pnpm run dev
+      ```
+
+---
+
+## Deployment
+
+_(Add specific deployment instructions here later - e.g., Docker deployment notes, Vercel instructions, etc.)_
+
+**Note on Vercel:** Deploying applications requiring PostgreSQL on Vercel typically involves using Vercel Postgres or connecting to external managed database providers like Neon, Supabase, Aiven, etc. Ensure your RPC Node connections are securely configured in your deployment environment variables.
+
+---
+
+## Contributing
+
+PRs and Issues are warmly welcomed!
+
+---
+
+## License
+
+Merkle Pay is licensed under the [MIT License](LICENSE).
