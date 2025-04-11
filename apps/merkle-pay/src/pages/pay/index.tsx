@@ -9,11 +9,11 @@ import {
 } from "@arco-design/web-react";
 import { IconArrowRight } from "@arco-design/web-react/icon";
 import { useRouter } from "next/router";
-import { paymentSchema } from "../../../types/payment";
+import { paymentSchema } from "../../types/payment";
 import { fromError } from "zod-validation-error";
 
 import { usePaymentStore } from "../../store/payment-store";
-import { RecipientWallet } from "../../../types/recipient";
+import { RecipientWallet } from "../../types/recipient";
 import styles from "./index.module.scss";
 import { useEffect, useState } from "react";
 import clsx from "clsx";

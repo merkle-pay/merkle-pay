@@ -2,7 +2,7 @@ import "src/styles/globals.css";
 import "@arco-design/web-react/dist/css/arco.css";
 import type { AppProps } from "next/app";
 
-import { RecipientWallet } from "../../types/recipient";
+import { RecipientWallet } from "../types/recipient";
 import { Layout } from "src/components/layout";
 
 export default function App({ Component, pageProps }: AppProps) {

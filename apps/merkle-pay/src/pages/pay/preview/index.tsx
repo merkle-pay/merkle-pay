@@ -6,7 +6,7 @@ import {
 } from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
-import { paymentSchema } from "../../../../types/payment";
+import { paymentSchema } from "../../../types/payment";
 import { fromError } from "zod-validation-error";
 import styles from "./index.module.scss";
 import { IconArrowLeft } from "@arco-design/web-react/icon";

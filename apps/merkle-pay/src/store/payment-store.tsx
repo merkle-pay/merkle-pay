@@ -1,7 +1,7 @@
-import { Payment, PaymentState, PaymentStore } from "../../types/payment";
+import { Payment, PaymentState, PaymentStore } from "../types/payment";
 
 import { create } from "zustand";
-import { RecipientWallet } from "../../types/recipient";
+import { RecipientWallet } from "../types/recipient";
 
 const initialState: PaymentState = {
   // payment will be saved into the database

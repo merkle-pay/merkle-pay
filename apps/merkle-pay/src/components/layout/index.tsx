@@ -4,7 +4,7 @@ import {
   Typography,
   Link as ArcoLink,
 } from "@arco-design/web-react";
-import { RecipientWallet } from "../../../types/recipient";
+import { RecipientWallet } from "../../types/recipient";
 import { useEffect } from "react";
 import { usePaymentStore } from "src/store/payment-store";
 import Image from "next/image";
