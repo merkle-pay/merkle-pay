@@ -1,5 +1,4 @@
-.PHONY: i dev-pay dev-dashboard dev build lint
-
+.PHONY: i dev-pay dev-dashboard dev build lint clean tag tags
 i:
 	pnpm install
 
@@ -30,3 +29,4 @@ tag:
 
 tags:
 	git push --tags
+

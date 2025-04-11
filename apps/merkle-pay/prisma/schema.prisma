@@ -3,9 +3,21 @@ datasource db {
   provider = "postgresql"
 }
 
-
 generator client {
   provider = "prisma-client-js"
   output   = "./client"
 }
 
+model Payment {
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  amount             Float
+  token              String
+  blockchain         String
+  orderId            String
+  status             String
+  referencePublicKey String   @unique
+  mpid               String   @unique
+  raw                Json
+}
