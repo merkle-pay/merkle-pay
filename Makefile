@@ -1,4 +1,15 @@
-.PHONY: i dev-pay dev-dashboard dev build lint clean tag tags
+# General/Utility Targets
+.PHONY: i clean tag tags
+
+# Development Targets
+.PHONY: dev dev-pay dev-dashboard
+
+# Build Targets
+.PHONY: build build-pay build-dashboard
+
+# Linting Targets
+.PHONY: lint lint-pay lint-dashboard
+
 i:
 	pnpm install
 
@@ -12,11 +23,21 @@ dev-dashboard:
 	pnpm --filter merkle-dashboard dev
 
 build:
+	$(MAKE) -j2 build-pay build-dashboard
+
+build-pay:
 	pnpm --filter merkle-pay build
+
+build-dashboard:
 	pnpm --filter merkle-dashboard build
 
 lint:
+	$(MAKE) -j2 lint-pay lint-dashboard
+
+lint-pay:
 	pnpm --filter merkle-pay lint
+
+lint-dashboard:
 	pnpm --filter merkle-dashboard lint
 
 clean:
