@@ -9,7 +9,7 @@ generator client {
 }
 
 model Payment {
-  id                 String   @id @default(uuid())
+  id                 Int      @id @default(autoincrement())
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   amount             Float
