@@ -25,6 +25,11 @@ clean:
 	rm -rf apps/merkle-dashboard/node_modules
 
 tag:
+ifeq ($(strip $(TAG)),)
+	@echo "Listing all tags" >&2
+	@echo "Usage: make tag TAG=<your_tag_name> if you want to create a new one" >&2
+	exit 0
+endif
 	git tag $(TAG)
 
 tags:
