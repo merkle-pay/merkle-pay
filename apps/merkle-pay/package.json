@@ -14,6 +14,7 @@
     "@solana/pay": "catalog:pay",
     "bignumber.js": "catalog:pay",
     "clsx": "catalog:pay",
+    "nanoid": "catalog:pay",
     "next": "catalog:pay",
     "react": "catalog:pay",
     "react-dom": "catalog:pay",
