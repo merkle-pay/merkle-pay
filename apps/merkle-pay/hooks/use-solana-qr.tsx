@@ -2,14 +2,14 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import { encodeURL, createQROptions } from "@solana/pay";
 import BigNumber from "bignumber.js";
 import { Payment } from "../types/payment";
-import { establishConnection, SplTokens } from "../utils/solana";
+import { SplTokens } from "../utils/solana";
 import { useEffect, useMemo, useRef } from "react";
 import { logoSvg } from "../utils/logo";
 import QRCodeStyling from "@solana/qr-code-styling";
 
 export const useSolanaQR = (payment: Payment) => {
-  const connection = establishConnection("mainnet-beta");
   const qrCodeRef = useRef<HTMLDivElement>(null);
+  const referencePublicKeyRef = useRef<PublicKey | null>(null);
 
   // amount
   // label
@@ -27,10 +27,13 @@ export const useSolanaQR = (payment: Payment) => {
   // const memo = 'JC#4098';
 
   const qrCode = useMemo(() => {
+    const referenceKeypair = Keypair.generate(); // Use generate() for clarity
+    referencePublicKeyRef.current = referenceKeypair.publicKey; // Store it
+
     const url = encodeURL({
       recipient: new PublicKey(payment.recipient_address),
       amount: new BigNumber(payment.amount),
-      reference: new Keypair().publicKey,
+      reference: referencePublicKeyRef.current,
       label: payment.businessName,
       memo: payment.orderId,
       message: payment.message,
@@ -66,5 +69,8 @@ export const useSolanaQR = (payment: Payment) => {
     return () => {};
   }, [qrCode]); // Re-run if qrCode changes
 
-  return { connection, qrCodeRef };
+  return {
+    qrCodeRef,
+    referencePublicKey: referencePublicKeyRef.current,
+  };
 };

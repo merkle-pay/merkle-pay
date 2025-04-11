@@ -4,18 +4,23 @@ import { useRouter } from "next/router";
 
 import styles from "./index.module.scss";
 
-// import { useState } from "react";
 import { useSolanaQR } from "../../../../hooks/use-solana-qr";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
+import { useEffect } from "react";
 
 export default function PaymentConfirmPage() {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
-  // const [paymentStatus, setPaymentStatus] = useState<
-  //   "pending" | "success" | "error"
-  // >();
 
-  const { qrCodeRef } = useSolanaQR(payment);
+  const { qrCodeRef, referencePublicKey } = useSolanaQR(payment);
+  const referencePublicKeyString = referencePublicKey?.toBase58();
+
+  useEffect(() => {
+    if (referencePublicKeyString) {
+      // save it to database
+      console.log("referencePublicKeyString", referencePublicKeyString);
+    }
+  }, [referencePublicKeyString]);
 
   return (
     <Space direction="vertical" size={8} className={styles.container}>
