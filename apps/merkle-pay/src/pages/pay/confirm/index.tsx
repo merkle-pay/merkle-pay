@@ -4,23 +4,16 @@ import { useRouter } from "next/router";
 
 import styles from "./index.module.scss";
 
-import { useSolanaQR } from "../../../../hooks/use-solana-qr";
+import { useSolanaQR } from "../../../hooks/use-solana-qr";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
-import { useEffect } from "react";
 
 export default function PaymentConfirmPage() {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
-  const { qrCodeRef, referencePublicKey } = useSolanaQR(payment);
-  const referencePublicKeyString = referencePublicKey?.toBase58();
-
-  useEffect(() => {
-    if (referencePublicKeyString) {
-      // save it to database
-      console.log("referencePublicKeyString", referencePublicKeyString);
-    }
-  }, [referencePublicKeyString]);
+  const { qrCodeRef, paymentRecord, isLoading } = useSolanaQR({
+    payment,
+  });
 
   return (
     <Space direction="vertical" size={8} className={styles.container}>
@@ -42,8 +35,11 @@ export default function PaymentConfirmPage() {
         <Button
           type="primary"
           onClick={() => {
-            router.push(payment.returnUrl);
+            if (paymentRecord.mpid) {
+              router.push(`/pay/status?mpid=${paymentRecord.mpid}`);
+            }
           }}
+          loading={isLoading}
         >
           I have finished paying on my wallet
         </Button>
