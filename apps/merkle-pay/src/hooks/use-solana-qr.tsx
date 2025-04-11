@@ -18,32 +18,38 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const effectRan = useRef(false);
 
   useEffect(() => {
-    const createPaymentTableRecord = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // Replace with your actual API call
-        const { data, error } = await createPaymentService(payment);
-        if (error || !data) {
-          setError(error);
-          return;
+    if (effectRan.current === false) {
+      const createPaymentTableRecord = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          // Replace with your actual API call
+          const { data, error } = await createPaymentService(payment);
+          if (error || !data) {
+            setError(error);
+            return;
+          }
+
+          setPaymentRecord(data);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Unknown error");
+          setPaymentRecord({
+            mpid: null,
+            urlForQrCode: null,
+          });
+        } finally {
+          setIsLoading(false);
         }
+      };
+      createPaymentTableRecord();
+    }
 
-        setPaymentRecord(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-        setPaymentRecord({
-          mpid: null,
-          urlForQrCode: null,
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    return () => {
+      effectRan.current = true;
     };
-
-    createPaymentTableRecord();
   }, [payment]);
 
   const qrCodeRef = useRef<HTMLDivElement>(null);
