@@ -54,13 +54,8 @@ export default function PayPage() {
       returnUrl: router.query.returnUrl ?? returnUrlFromStore,
     });
     setIsFormInitialized(true);
-  }, [
-    router.isReady,
-    router.query,
-    form,
-    businessNameFromStore,
-    returnUrlFromStore,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, form, businessNameFromStore, returnUrlFromStore]);
 
   const updateQueryParam = () => {
     if (!isFormInitialized) return;
