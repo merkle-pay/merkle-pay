@@ -3,7 +3,7 @@ import { prisma } from "../utils/prisma";
 
 export const createPaymentService = async (payment: Payment) => {
   // !TODO: credentials
-  const res = await fetch("/api/init-payment", {
+  const res = await fetch("/api/payment/init", {
     method: "POST",
     body: JSON.stringify({ payment }),
     headers: {
