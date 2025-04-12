@@ -1,5 +1,5 @@
 import { Payment } from "src/types/payment";
-import { prisma } from "../utils/prisma";
+import { PaymentStatus, prisma } from "../utils/prisma";
 
 export const createPaymentService = async (payment: Payment) => {
   // !TODO: credentials
@@ -33,7 +33,7 @@ export const createPayment = async ({
       token: payment.token,
       blockchain: payment.blockchain,
       orderId: payment.orderId,
-      status: "pending",
+      status: PaymentStatus.PENDING,
       referencePublicKey: referencePublicKey,
       mpid,
       raw: payment,
@@ -45,6 +45,17 @@ export const createPayment = async ({
 export const getPaymentByMpid = async (mpid: string) => {
   const p = await prisma.payment.findUnique({
     where: { mpid },
+  });
+  return p;
+};
+
+export const updatePaymentStatus = async (
+  mpid: string,
+  status: PaymentStatus
+) => {
+  const p = await prisma.payment.update({
+    where: { mpid },
+    data: { status },
   });
   return p;
 };
