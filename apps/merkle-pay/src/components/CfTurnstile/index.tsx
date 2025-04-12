@@ -17,15 +17,21 @@ export function CfTurnstile({
       onSuccess={(token) => {
         handleVerification({
           token,
+          error: "",
+          isExpired: false,
         });
       }}
       onError={(error) => {
         handleVerification({
+          token: "",
           error,
+          isExpired: false,
         });
       }}
       onExpire={() => {
         handleVerification({
+          token: "",
+          error: "",
           isExpired: true,
         });
       }}

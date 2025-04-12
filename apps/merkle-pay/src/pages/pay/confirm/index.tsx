@@ -7,7 +7,6 @@ import styles from "./index.module.scss";
 import { useSolanaQR } from "../../../hooks/use-solana-qr";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/CfTurnstile";
-import { useState } from "react";
 
 export default function PaymentConfirmPage({
   turnstileSiteKey,
@@ -17,33 +16,14 @@ export default function PaymentConfirmPage({
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
-  const [turnstileToken, setTurnstileToken] = useState({
-    token: "",
-    error: "",
-    isExpired: true,
-  });
-
-  const handleTurnsTokenVerification = (params: {
-    token?: string;
-    error?: string;
-    isExpired?: boolean;
-  }) => {
-    setTurnstileToken((tt) => {
-      return {
-        ...tt,
-        ...params,
-      };
-    });
-  };
-
   const {
     qrCodeRef,
     paymentRecord,
     isLoading,
     error: qrCodeError,
+    handleTurnsTokenVerification,
   } = useSolanaQR({
     payment,
-    turnstileToken,
   });
 
   return (

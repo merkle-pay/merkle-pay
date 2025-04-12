@@ -6,17 +6,7 @@ import QRCodeStyling from "@solana/qr-code-styling";
 import { createPaymentService } from "src/services/payment";
 import { Payment } from "src/types/payment";
 
-export const useSolanaQR = ({
-  payment,
-  turnstileToken,
-}: {
-  payment: Payment;
-  turnstileToken: {
-    token: string;
-    error: string;
-    isExpired: boolean;
-  };
-}) => {
+export const useSolanaQR = ({ payment }: { payment: Payment }) => {
   const [paymentRecord, setPaymentRecord] = useState<{
     mpid: string | null;
     urlForQrCode: string | null;
@@ -24,32 +14,65 @@ export const useSolanaQR = ({
     mpid: null,
     urlForQrCode: null,
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const effectRan = useRef(false);
+
+  const [turnstileToken, setTurnstileToken] = useState({
+    token: "",
+    error: "",
+    isExpired: true,
+  });
+
+  const handleTurnsTokenVerification = (params: {
+    token?: string;
+    error?: string;
+    isExpired?: boolean;
+  }) => {
+    setTurnstileToken((tt) => {
+      return {
+        ...tt,
+        ...params,
+      };
+    });
+  };
 
   useEffect(() => {
     if (effectRan.current === false) {
       const createPaymentTableRecord = async () => {
+        if (turnstileToken.error) {
+          setError(turnstileToken.error);
+          return;
+        }
+
+        if (turnstileToken.isExpired) {
+          setError("Turnstile token expired");
+          return;
+        }
+
+        if (!turnstileToken.token) {
+          setError("Turnstile token missing");
+          return;
+        }
+
+        if (
+          payment.amount <= 0 ||
+          !payment.blockchain ||
+          !payment.token ||
+          !payment.businessName ||
+          !payment.recipient_address ||
+          !payment.payer ||
+          !payment.orderId ||
+          !payment.returnUrl
+        ) {
+          setError("Invalid payment");
+          return;
+        }
+
         setIsLoading(true);
         setError(null);
 
         try {
-          if (turnstileToken.isExpired) {
-            setError("Turnstile token expired");
-            return;
-          }
-
-          if (turnstileToken.error) {
-            setError(turnstileToken.error);
-            return;
-          }
-
-          if (!turnstileToken.token) {
-            setError("Turnstile token missing");
-            return;
-          }
-
           // Replace with your actual API call
           const { data, error } = await createPaymentService(
             payment,
@@ -75,9 +98,21 @@ export const useSolanaQR = ({
     }
 
     return () => {
+      if (
+        turnstileToken.isExpired ||
+        turnstileToken.error ||
+        !turnstileToken.token
+      ) {
+        return;
+      }
       effectRan.current = true;
     };
-  }, [payment, turnstileToken]);
+  }, [
+    payment,
+    turnstileToken.token,
+    turnstileToken.error,
+    turnstileToken.isExpired,
+  ]);
 
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const qrCode = useMemo(() => {
@@ -119,5 +154,11 @@ export const useSolanaQR = ({
 
   // Return only the ref needed for rendering the QR code
   // The component calling this hook already has the payment details (including reference)
-  return { qrCodeRef, paymentRecord, isLoading, error };
+  return {
+    qrCodeRef,
+    paymentRecord,
+    isLoading,
+    error,
+    handleTurnsTokenVerification,
+  };
 };
