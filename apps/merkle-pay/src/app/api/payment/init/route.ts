@@ -25,12 +25,23 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  const { payment } = parsedJson.data;
+
+  if (
+    !process.env.NEXT_PUBLIC_SOLANA?.includes(payment.blockchain) ||
+    !process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.includes(payment.token)
+  ) {
+    return NextResponse.json({
+      code: 400,
+      data: null,
+      message: "Invalid blockchain or token",
+    });
+  }
+
   try {
     const referenceKeypair = Keypair.generate(); // Use generate() for clarity
     const referencePublicKey = referenceKeypair.publicKey;
     const referencePublicKeyString = referencePublicKey.toBase58();
-
-    const { payment } = parsedJson.data;
 
     const url = encodeURL({
       recipient: new PublicKey(payment.recipient_address),
