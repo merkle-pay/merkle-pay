@@ -17,6 +17,8 @@ export default function App({ Component, pageProps }: AppProps) {
   );
 
   const businessName = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? "";
+  const blockchainOptions =
+    process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.split(",") ?? [];
   const tokenOptions = process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.split(",") ?? [];
   const returnUrl = process.env.NEXT_PUBLIC_RETURN_URL ?? "/pay/status";
 
@@ -25,6 +27,7 @@ export default function App({ Component, pageProps }: AppProps) {
       solanaWallets={solanaWallets}
       businessName={businessName}
       tokenOptions={tokenOptions}
+      blockchainOptions={blockchainOptions}
       returnUrl={returnUrl}
     >
       <Component {...pageProps} />

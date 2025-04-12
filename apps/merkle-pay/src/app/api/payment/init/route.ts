@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   const { payment } = parsedJson.data;
 
   if (
-    !process.env.NEXT_PUBLIC_SOLANA?.includes(payment.blockchain) ||
+    !process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.includes(payment.blockchain) ||
     !process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.includes(payment.token)
   ) {
     return NextResponse.json({

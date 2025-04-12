@@ -19,6 +19,7 @@ const initialState: PaymentState = {
   solanaWallets: [], // configurable
   businessName: "", // configurable
   tokenOptions: [], // configurable
+  blockchainOptions: [], // configurable
   returnUrl: "", // configurable
   paymentFormUrl: "",
 };
@@ -32,5 +33,7 @@ export const usePaymentStore = create<PaymentStore>((set) => ({
     set({ solanaWallets: wallets }),
   setBusinessName: (name: string) => set({ businessName: name }),
   setTokenOptions: (options: string[]) => set({ tokenOptions: options }),
+  setBlockchainOptions: (options: string[]) =>
+    set({ blockchainOptions: options }),
   setReturnUrl: (url: string) => set({ returnUrl: url }),
 }));
