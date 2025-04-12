@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PROCESSED', 'CONFIRMED', 'FINALIZED', 'EXPIRED', 'FAILED', 'REFUNDED', 'CANCELLED');
+
 -- CreateTable
 CREATE TABLE "Payment" (
     "id" SERIAL NOT NULL,
@@ -7,7 +10,9 @@ CREATE TABLE "Payment" (
     "token" TEXT NOT NULL,
     "blockchain" TEXT NOT NULL,
     "orderId" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "PaymentStatus" NOT NULL,
+    "recipient_address" TEXT,
+    "payer_address" TEXT,
     "referencePublicKey" TEXT NOT NULL,
     "mpid" TEXT NOT NULL,
     "raw" JSONB NOT NULL,
