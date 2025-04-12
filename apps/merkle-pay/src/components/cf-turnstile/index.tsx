@@ -1,15 +1,12 @@
 import { Turnstile } from "@marsidev/react-turnstile";
+import { AntibotToken } from "src/types/antibot";
 
 export function CfTurnstile({
   siteKey,
   handleVerification,
 }: {
   siteKey: string;
-  handleVerification: (params: {
-    token?: string;
-    error?: string;
-    isExpired?: boolean;
-  }) => void;
+  handleVerification: (params: AntibotToken) => void;
 }) {
   return (
     <Turnstile
@@ -19,6 +16,7 @@ export function CfTurnstile({
           token,
           error: "",
           isExpired: false,
+          isInitialized: true,
         });
       }}
       onError={(error) => {
@@ -26,6 +24,7 @@ export function CfTurnstile({
           token: "",
           error,
           isExpired: false,
+          isInitialized: true,
         });
       }}
       onExpire={() => {
@@ -33,6 +32,7 @@ export function CfTurnstile({
           token: "",
           error: "",
           isExpired: true,
+          isInitialized: true,
         });
       }}
     />

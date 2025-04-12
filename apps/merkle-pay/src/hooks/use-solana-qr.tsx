@@ -5,8 +5,15 @@ import { logoSvg } from "../utils/logo";
 import QRCodeStyling from "@solana/qr-code-styling";
 import { createPaymentService } from "src/services/payment";
 import { Payment } from "src/types/payment";
+import { AntibotToken } from "src/types/antibot";
 
-export const useSolanaQR = ({ payment }: { payment: Payment }) => {
+export const useSolanaQR = ({
+  payment,
+  antibotToken,
+}: {
+  payment: Payment;
+  antibotToken: AntibotToken;
+}) => {
   const [paymentRecord, setPaymentRecord] = useState<{
     mpid: string | null;
     urlForQrCode: string | null;
@@ -18,39 +25,24 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
   const [error, setError] = useState<string | null>(null);
   const effectRan = useRef(false);
 
-  const [turnstileToken, setTurnstileToken] = useState({
-    token: "",
-    error: "",
-    isExpired: true,
-  });
-
-  const handleTurnsTokenVerification = (params: {
-    token?: string;
-    error?: string;
-    isExpired?: boolean;
-  }) => {
-    setTurnstileToken((tt) => {
-      return {
-        ...tt,
-        ...params,
-      };
-    });
-  };
-
   useEffect(() => {
     if (effectRan.current === false) {
       const createPaymentTableRecord = async () => {
-        if (turnstileToken.error) {
-          setError(turnstileToken.error);
+        if (!antibotToken.isInitialized) {
           return;
         }
 
-        if (turnstileToken.isExpired) {
+        if (antibotToken.error) {
+          setError(antibotToken.error);
+          return;
+        }
+
+        if (antibotToken.isExpired) {
           setError("Turnstile token expired");
           return;
         }
 
-        if (!turnstileToken.token) {
+        if (!antibotToken.token) {
           setError("Turnstile token missing");
           return;
         }
@@ -76,7 +68,7 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
           // Replace with your actual API call
           const { data, error } = await createPaymentService(
             payment,
-            turnstileToken.token
+            antibotToken.token
           );
           if (error || !data) {
             setError(error);
@@ -98,20 +90,17 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
     }
 
     return () => {
-      if (
-        turnstileToken.isExpired ||
-        turnstileToken.error ||
-        !turnstileToken.token
-      ) {
+      if (antibotToken.isExpired || antibotToken.error || !antibotToken.token) {
         return;
       }
       effectRan.current = true;
     };
   }, [
     payment,
-    turnstileToken.token,
-    turnstileToken.error,
-    turnstileToken.isExpired,
+    antibotToken.token,
+    antibotToken.error,
+    antibotToken.isExpired,
+    antibotToken.isInitialized,
   ]);
 
   const qrCodeRef = useRef<HTMLDivElement>(null);
@@ -159,6 +148,5 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
     paymentRecord,
     isLoading,
     error,
-    handleTurnsTokenVerification,
   };
 };

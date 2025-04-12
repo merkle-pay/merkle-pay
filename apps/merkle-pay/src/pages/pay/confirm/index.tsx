@@ -6,8 +6,9 @@ import styles from "./index.module.scss";
 
 import { useSolanaQR } from "../../../hooks/use-solana-qr";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
-import { CfTurnstile } from "../../../components/CfTurnstile";
-
+import { CfTurnstile } from "../../../components/cf-turnstile";
+import { useState } from "react";
+import { AntibotToken } from "src/types/antibot";
 export default function PaymentConfirmPage({
   turnstileSiteKey,
 }: {
@@ -16,14 +17,30 @@ export default function PaymentConfirmPage({
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
+  const [turnstileToken, setTurnstileToken] = useState<AntibotToken>({
+    token: "",
+    error: "",
+    isExpired: true,
+    isInitialized: false,
+  });
+
+  const handleTurnstileTokenVerification = (params: AntibotToken) => {
+    setTurnstileToken((tt) => {
+      return {
+        ...tt,
+        ...params,
+      };
+    });
+  };
+
   const {
     qrCodeRef,
     paymentRecord,
     isLoading,
     error: qrCodeError,
-    handleTurnsTokenVerification,
   } = useSolanaQR({
     payment,
+    antibotToken: turnstileToken,
   });
 
   return (
@@ -50,10 +67,10 @@ export default function PaymentConfirmPage({
           />
         </div>
       )}
-      <div id="qr-code" ref={qrCodeRef} />
+      <div id="qr-code-container" ref={qrCodeRef} />
       <CfTurnstile
         siteKey={turnstileSiteKey}
-        handleVerification={handleTurnsTokenVerification}
+        handleVerification={handleTurnstileTokenVerification}
       />
       <Space size={8} className={styles.buttons}>
         <Button
