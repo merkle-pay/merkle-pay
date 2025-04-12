@@ -6,12 +6,15 @@ import { SETTLED_TX_STATUSES, MERKLE_PAY_EXPIRE_TIME } from "src/utils/solana";
 import { useEffect, useState, useRef } from "react";
 import { PaymentStatus } from "src/utils/prisma";
 import { PaymentStatusApiResponse } from "src/types/payment";
+import { AntibotToken } from "src/types/antibot";
+import { CfTurnstile } from "src/components/cf-turnstile";
 
 type Props = {
   status: PaymentStatus | null;
   mpid: string | null;
   error: string | null;
   needPolling: boolean;
+  turnstileSiteKey: string;
 };
 
 export default function PaymentStatusPage(props: Props) {
@@ -20,6 +23,7 @@ export default function PaymentStatusPage(props: Props) {
     mpid,
     error: initialError,
     needPolling: initialNeedPolling,
+    turnstileSiteKey,
   } = props;
 
   const [displayStatus, setDisplayStatus] = useState<PaymentStatus | null>(
@@ -31,6 +35,17 @@ export default function PaymentStatusPage(props: Props) {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
+    token: "",
+    error: "",
+    isExpired: true,
+    isInitialized: false,
+  });
+
+  const handleAntibotToken = (params: AntibotToken) => {
+    setAntibotToken((prev) => ({ ...prev, ...params }));
+  };
+
   useEffect(() => {
     const fetchStatus = async () => {
       if (!mpid) {
@@ -39,8 +54,32 @@ export default function PaymentStatusPage(props: Props) {
         return;
       }
 
+      if (!antibotToken.isInitialized) {
+        return;
+      }
+
+      if (antibotToken.isExpired) {
+        setDisplayError("Turnstile token expired");
+        return;
+      }
+
+      if (antibotToken.error) {
+        setDisplayError(antibotToken.error);
+        return;
+      }
+
+      if (!antibotToken.token) {
+        setDisplayError("Turnstile token missing");
+        return;
+      }
+
       try {
-        const response = await fetch(`/api/payment/status?mpid=${mpid}`);
+        const response = await fetch(`/api/payment/status?mpid=${mpid}`, {
+          headers: {
+            "Content-Type": "application/json",
+            "mp-antibot-token": antibotToken.token,
+          },
+        });
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
@@ -97,7 +136,14 @@ export default function PaymentStatusPage(props: Props) {
         intervalRef.current = null;
       }
     };
-  }, [isPollingActive, mpid]);
+  }, [
+    isPollingActive,
+    mpid,
+    antibotToken.token,
+    antibotToken.isExpired,
+    antibotToken.isInitialized,
+    antibotToken.error,
+  ]);
 
   return (
     <Space direction="vertical" size="medium" className={styles.container}>
@@ -114,6 +160,10 @@ export default function PaymentStatusPage(props: Props) {
       {displayError && (
         <Typography.Text type="error">Error: {displayError}</Typography.Text>
       )}
+      <CfTurnstile
+        siteKey={turnstileSiteKey}
+        handleVerification={handleAntibotToken}
+      />
     </Space>
   );
 }
@@ -122,6 +172,7 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const { mpid } = context.query;
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
   if (typeof mpid !== "string" || !mpid) {
     return {
@@ -130,6 +181,7 @@ export const getServerSideProps = async (
         mpid: null,
         error: "MPID is required",
         needPolling: false,
+        turnstileSiteKey,
       },
     };
   }
@@ -143,6 +195,7 @@ export const getServerSideProps = async (
         mpid,
         error: "Payment not found",
         needPolling: false,
+        turnstileSiteKey,
       },
     };
   }
@@ -157,6 +210,7 @@ export const getServerSideProps = async (
       mpid,
       error: null,
       needPolling,
+      turnstileSiteKey,
     },
   };
 };

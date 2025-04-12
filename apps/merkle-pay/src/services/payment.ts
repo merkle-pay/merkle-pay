@@ -10,7 +10,7 @@ export const createPaymentService = async (
     body: JSON.stringify({ payment }),
     headers: {
       "Content-Type": "application/json",
-      "mp-cf-token": turnstileToken,
+      "mp-antibot-token": turnstileToken,
     },
   });
   const json = await res.json();
