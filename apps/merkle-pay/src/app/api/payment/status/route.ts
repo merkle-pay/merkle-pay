@@ -93,15 +93,24 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const { isValid, validationError } = validateTransaction(payment, tx);
-
-  if (!isValid) {
+  if (!tx) {
     return NextResponse.json({
       code: 400,
       data: {
-        status: tx?.meta?.err ? PaymentStatus.FAILED : PaymentStatus.PENDING,
+        status: PaymentStatus.PENDING,
       },
-      message: validationError || "Transaction validation failed",
+      message:
+        "Transaction data missing or not found at desired confirmation level",
+    });
+  }
+
+  if (tx.meta?.err) {
+    return NextResponse.json({
+      code: 400,
+      data: {
+        status: PaymentStatus.FAILED,
+      },
+      message: `Transaction failed on-chain: ${JSON.stringify(tx.meta.err)}`,
     });
   }
 
@@ -112,36 +121,4 @@ export async function GET(request: NextRequest) {
     },
     message: `Payment confirmed at level: ${REQUIRED_CONFIRMATION_LEVEL}`,
   });
-}
-
-type ValidationResult = {
-  isValid: boolean;
-  validationError: string | null;
-};
-
-/**
- * Validates if a transaction associated with the payment exists and succeeded on-chain
- * at the specified CONFIRMATION_LEVEL used to fetch it.
- * It does NOT validate the recipient, amount, or token mint details.
- */
-function validateTransaction(
-  _payment: PaymentTable,
-  tx: ParsedTransactionWithMeta | null
-): ValidationResult {
-  if (!tx) {
-    return {
-      isValid: false,
-      validationError:
-        "Transaction data missing or not found at desired confirmation level",
-    };
-  }
-
-  if (tx.meta?.err) {
-    return {
-      isValid: false,
-      validationError: `Transaction failed on-chain: ${JSON.stringify(tx.meta.err)}`,
-    };
-  }
-
-  return { isValid: true, validationError: null };
 }
