@@ -1,4 +1,4 @@
-import { Button, Space, Typography } from "@arco-design/web-react";
+import { Button, Space, Spin, Typography, Alert } from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 
@@ -11,7 +11,12 @@ export default function PaymentConfirmPage() {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
-  const { qrCodeRef, paymentRecord, isLoading } = useSolanaQR({
+  const {
+    qrCodeRef,
+    paymentRecord,
+    isLoading,
+    error: qrCodeError,
+  } = useSolanaQR({
     payment,
   });
 
@@ -23,6 +28,22 @@ export default function PaymentConfirmPage() {
       <Typography.Title heading={6} className={styles.subtitle}>
         Please scan the QR code with your Phantom or Solflare wallet
       </Typography.Title>
+      {isLoading && (
+        <div className={styles.loading}>
+          <Spin size={48} tip="Generating Payment QR Code..." />
+        </div>
+      )}
+      {qrCodeError && (
+        <div className={styles.error}>
+          <Alert
+            closable={false}
+            style={{ marginBottom: 20 }}
+            type="error"
+            title="Error"
+            content={qrCodeError}
+          />
+        </div>
+      )}
       <div id="qr-code" ref={qrCodeRef} />
       <Space size={8} className={styles.buttons}>
         <Button

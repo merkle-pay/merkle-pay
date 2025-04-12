@@ -1,12 +1,10 @@
 import { createQROptions } from "@solana/pay";
-import { renderToString } from "react-dom/server";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { logoSvg } from "../utils/logo";
 import QRCodeStyling from "@solana/qr-code-styling";
 import { createPaymentService } from "src/services/payment";
 import { Payment } from "src/types/payment";
-import { IconSync } from "@arco-design/web-react/icon";
 
 export const useSolanaQR = ({ payment }: { payment: Payment }) => {
   const [paymentRecord, setPaymentRecord] = useState<{
@@ -83,42 +81,8 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
       qrCode.append(currentRef);
 
       return () => {
-        if (currentRef) {
-          currentRef.innerHTML = "";
-        }
+        currentRef.innerHTML = "";
       };
-    } else if (currentRef) {
-      if (isLoading) {
-        currentRef.innerHTML = renderToString(
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "300px",
-              height: "300px",
-            }}
-          >
-            <IconSync spin style={{ fontSize: "36px" }} />
-          </div>
-        );
-      }
-
-      if (error) {
-        currentRef.innerHTML = renderToString(
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "300px",
-              height: "300px",
-            }}
-          >
-            Error: {error}
-          </div>
-        );
-      }
     }
 
     return () => {};
