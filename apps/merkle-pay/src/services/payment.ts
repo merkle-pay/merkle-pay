@@ -35,6 +35,7 @@ export const createPayment = async ({
       orderId: payment.orderId,
       status: PaymentStatus.PENDING,
       referencePublicKey: referencePublicKey,
+      recipient_address: payment.recipient_address,
       mpid,
       raw: payment,
     },

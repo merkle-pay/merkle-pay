@@ -1,6 +1,7 @@
 import { StableCoin } from "./currency";
 import { z } from "zod";
 import { RecipientWallet } from "./recipient";
+import { PaymentStatus } from "../utils/prisma";
 
 export const payPageQuerySchema = z.object({
   blockchain: z
@@ -106,3 +107,9 @@ export type PaymentActions = {
 };
 
 export type PaymentStore = PaymentState & PaymentActions;
+
+export type PaymentStatusApiResponse = {
+  code: number;
+  data: { status: PaymentStatus } | null;
+  message: string;
+};
