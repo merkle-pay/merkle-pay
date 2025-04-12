@@ -2,19 +2,18 @@ import { getPaymentByMpid } from "src/services/payment";
 import styles from "./index.module.scss";
 import { Space, Typography } from "@arco-design/web-react";
 import { GetServerSidePropsContext } from "next";
-import {
-  FINAL_SOLANA_TX_STATUSES,
-  MERKLE_PAY_EXPIRE_TIME,
-} from "src/utils/solana";
+import { SETTLED_TX_STATUSES, MERKLE_PAY_EXPIRE_TIME } from "src/utils/solana";
 
 export default function PaymentStatusPage({
   status,
   mpid,
   error,
+  needPolling,
 }: {
   status: string | null;
   mpid: string | null;
   error: string | null;
+  needPolling: boolean;
 }) {
   return (
     <Space direction="vertical" size="medium" className={styles.container}>
@@ -37,7 +36,7 @@ export const getServerSideProps = async (
         status: null,
         mpid: null,
         error: "MPID is required",
-        needWs: false,
+        needPolling: false,
       },
     };
   }
@@ -46,13 +45,18 @@ export const getServerSideProps = async (
 
   if (!payment) {
     return {
-      props: { status: null, mpid, error: "Payment not found", needWs: false },
+      props: {
+        status: null,
+        mpid,
+        error: "Payment not found",
+        needPolling: false,
+      },
     };
   }
 
-  const needWs =
+  const needPolling =
     // not final, and not expired
-    !FINAL_SOLANA_TX_STATUSES.has(payment.status) &&
+    !SETTLED_TX_STATUSES.has(payment.status) &&
     new Date(payment.updatedAt).getTime() + MERKLE_PAY_EXPIRE_TIME > Date.now();
 
   return {
@@ -60,7 +64,7 @@ export const getServerSideProps = async (
       status: payment?.status,
       mpid,
       error: null,
-      needWs,
+      needPolling,
     },
   };
 };
