@@ -1,7 +1,6 @@
 import type { Cluster } from "@solana/web3.js";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { PaymentStatus } from "./prisma";
-
 /**
  * Establish a connection to the cluster
  */
@@ -30,3 +29,7 @@ export const SETTLED_TX_STATUSES = new Set<PaymentStatus>([
 ]);
 
 export const MERKLE_PAY_EXPIRE_TIME = 1000 * 60 * 60 * 2; // 2 hours
+
+export const POLLING_INTERVAL_MS = 2000; // Check every 2 seconds
+export const MONITORING_TIMEOUT_MS = 90 * 1000; // 90 seconds timeout per payment
+export const REQUIRED_CONFIRMATION_LEVEL = "confirmed"; // Or 'finalized'
