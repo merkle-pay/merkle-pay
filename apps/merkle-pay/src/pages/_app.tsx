@@ -7,7 +7,7 @@ import { Layout } from "src/components/layout";
 
 export default function App({ Component, pageProps }: AppProps) {
   const solanaWalletsPublicEnv =
-    process.env.NEXT_PUBLIC_SOLANA?.split(",") ?? [];
+    process.env.NEXT_PUBLIC_SOLANA_WALLETS?.split(",") ?? [];
   const solanaWallets: RecipientWallet[] = solanaWalletsPublicEnv.map(
     (wallet) => ({
       id: `solana-${wallet}`,

@@ -101,17 +101,22 @@ Wallet compatibility ensures a smooth payment experience for your customers.
       ```dotenv
       # Example .env content - Adjust based on .env.example
 
+
+      # env variables starting with NEXT_PUBLIC_ can be used in the client
+      NEXT_PUBLIC_SOLANA_WALLETS=
+      NEXT_PUBLIC_BUSINESS_NAME="Merkle Pay Demo"
+      NEXT_PUBLIC_TOKEN_OPTIONS=USDT,USDC,SOL
+      NEXT_PUBLIC_BLOCKCHAIN_OPTIONS=solana
+
       # Database Connection String
       DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 
-      # RPC Node URLs (Essential for backend monitoring!)
-      # Use reliable providers like Alchemy, QuickNode, Infura, Helius, etc.
-      # DO NOT rely solely on public RPCs for production.
-      SOLANA_RPC_URL="https://your_solana_rpc_endpoint"
-      POLYGON_RPC_URL="https://your_polygon_rpc_endpoint"
-      ARBITRUM_RPC_URL="https://your_arbitrum_rpc_endpoint"
-      ZKSYNC_ERA_RPC_URL="https://your_zksync_rpc_endpoint"
+      BETTER_AUTH_SECRET=
+      BETTER_AUTH_URL=
 
+      # env variables starting with NEXT_PUBLIC_ can be used in the client
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+      TURNSTILE_SECRET_KEY=
 
       # Add any other required variables (API keys, JWT secrets, etc.)
       # ...
@@ -124,7 +129,10 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     - _(Assuming Prisma)_ Apply the database schema:
       ```bash
       # In the package/app where Prisma schema is defined
-      pnpm prisma migrate dev
+      make prisma-fmt
+      make prisma-gen
+      make prisma-migrate NAME=MY_MIGRATION_NAME
+      make prisma-deploy # password is yesyesyes
       ```
 
 5.  **Run Locally**
@@ -134,12 +142,8 @@ Wallet compatibility ensures a smooth payment experience for your customers.
       docker compose up --build
       ```
     - **Running Manually:**
-      _(Start your PostgreSQL server separately first)_
       ```bash
-      # Using make (if defined)
       make dev
-      # Or manually with pnpm (adjust based on your package.json scripts)
-      pnpm run dev
       ```
 
 ---
