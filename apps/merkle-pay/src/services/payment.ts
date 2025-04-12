@@ -1,13 +1,16 @@
 import { Payment } from "src/types/payment";
 import { PaymentStatus, prisma } from "../utils/prisma";
 
-export const createPaymentService = async (payment: Payment) => {
-  // !TODO: credentials
+export const createPaymentService = async (
+  payment: Payment,
+  turnstileToken: string
+) => {
   const res = await fetch("/api/payment/init", {
     method: "POST",
     body: JSON.stringify({ payment }),
     headers: {
       "Content-Type": "application/json",
+      "x-mp-human-token": turnstileToken,
     },
   });
   const json = await res.json();

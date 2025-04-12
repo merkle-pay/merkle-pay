@@ -12,6 +12,7 @@
   "dependencies": {
     "@solana/kit": "catalog:pay",
     "@solana/pay": "catalog:pay",
+    "@marsidev/react-turnstile": "catalog:pay",
     "bignumber.js": "catalog:pay",
     "better-auth": "catalog:pay",
     "clsx": "catalog:pay",

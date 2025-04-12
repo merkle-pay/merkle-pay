@@ -18,8 +18,6 @@ import styles from "./index.module.scss";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 
-// import { GetServerSidePropsContext } from "next/types";
-
 // solana:
 //        <recipient>?amount=<amount>
 //       &spl-token=<spl-token>

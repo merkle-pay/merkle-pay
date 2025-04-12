@@ -6,10 +6,35 @@ import styles from "./index.module.scss";
 
 import { useSolanaQR } from "../../../hooks/use-solana-qr";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
+import { CfTurnstile } from "../../../components/CfTurnstile";
+import { useState } from "react";
 
-export default function PaymentConfirmPage() {
+export default function PaymentConfirmPage({
+  turnstileSiteKey,
+}: {
+  turnstileSiteKey: string;
+}) {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
+
+  const [turnstileToken, setTurnstileToken] = useState({
+    token: "",
+    error: "",
+    isExpired: true,
+  });
+
+  const handleTurnsTokenVerification = (params: {
+    token?: string;
+    error?: string;
+    isExpired?: boolean;
+  }) => {
+    setTurnstileToken((tt) => {
+      return {
+        ...tt,
+        ...params,
+      };
+    });
+  };
 
   const {
     qrCodeRef,
@@ -18,6 +43,7 @@ export default function PaymentConfirmPage() {
     error: qrCodeError,
   } = useSolanaQR({
     payment,
+    turnstileToken,
   });
 
   return (
@@ -45,11 +71,17 @@ export default function PaymentConfirmPage() {
         </div>
       )}
       <div id="qr-code" ref={qrCodeRef} />
+      <CfTurnstile
+        siteKey={turnstileSiteKey}
+        handleVerification={handleTurnsTokenVerification}
+      />
       <Space size={8} className={styles.buttons}>
         <Button
           type="outline"
           icon={<IconArrowLeft />}
-          onClick={() => router.push(paymentFormUrl)}
+          onClick={() => {
+            router.push(paymentFormUrl || "/pay");
+          }}
         >
           Back to Payment Form
         </Button>
@@ -61,6 +93,7 @@ export default function PaymentConfirmPage() {
             }
           }}
           loading={isLoading}
+          disabled={!paymentRecord.mpid}
         >
           I have finished paying on my wallet
         </Button>
@@ -68,3 +101,11 @@ export default function PaymentConfirmPage() {
     </Space>
   );
 }
+
+export const getServerSideProps = async () => {
+  return {
+    props: {
+      turnstileSiteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "",
+    },
+  };
+};

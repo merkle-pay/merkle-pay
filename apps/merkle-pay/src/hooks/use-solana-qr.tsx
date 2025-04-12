@@ -6,7 +6,17 @@ import QRCodeStyling from "@solana/qr-code-styling";
 import { createPaymentService } from "src/services/payment";
 import { Payment } from "src/types/payment";
 
-export const useSolanaQR = ({ payment }: { payment: Payment }) => {
+export const useSolanaQR = ({
+  payment,
+  turnstileToken,
+}: {
+  payment: Payment;
+  turnstileToken: {
+    token: string;
+    error: string;
+    isExpired: boolean;
+  };
+}) => {
   const [paymentRecord, setPaymentRecord] = useState<{
     mpid: string | null;
     urlForQrCode: string | null;
@@ -23,9 +33,28 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
       const createPaymentTableRecord = async () => {
         setIsLoading(true);
         setError(null);
+
         try {
+          if (turnstileToken.isExpired) {
+            setError("Turnstile token expired");
+            return;
+          }
+
+          if (turnstileToken.error) {
+            setError(turnstileToken.error);
+            return;
+          }
+
+          if (!turnstileToken.token) {
+            setError("Turnstile token missing");
+            return;
+          }
+
           // Replace with your actual API call
-          const { data, error } = await createPaymentService(payment);
+          const { data, error } = await createPaymentService(
+            payment,
+            turnstileToken.token
+          );
           if (error || !data) {
             setError(error);
             return;
@@ -48,7 +77,7 @@ export const useSolanaQR = ({ payment }: { payment: Payment }) => {
     return () => {
       effectRan.current = true;
     };
-  }, [payment]);
+  }, [payment, turnstileToken]);
 
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const qrCode = useMemo(() => {

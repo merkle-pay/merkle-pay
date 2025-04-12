@@ -13,6 +13,7 @@ catalogs:
     react-dom: ^18
     react-icons: ^5.5.0
     "@arco-design/web-react": ^2.66.1
+    "@marsidev/react-turnstile": ^1.1.0
     "@eslint/eslintrc": ^3
     "@types/node": ^22
     "@types/react": ^18
