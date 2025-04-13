@@ -20,7 +20,12 @@ export default function App({ Component, pageProps }: AppProps) {
   const blockchainOptions =
     process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.split(",") ?? [];
   const tokenOptions = process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.split(",") ?? [];
-  const returnUrl = process.env.NEXT_PUBLIC_RETURN_URL ?? "/pay/status";
+  const returnUrlFrom = process.env.NEXT_PUBLIC_RETURN_URL ?? "";
+  const supportedBlockchains =
+    process.env.NEXT_PUBLIC_SUPPORTED_BLOCKCHAINS?.split(",") ?? [];
+
+
+
 
   return (
     <Layout
@@ -28,7 +33,8 @@ export default function App({ Component, pageProps }: AppProps) {
       businessName={businessName}
       tokenOptions={tokenOptions}
       blockchainOptions={blockchainOptions}
-      returnUrl={returnUrl}
+      returnUrl={returnUrlFrom}
+      supportedBlockchains={supportedBlockchains}
     >
       <Component {...pageProps} />
     </Layout>

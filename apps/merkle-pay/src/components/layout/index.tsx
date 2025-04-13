@@ -9,14 +9,16 @@ import { useEffect } from "react";
 import { usePaymentStore } from "src/store/payment-store";
 import Image from "next/image";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 
+// ! All props are from env variables
 export const Layout = ({
   children,
   solanaWallets,
-  businessName,
+  businessName: businessNameFromEnv,
   tokenOptions,
   blockchainOptions,
-  returnUrl,
+  returnUrl: returnUrlFromEnv,
 }: {
   children: React.ReactNode;
   solanaWallets: RecipientWallet[];
@@ -24,7 +26,12 @@ export const Layout = ({
   tokenOptions: string[];
   blockchainOptions: string[];
   returnUrl: string;
+  supportedBlockchains: string[];
 }) => {
+  const router = useRouter();
+  const returnUrlFromUrl = router.query.returnUrl as string;
+  const businessNameFromUrl = router.query.businessName as string;
+
   const {
     setSolanaWallets,
     setBusinessName,
@@ -34,12 +41,18 @@ export const Layout = ({
   } = usePaymentStore();
 
   useEffect(() => {
+    if (!router.isReady) return;
+
+    if (!businessNameFromEnv && !businessNameFromUrl) {
+      throw new Error("Business name is not set");
+    }
+
     setSolanaWallets(solanaWallets);
-    setBusinessName(businessName);
+    setBusinessName(businessNameFromEnv || businessNameFromUrl);
     setTokenOptions(tokenOptions);
     setBlockchainOptions(blockchainOptions);
-    setReturnUrl(returnUrl);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setReturnUrl(returnUrlFromUrl || returnUrlFromEnv || "/pay/status");
+  }, [router.isReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ArcoLayout className={styles.layout}>

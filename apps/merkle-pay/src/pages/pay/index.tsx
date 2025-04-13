@@ -16,7 +16,7 @@ import { fromError } from "zod-validation-error";
 import { usePaymentStore } from "../../store/payment-store";
 import { RecipientWallet } from "../../types/recipient";
 import styles from "./index.module.scss";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import clsx from "clsx";
 
 // solana:
@@ -29,7 +29,11 @@ import clsx from "clsx";
 
 // solana:mvines9iiHiQTysrwkJjGf2gb9Ex9jXJX8ns3qwf2kN?amount=1&label=Michael&message=Thanks%20for%20all%20the%20fish&memo=OrderId12345
 
-export default function PayPage() {
+export default function PayPage({
+  businessNameFromEnv,
+}: {
+  businessNameFromEnv: string | null;
+}) {
   const [form] = Form.useForm();
   const router = useRouter();
 
@@ -38,26 +42,23 @@ export default function PayPage() {
     setPayment,
     businessName: businessNameFromStore,
     tokenOptions,
+    blockchainOptions,
     setPaymentFormUrl,
     returnUrl: returnUrlFromStore,
   } = usePaymentStore();
-
-  const [isFormInitialized, setIsFormInitialized] = useState(false);
 
   useEffect(() => {
     if (!router.isReady) return;
     form.setFieldsValue({
       ...router.query,
       amount: router.query.amount ? Number(router.query.amount) : undefined,
-      businessName: businessNameFromStore,
-      returnUrl: router.query.returnUrl ?? returnUrlFromStore,
+      businessName: businessNameFromStore, // should not be updated
+      returnUrl: returnUrlFromStore, // should not be updated
     });
-    setIsFormInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, form, businessNameFromStore, returnUrlFromStore]);
 
   const updateQueryParam = () => {
-    if (!isFormInitialized) return;
     const formValues = form.getFieldsValue();
     const _searchParams = new URLSearchParams(
       router.query as unknown as Record<string, string>
@@ -67,6 +68,13 @@ export default function PayPage() {
         _searchParams.delete(key);
       } else {
         _searchParams.set(key, value.toString());
+      }
+
+      // businessName should be removed from url if it's already set in env
+      if (key === "businessName") {
+        if (businessNameFromEnv) {
+          _searchParams.delete(key);
+        }
       }
     });
     router.push(
@@ -184,9 +192,9 @@ export default function PayPage() {
           className={styles.formItem}
         >
           <Select placeholder="Select blockchain">
-            {solanaWallets.map((option: RecipientWallet) => (
-              <Select.Option key={option.blockchain} value={option.blockchain}>
-                {option.blockchain}
+            {blockchainOptions.map((option) => (
+              <Select.Option key={option} value={option}>
+                {option}
               </Select.Option>
             ))}
           </Select>
@@ -296,3 +304,11 @@ export default function PayPage() {
     </>
   );
 }
+
+export const getServerSideProps = async () => {
+  const businessNameFromEnv = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? null;
+
+  return {
+    props: { businessNameFromEnv },
+  };
+};
