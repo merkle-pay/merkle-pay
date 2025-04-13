@@ -41,6 +41,7 @@ export const createPayment = async ({
       recipient_address: payment.recipient_address,
       mpid,
       raw: payment,
+      business_name: payment.businessName,
     },
   });
   return p;

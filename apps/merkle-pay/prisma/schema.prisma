@@ -28,6 +28,7 @@ model Payment {
   blockchain         String
   orderId            String
   status             PaymentStatus
+  business_name      String        @default("")
   recipient_address  String
   payer_address      String?
   referencePublicKey String        @unique
