@@ -48,8 +48,8 @@ export default function PayPage() {
     form.setFieldsValue({
       ...router.query,
       amount: router.query.amount ? Number(router.query.amount) : undefined,
-      businessName: businessNameFromStore ?? router.query.businessName,
-      returnUrl: router.query.returnUrl ?? returnUrlFromStore,
+      businessName: businessNameFromStore || router.query.businessName,
+      returnUrl: returnUrlFromStore || router.query.returnUrl,
     });
     setIsFormInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,7 +87,7 @@ export default function PayPage() {
           ? Number(router.query.amount)
           : router.query.amount,
       payer: router.query.payer ?? "",
-      businessName: businessNameFromStore ?? router.query.businessName,
+      businessName: businessNameFromStore || router.query.businessName,
     });
 
     if (!parsedPayment.success) {
