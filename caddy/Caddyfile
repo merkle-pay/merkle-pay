@@ -1,0 +1,12 @@
+{$DOMAIN} {
+    reverse_proxy /dashboard/* {
+        to merkle-dashboard:9999
+        # Rewrite SPA routes to index.html
+        @spa {
+            path /dashboard/*
+            not path /dashboard/assets/* /dashboard/*.js /dashboard/*.css /dashboard/*.png /dashboard/*.svg /dashboard/*.ico
+        }
+        rewrite @spa /dashboard/index.html
+    }
+    reverse_proxy /* merkle-pay:8888
+}

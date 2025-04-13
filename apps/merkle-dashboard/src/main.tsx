@@ -13,7 +13,6 @@ import { toast } from '@/hooks/use-toast'
 import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
 import './index.css'
-// Generated Routes
 import { routeTree } from './routeTree.gen'
 
 const queryClient = new QueryClient({
@@ -22,10 +21,8 @@ const queryClient = new QueryClient({
       retry: (failureCount, error) => {
         // eslint-disable-next-line no-console
         if (import.meta.env.DEV) console.log({ failureCount, error })
-
         if (failureCount >= 0 && import.meta.env.DEV) return false
         if (failureCount > 3 && import.meta.env.PROD) return false
-
         return !(
           error instanceof AxiosError &&
           [401, 403].includes(error.response?.status ?? 0)
@@ -37,14 +34,11 @@ const queryClient = new QueryClient({
     mutations: {
       onError: (error) => {
         handleServerError(error)
-
-        if (error instanceof AxiosError) {
-          if (error.response?.status === 304) {
-            toast({
-              variant: 'destructive',
-              title: 'Content not modified!',
-            })
-          }
+        if (error instanceof AxiosError && error.response?.status === 304) {
+          toast({
+            variant: 'destructive',
+            title: 'Content not modified!',
+          })
         }
       },
     },
@@ -76,22 +70,21 @@ const queryClient = new QueryClient({
   }),
 })
 
-// Create a new router instance
+// Create router with base path
 const router = createRouter({
   routeTree,
   context: { queryClient },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
+  basepath: '/dashboard',
 })
 
-// Register the router instance for type safety
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
   }
 }
 
-// Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)

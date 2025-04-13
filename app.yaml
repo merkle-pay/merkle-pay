@@ -1,0 +1,33 @@
+name: merkle-app
+services:
+  - name: merkle-pay
+    dockerfile_path: apps/merkle-pay/Dockerfile
+    source_dir: .
+    http_port: 8888
+    environment:
+      - key: DATABASE_URL
+        value: "${{ secrets.DATABASE_URL }}"
+      - key: NODE_ENV
+        value: production
+    instance_size_slug: basic-xs
+    instance_count: 1
+  - name: merkle-dashboard
+    dockerfile_path: apps/merkle-dashboard/Dockerfile
+    source_dir: .
+    http_port: 9999
+    environment:
+      - key: NODE_ENV
+        value: production
+    instance_size_slug: basic-xs
+    instance_count: 1
+  - name: caddy
+    dockerfile_path: caddy/Dockerfile
+    source_dir: .
+    http_port: 80
+    instance_size_slug: basic-xs
+    instance_count: 1
+    routes:
+      - path: /
+      - path: /dashboard
+domains:
+  - domain: "${{ secrets.DOMAIN }}"
