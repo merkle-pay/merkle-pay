@@ -6,6 +6,7 @@ import {
   InputNumber,
   Typography,
   Space,
+  Message,
 } from "@arco-design/web-react";
 import { IconArrowRight } from "@arco-design/web-react/icon";
 import { useRouter } from "next/router";
@@ -91,7 +92,7 @@ export default function PayPage() {
     });
 
     if (!parsedPayment.success) {
-      alert(fromError(parsedPayment.error).message);
+      Message.error(fromError(parsedPayment.error).message);
       return;
     }
 
