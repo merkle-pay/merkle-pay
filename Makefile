@@ -1,5 +1,5 @@
 # General/Utility Targets
-.PHONY: i clean tag tags
+.PHONY: i clean tag tags tree
 
 # Development Targets
 .PHONY: dev dev-pay dev-dashboard
@@ -56,3 +56,5 @@ endif
 tags:
 	git push --tags
 
+tree:
+	tree --opt-toggle -I node_modules
