@@ -14,7 +14,6 @@
     "@solana/pay": "catalog:pay",
     "@marsidev/react-turnstile": "catalog:pay",
     "bignumber.js": "catalog:pay",
-    "better-auth": "catalog:pay",
     "clsx": "catalog:pay",
     "nanoid": "catalog:pay",
     "next": "catalog:pay",
