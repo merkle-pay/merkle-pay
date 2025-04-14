@@ -11,18 +11,13 @@ services:
     networks:
       - merkle-network
 
+  # This service now only builds the dashboard assets and exits
   merkle-dashboard:
     build:
       context: .
       dockerfile: apps/merkle-dashboard/Dockerfile
-    container_name: merkle-dashboard-app
-    restart: unless-stopped
-    ports:
-      - "9999:9999"
-    environment:
-      - NODE_ENV=production
-    networks:
-      - merkle-network
+    volumes:
+      - dashboard-dist:/app/apps/merkle-dashboard/dist
 
   caddy:
     build:
@@ -37,12 +32,21 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
     networks:
-      - merkle-network
+      - merkle-network # Caddy still needs the network to proxy to merkle-pay
     volumes:
+      # Mount the built dashboard assets from the named volume (read-only)
+      - dashboard-dist:/srv/dashboard:ro
       - ./caddy/data:/data
       - ./caddy/config:/config
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+    # Ensure dashboard build completes before Caddy starts
+    depends_on:
+      - merkle-dashboard
 
 networks:
   merkle-network:
     driver: bridge
+
+# Define the named volume for dashboard assets
+volumes:
+  dashboard-dist:
