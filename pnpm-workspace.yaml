@@ -3,7 +3,8 @@ packages:
   - packages/*
 catalogs:
   pay:
-    "@solana/kit": ^2.1.0
+    "@solana/web3.js": ^1.98.0
+    "@solana/qr-code-styling": ^1.6.0
     "@solana/pay": ^0.2.5
     bignumber.js: ^9.2.1
     clsx: ^2.1.1

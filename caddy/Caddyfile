@@ -1,0 +1,14 @@
+{$DOMAIN} {
+    # Handle dashboard routes
+    @spa path_regexp ^/dashboard/.*$
+    rewrite @spa /dashboard/index.html
+    reverse_proxy @spa merkle-dashboard:9999
+
+    # Handle all other paths
+    reverse_proxy /* merkle-pay:8888
+
+    # Logging
+    log {
+        output stdout
+    }
+}

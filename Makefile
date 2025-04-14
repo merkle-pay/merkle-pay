@@ -57,4 +57,16 @@ tags:
 	git push --tags
 
 tree:
-	tree --opt-toggle -I node_modules
+	tree --opt-toggle -I node_modules > tree.txt
+
+d-up:
+	docker compose --env-file .env up -d
+
+d-stop:
+	docker compose stop
+
+d-down:
+	docker compose down
+
+d-clean:
+	docker compose down -v --rmi all

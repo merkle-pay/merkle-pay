@@ -1,0 +1,49 @@
+services:
+  merkle-pay:
+    build:
+      context: .
+      dockerfile: apps/merkle-pay/Dockerfile
+    container_name: merkle-pay-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - merkle-network
+    command: ["/bin/sh", "-c", "pnpm --filter merkle-pay start"]
+
+  merkle-dashboard:
+    build:
+      context: .
+      dockerfile: apps/merkle-dashboard/Dockerfile
+    container_name: merkle-dashboard-app
+    restart: unless-stopped
+    ports:
+      - "9999:9999"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - merkle-network
+
+  caddy:
+    build:
+      context: .
+      dockerfile: caddy/Dockerfile
+    container_name: caddy-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      - DOMAIN=${DOMAIN}
+    networks:
+      - merkle-network
+    volumes:
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+
+networks:
+  merkle-network:
+    driver: bridge

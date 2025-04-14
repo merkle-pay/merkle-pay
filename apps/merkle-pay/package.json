@@ -10,8 +10,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@solana/kit": "catalog:pay",
+    "@solana/web3.js": "catalog:pay",
     "@solana/pay": "catalog:pay",
+    "@solana/qr-code-styling": "catalog:pay",
     "@marsidev/react-turnstile": "catalog:pay",
     "bignumber.js": "catalog:pay",
     "clsx": "catalog:pay",
