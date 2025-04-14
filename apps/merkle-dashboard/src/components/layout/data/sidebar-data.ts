@@ -21,13 +21,14 @@ import {
 } from '@tabler/icons-react'
 import { AudioWaveform, GalleryVerticalEnd } from 'lucide-react'
 import Logo from '@/assets/logo.svg?react'
+import LogoUrl from '@/assets/logo.svg?url'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
   user: {
     name: 'Merkle Pay',
     email: 'support@merklepay.io',
-    avatar: '/avatars/shadcn.jpg',
+    avatar: LogoUrl,
   },
   teams: [
     {
