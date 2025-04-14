@@ -69,4 +69,6 @@ d-down:
 	docker compose down
 
 d-clean:
-	docker compose down -v --rmi all
+	docker compose down -v --rmi all --remove-orphans && \
+	rm -rf caddy/data/caddy && \
+	rm -rf caddy/config/caddy
