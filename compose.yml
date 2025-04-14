@@ -8,6 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
     networks:
       - merkle-network
 
