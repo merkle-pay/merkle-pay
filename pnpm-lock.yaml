@@ -525,6 +525,12 @@ importers:
       react-icons:
         specifier: catalog:pay
         version: 5.5.0(react@18.3.1)
+      zod:
+        specifier: catalog:pay
+        version: 3.24.2
+      zod-validation-error:
+        specifier: catalog:pay
+        version: 3.4.0(zod@3.24.2)
       zustand:
         specifier: catalog:pay
         version: 5.0.3(@types/react@18.3.20)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
@@ -553,12 +559,6 @@ importers:
       typescript:
         specifier: catalog:pay
         version: 5.8.3
-      zod:
-        specifier: catalog:pay
-        version: 3.24.2
-      zod-validation-error:
-        specifier: catalog:pay
-        version: 3.4.0(zod@3.24.2)
 
 packages:
 

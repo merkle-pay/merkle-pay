@@ -11,7 +11,7 @@ import {
 import { IconArrowRight } from "@arco-design/web-react/icon";
 import { useRouter } from "next/router";
 import { paymentSchema } from "../../types/payment";
-import { fromError } from "zod-validation-error";
+import { fromZodError } from "zod-validation-error";
 
 import { usePaymentStore } from "../../store/payment-store";
 import { RecipientWallet } from "../../types/recipient";
@@ -100,7 +100,7 @@ export default function PayPage({
     });
 
     if (!parsedPayment.success) {
-      Message.error(fromError(parsedPayment.error).message);
+      Message.error(fromZodError(parsedPayment.error).message);
       return;
     }
 

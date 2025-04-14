@@ -9,6 +9,7 @@ import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/cf-turnstile";
 import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
+
 export default function PaymentConfirmPage({
   turnstileSiteKey,
 }: {

@@ -24,7 +24,9 @@
     "prisma": "catalog:pay",
     "@prisma/client": "catalog:pay",
     "@arco-design/web-react": "catalog:pay",
-    "zustand": "catalog:pay"
+    "zustand": "catalog:pay",
+    "zod": "catalog:pay",
+    "zod-validation-error": "catalog:pay"
   },
   "devDependencies": {
     "@eslint/eslintrc": "catalog:pay",
@@ -34,8 +36,6 @@
     "eslint": "catalog:pay",
     "eslint-config-next": "catalog:pay",
     "typescript": "catalog:pay",
-    "sass": "catalog:pay",
-    "zod": "catalog:pay",
-    "zod-validation-error": "catalog:pay"
+    "sass": "catalog:pay"
   }
 }

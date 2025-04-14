@@ -7,7 +7,7 @@ import {
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import { paymentSchema } from "../../../types/payment";
-import { fromError } from "zod-validation-error";
+import { fromZodError } from "zod-validation-error";
 import styles from "./index.module.scss";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 
@@ -27,7 +27,7 @@ export default function PaymentPreviewPage() {
     return (
       <Space direction="vertical" size={16}>
         <Typography.Title>Payment data is invalid</Typography.Title>
-        <Typography.Text>{fromError(error).message}</Typography.Text>
+        <Typography.Text>{fromZodError(error).message}</Typography.Text>
         <Button type="outline" onClick={() => router.push("/pay")}>
           Back to Payment
         </Button>
