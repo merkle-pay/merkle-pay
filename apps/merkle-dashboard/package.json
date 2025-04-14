@@ -58,7 +58,7 @@
     "@faker-js/faker": "catalog:dashboard",
     "@tanstack/eslint-plugin-query": "catalog:dashboard",
     "@tanstack/react-query-devtools": "catalog:dashboard",
-    "@tanstack/router-devtools": "catalog:dashboard",
+    "@tanstack/react-router-devtools": "catalog:dashboard",
     "@tanstack/router-plugin": "catalog:dashboard",
     "@trivago/prettier-plugin-sort-imports": "catalog:dashboard",
     "@types/js-cookie": "catalog:dashboard",
@@ -78,7 +78,8 @@
     "tailwindcss": "catalog:dashboard",
     "typescript": "catalog:dashboard",
     "typescript-eslint": "catalog:dashboard",
-    "vite": "catalog:dashboard"
+    "vite": "catalog:dashboard",
+    "vite-plugin-svgr": "catalog:dashboard"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.6.4"
