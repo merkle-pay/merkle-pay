@@ -57,4 +57,4 @@ tags:
 	git push --tags
 
 tree:
-	tree --opt-toggle -I node_modules
+	tree --opt-toggle -I node_modules > tree.txt

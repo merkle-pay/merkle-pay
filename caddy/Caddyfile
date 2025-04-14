@@ -1,0 +1,17 @@
+{$DOMAIN} {
+    # Handle dashboard routes specifically
+    handle_path /dashboard/* {
+        # Strip the /dashboard prefix before proxying
+        reverse_proxy merkle-dashboard:9999
+    }
+
+    # Handle all other paths (fallback)
+    handle {
+        reverse_proxy merkle-pay:8888
+    }
+
+    # Optional: Add logging
+    log {
+        output stdout
+    }
+}

@@ -1,0 +1,79 @@
+services:
+  #-----------------------------------
+  # Merkle Pay (Next.js App)
+  #-----------------------------------
+  merkle-pay:
+    build:
+      context: . # Build context is the root directory
+      dockerfile: apps/merkle-pay/Dockerfile # Path to the Dockerfile
+    container_name: merkle-pay-app
+    restart: unless-stopped
+    ports:
+      # Map host port 8888 to container port 8888 (where Next.js runs)
+      - "8888:8888"
+    environment:
+      # NODE_ENV is often set within the Dockerfile, but can be explicit here
+      - NODE_ENV=production
+      # PORT is set in the Dockerfile, Docker Compose doesn't override EXPOSE directly
+      # DATABASE_URL will be read from the .env file
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - merkle-network
+
+  #-----------------------------------
+  # Merkle Dashboard (Vite React SPA)
+  #-----------------------------------
+  merkle-dashboard:
+    build:
+      context: .
+      dockerfile: apps/merkle-dashboard/Dockerfile
+    container_name: merkle-dashboard-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - merkle-network
+
+  #-----------------------------------
+  # Caddy Reverse Proxy
+  #-----------------------------------
+  caddy:
+    build:
+      context: .
+      dockerfile: caddy/Dockerfile
+    container_name: caddy-proxy
+    restart: unless-stopped
+    ports:
+      # Map standard web ports on the host to Caddy's container ports
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # Needed for HTTP/3
+    environment:
+      # DOMAIN will be read from the .env file (used by Caddyfile)
+      - DOMAIN=${DOMAIN}
+      # Optional: Add ACME_EMAIL for Let's Encrypt rate limits/notifications
+      - ACME_EMAIL=${ACME_EMAIL}
+    networks:
+      - merkle-network
+    depends_on:
+      # Ensure backend services are started before Caddy (though Caddy handles failures)
+      - merkle-pay
+      - merkle-dashboard
+    volumes:
+      # Persist Caddy's state (certificates, etc.) across restarts
+      - caddy_data:/data
+      - caddy_config:/config
+
+#-----------------------------------
+# Volumes (for Caddy persistence)
+#-----------------------------------
+volumes:
+  caddy_data:
+  caddy_config:
+
+#-----------------------------------
+# Network (allows services to communicate)
+#-----------------------------------
+networks:
+  merkle-network:
+    driver: bridge # Default network driver
