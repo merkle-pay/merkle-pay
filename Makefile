@@ -10,6 +10,9 @@
 # Linting Targets
 .PHONY: lint lint-pay lint-dashboard
 
+# Docker Compose Command
+COMPOSE_CMD = docker compose --env-file ./apps/merkle-pay/.env
+
 i:
 	pnpm install
 
@@ -60,15 +63,15 @@ tree:
 	tree --opt-toggle -I node_modules > tree.txt
 
 d-up:
-	docker compose --env-file .env up -d
+	$(COMPOSE_CMD) up -d
 
 d-stop:
-	docker compose stop
+	$(COMPOSE_CMD) stop
 
 d-down:
-	docker compose down
+	$(COMPOSE_CMD) down
 
 d-clean:
-	docker compose down -v --rmi all --remove-orphans && \
+	$(COMPOSE_CMD) down -v --rmi all --remove-orphans && \
 	rm -rf caddy/data/caddy && \
 	rm -rf caddy/config/caddy
