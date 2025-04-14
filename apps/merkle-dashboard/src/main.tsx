@@ -91,7 +91,7 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
+        <ThemeProvider defaultTheme='light' storageKey='mp-ui-theme'>
           <FontProvider>
             <RouterProvider router={router} />
           </FontProvider>

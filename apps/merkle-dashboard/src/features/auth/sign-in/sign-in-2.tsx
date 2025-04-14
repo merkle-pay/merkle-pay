@@ -1,4 +1,4 @@
-import ViteLogo from '@/assets/vite.svg'
+import Logo from '@/assets/logo.svg'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn2() {
@@ -23,11 +23,11 @@ export default function SignIn2() {
         </div>
 
         <img
-          src={ViteLogo}
+          src={Logo}
           className='relative m-auto'
           width={301}
           height={60}
-          alt='Vite'
+          alt='Merkle Pay'
         />
 
         <div className='relative z-20 mt-auto'>

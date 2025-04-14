@@ -20,6 +20,7 @@ import {
   IconUsers,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
+import Logo from '@/assets/logo.svg'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -30,9 +31,9 @@ export const sidebarData: SidebarData = {
   },
   teams: [
     {
-      name: 'Shadcn Admin',
+      name: 'Merkle Pay',
       logo: Command,
-      plan: 'Vite + ShadcnUI',
+      plan: 'Crypto Payment Solution',
     },
     {
       name: 'Acme Inc',
