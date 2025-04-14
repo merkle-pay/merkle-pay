@@ -19,6 +19,8 @@ services:
       dockerfile: apps/merkle-dashboard/Dockerfile
     container_name: merkle-dashboard-app
     restart: unless-stopped
+    ports:
+      - "9999:9999"
     environment:
       - NODE_ENV=production
     networks:
