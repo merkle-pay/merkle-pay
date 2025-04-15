@@ -2,8 +2,10 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -47,7 +49,7 @@ const formSchema = z
 
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-
+  const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,17 +72,19 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           body: JSON.stringify(data),
         }
       )
-
       const json = await response.json()
 
       if (json.code === 201) {
-        alert('Boss created successfully')
+        navigate({ to: '/sign-in' })
       } else {
-        alert(json.message)
+        toast({
+          title: json.message,
+        })
       }
     } catch (error) {
-      console.log('onSubmit error', error)
-      alert((error as Error).message)
+      toast({
+        title: (error as Error).message,
+      })
     } finally {
       setIsLoading(false)
     }
