@@ -2,9 +2,12 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { jwtDecode } from 'jwt-decode'
+import { useAuth, AuthUser } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -16,6 +19,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { signIn } from '../utils/sign-in'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -35,6 +39,8 @@ const formSchema = z.object({
 })
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+  const auth = useAuth()
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,27 +55,38 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch(
-        'http://localhost:8888/api/boss-auth/sign-in',
-        {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        }
-      )
-
-      const json = await response.json()
+      const json = await signIn(data)
 
       if (json.code === 200) {
-        alert('Login successful')
+        const { sessionToken, jwtToken } = json.data
+
+        // AuthUser is a subset of the decoded payload
+        const decodedPayload = jwtDecode<AuthUser>(jwtToken)
+
+        auth.setJwtToken(jwtToken)
+        auth.setSessionToken(sessionToken)
+        auth.setUser({
+          id: decodedPayload.id,
+          name: decodedPayload.name,
+          email: decodedPayload.email,
+          blockchains: decodedPayload.blockchains,
+          wallets: decodedPayload.wallets,
+          image: decodedPayload.image,
+          exp: decodedPayload.exp,
+          level: decodedPayload.level,
+          business_name: decodedPayload.business_name,
+          backup_email: decodedPayload.backup_email,
+        })
+        navigate({ to: '/' })
       } else {
-        alert(json.message)
+        toast({
+          title: json.message,
+        })
       }
     } catch (error) {
-      alert((error as Error).message)
+      toast({
+        title: (error as Error).message,
+      })
     } finally {
       setIsLoading(false)
     }

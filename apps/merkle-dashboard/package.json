@@ -42,6 +42,7 @@
     "cmdk": "catalog:dashboard",
     "date-fns": "catalog:dashboard",
     "js-cookie": "catalog:dashboard",
+    "jwt-decode": "catalog:dashboard",
     "lucide-react": "catalog:dashboard",
     "react": "catalog:dashboard",
     "react-day-picker": "catalog:dashboard",

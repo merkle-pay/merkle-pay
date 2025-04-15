@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       })
       .parse(json);
 
-    const { token: sessionToken, user: boss } = await bossAuth.api.signInEmail({
+    const { token: sessionToken } = await bossAuth.api.signInEmail({
       body: {
         password,
         email,
@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
       code: 200,
       data: {
         sessionToken,
-        boss,
         jwtToken,
       },
       message: "Login successful",

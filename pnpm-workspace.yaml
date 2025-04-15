@@ -61,6 +61,7 @@ catalogs:
     cmdk: 1.0.4
     date-fns: ^4.1.0
     js-cookie: ^3.0.5
+    jwt-decode: ^4.0.0
     lucide-react: ^0.468.0
     react: ^19.0.0
     react-day-picker: 8.10.1
