@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
-import { signIn } from '../utils/sign-in'
+import { signIn } from '../../utils'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
 

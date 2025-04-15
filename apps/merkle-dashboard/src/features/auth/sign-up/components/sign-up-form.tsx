@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { signUp } from '../../utils'
 
 type SignUpFormProps = HTMLAttributes<HTMLDivElement>
 
@@ -65,14 +66,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch(
-        'http://localhost:8888/api/boss-auth/sign-up',
-        {
-          method: 'POST',
-          body: JSON.stringify(data),
-        }
-      )
-      const json = await response.json()
+      const json = await signUp(data)
 
       if (json.code === 201) {
         navigate({ to: '/sign-in' })
