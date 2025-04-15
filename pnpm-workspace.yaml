@@ -8,6 +8,8 @@ catalogs:
     "@solana/pay": ^0.2.5
     bignumber.js: ^9.2.1
     clsx: ^2.1.1
+    better-auth: ^1.2.7
+    jose: ^6.0.10
     next: 15.2.3
     react: ^18
     react-dom: ^18
@@ -69,6 +71,7 @@ catalogs:
     tailwindcss-animate: ^1.0.7
     vite-plugin-svgr: ^4.3.0
     zod: ^3.23.8
+    zod-validation-error: ^3.4.0
     zustand: ^5.0.2
     "@eslint/js": ^9.16.0
     "@faker-js/faker": ^9.3.0

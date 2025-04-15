@@ -45,14 +45,34 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
 
-    setTimeout(() => {
+    try {
+      const response = await fetch(
+        'http://localhost:8888/api/boss-auth/sign-in',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        }
+      )
+
+      const json = await response.json()
+
+      if (json.code === 200) {
+        alert('Login successful')
+      } else {
+        alert(json.message)
+      }
+    } catch (error) {
+      alert((error as Error).message)
+    } finally {
       setIsLoading(false)
-    }, 3000)
+    }
   }
 
   return (

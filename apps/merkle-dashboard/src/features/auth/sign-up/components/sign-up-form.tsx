@@ -20,6 +20,12 @@ type SignUpFormProps = HTMLAttributes<HTMLDivElement>
 
 const formSchema = z
   .object({
+    business_name: z.string().min(4, {
+      message: 'Business name is required and must be at least 4 letters long',
+    }),
+    name: z.string().min(4, {
+      message: 'Name is required and must be at least 4 letters long',
+    }),
     email: z
       .string()
       .min(1, { message: 'Please enter your email' })
@@ -48,17 +54,36 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       email: '',
       password: '',
       confirmPassword: '',
+      business_name: '',
+      name: '',
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
 
-    setTimeout(() => {
+    try {
+      const response = await fetch(
+        'http://localhost:8888/api/boss-auth/sign-up',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }
+      )
+
+      const json = await response.json()
+
+      if (json.code === 201) {
+        alert('Boss created successfully')
+      } else {
+        alert(json.message)
+      }
+    } catch (error) {
+      console.log('onSubmit error', error)
+      alert((error as Error).message)
+    } finally {
       setIsLoading(false)
-    }, 3000)
+    }
   }
 
   return (
@@ -66,6 +91,32 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-2'>
+            <FormField
+              control={form.control}
+              name='business_name'
+              render={({ field }) => (
+                <FormItem className='space-y-1'>
+                  <FormLabel>Business Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Business Name' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem className='space-y-1'>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Name' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name='email'

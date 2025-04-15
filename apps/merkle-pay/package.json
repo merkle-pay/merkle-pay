@@ -14,6 +14,7 @@
     "@solana/pay": "catalog:pay",
     "@solana/qr-code-styling": "catalog:pay",
     "@marsidev/react-turnstile": "catalog:pay",
+    "better-auth": "catalog:pay",
     "bignumber.js": "catalog:pay",
     "clsx": "catalog:pay",
     "nanoid": "catalog:pay",
@@ -26,7 +27,8 @@
     "@arco-design/web-react": "catalog:pay",
     "zustand": "catalog:pay",
     "zod": "catalog:pay",
-    "zod-validation-error": "catalog:pay"
+    "zod-validation-error": "catalog:pay",
+    "jose": "catalog:pay"
   },
   "devDependencies": {
     "@eslint/eslintrc": "catalog:pay",

@@ -51,6 +51,7 @@
     "tailwind-merge": "catalog:dashboard",
     "tailwindcss-animate": "catalog:dashboard",
     "zod": "catalog:dashboard",
+    "zod-validation-error": "catalog:dashboard",
     "zustand": "catalog:dashboard"
   },
   "devDependencies": {

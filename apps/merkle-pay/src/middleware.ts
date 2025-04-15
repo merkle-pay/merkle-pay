@@ -31,5 +31,5 @@ export async function middleware(request: NextRequest) {
 
 // Configure the matcher to only run this middleware for specific API routes
 export const config = {
-  matcher: ["/api/payment/:path*"],
+  matcher: ["/api/:path*"],
 };
