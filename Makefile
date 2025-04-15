@@ -1,5 +1,5 @@
 # General/Utility Targets
-.PHONY: i clean tag tags tree
+.PHONY: help i clean tag tags tree
 
 # Development Targets
 .PHONY: dev dev-pay dev-dashboard
@@ -10,13 +10,35 @@
 # Linting Targets
 .PHONY: lint lint-pay lint-dashboard
 
-# Docker Compose Command
-COMPOSE_CMD = docker compose --env-file ./apps/merkle-pay/.env
+# Docker Targets
+.PHONY: d-up d-stop d-restart d-down d-clean
+
+# Variables
+PAY_DIR := apps/merkle-pay
+DASHBOARD_DIR := apps/merkle-dashboard
+DOCKER_COMPOSE_ENV_FILE := --env-file $(PAY_DIR)/.env
+
+# Default target
+help:
+	@echo "Available targets:"
+	@echo "  i               - Install pnpm dependencies"
+	@echo "  dev             - Run dev for pay and dashboard"
+	@echo "  build           - Build pay and dashboard"
+	@echo "  lint            - Lint pay and dashboard"
+	@echo "  clean           - Remove node_modules and build artifacts"
+	@echo "  d-up            - Build Docker Compose images and start containers"
+	@echo "  d-stop          - Stop Docker Compose containers"
+	@echo "  d-restart       - Restart Docker Compose containers"
+	@echo "  d-down          - Stop and remove Docker compose containers"
+	@echo "  d-clean         - Clean all Docker resources, including images, containers, volumes, and networks"
+	@echo "  tag TAG=<name>  - Create a Git tag or list all local tags if no TAG is provided"
+	@echo "  tags            - Push all Git tags to the remote repository"
+	@echo "  tree            - Generate directory tree of the project"
 
 i:
 	pnpm install
 
-dev:
+dev: i
 	$(MAKE) -j2 dev-pay dev-dashboard
 
 dev-pay:
@@ -25,7 +47,7 @@ dev-pay:
 dev-dashboard:
 	pnpm --filter merkle-dashboard dev
 
-build:
+build: i
 	$(MAKE) -j2 build-pay build-dashboard
 
 build-pay:
@@ -44,34 +66,43 @@ lint-dashboard:
 	pnpm --filter merkle-dashboard lint
 
 clean:
-	rm -rf node_modules
-	rm -rf apps/merkle-pay/node_modules
-	rm -rf apps/merkle-dashboard/node_modules
+	rm -rf node_modules || true
+	rm -rf $(PAY_DIR)/node_modules $(PAY_DIR)/dist || true
+	rm -rf $(DASHBOARD_DIR)/node_modules $(DASHBOARD_DIR)/dist || true
 
 tag:
 ifeq ($(strip $(TAG)),)
-	@echo "Listing all tags" >&2
-	@echo "Usage: make tag TAG=<your_tag_name> if you want to create a new one" >&2
-	exit 0
+	@echo "Listing all local tags:"
+	@git tag -l
+else
+	@if [ "$(shell git tag -l $(TAG))" = "$(TAG)" ]; then \
+		echo "Error: Tag $(TAG) already exists" >&2; \
+		exit 1; \
+	fi
+	@git tag $(TAG)
+	@echo "Created tag $(TAG)"
 endif
-	git tag $(TAG)
 
 tags:
 	git push --tags
 
 tree:
-	tree --opt-toggle -I node_modules > tree.txt
+	@command -v tree >/dev/null 2>&1 || { echo "Error: tree command not found"; exit 1; }
+	tree -I node_modules > tree.txt
 
 d-up:
-	$(COMPOSE_CMD) up -d
+	docker compose $(DOCKER_COMPOSE_ENV_FILE) up -d
 
 d-stop:
-	$(COMPOSE_CMD) stop
+	docker compose $(DOCKER_COMPOSE_ENV_FILE) stop
+
+d-restart:
+	docker compose $(DOCKER_COMPOSE_ENV_FILE) restart
 
 d-down:
-	$(COMPOSE_CMD) down
+	docker compose $(DOCKER_COMPOSE_ENV_FILE) down
 
+# Warning: Deletes all Docker resources and Caddy data/config
 d-clean:
-	$(COMPOSE_CMD) down -v --rmi all --remove-orphans && \
-	rm -rf caddy/data/caddy && \
-	rm -rf caddy/config/caddy
+	docker compose $(DOCKER_COMPOSE_ENV_FILE) down -v --rmi all --remove-orphans
+	rm -rf caddy/data/caddy caddy/config/caddy
