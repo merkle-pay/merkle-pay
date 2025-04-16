@@ -57,8 +57,8 @@ export const sidebarData: SidebarData = {
           icon: IconLayoutDashboard,
         },
         {
-          title: 'Tasks',
-          url: '/tasks',
+          title: 'Payments',
+          url: '/payments',
           icon: IconChecklist,
         },
         {

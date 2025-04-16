@@ -10,7 +10,7 @@ import { TasksPrimaryButtons } from './components/tasks-primary-buttons'
 import TasksProvider from './context/tasks-context'
 import { tasks } from './data/tasks'
 
-export default function Tasks() {
+export default function Payments() {
   return (
     <TasksProvider>
       <Header fixed>
@@ -24,9 +24,9 @@ export default function Tasks() {
       <Main>
         <div className='mb-2 flex flex-wrap items-center justify-between gap-x-4 space-y-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>Tasks</h2>
+            <h2 className='text-2xl font-bold tracking-tight'>Payments</h2>
             <p className='text-muted-foreground'>
-              Here&apos;s a list of your tasks for this month!
+              Here&apos;s a list of your payments for this month!
             </p>
           </div>
           <TasksPrimaryButtons />
