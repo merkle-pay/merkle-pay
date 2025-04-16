@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPaymentByMpid } from "src/services/payment";
+import {
+  getPaymentByMpid,
+  updatePaymentTxIdIfNotSet,
+} from "src/services/payment";
 import { PaymentStatus, PaymentTable } from "src/utils/prisma";
 
 import {
@@ -103,6 +106,11 @@ export async function GET(request: NextRequest) {
         "Transaction data missing or not found at desired confirmation level",
     });
   }
+
+  await updatePaymentTxIdIfNotSet({
+    mpid: payment.mpid,
+    txId: tx.transaction.signatures[0],
+  });
 
   if (tx.meta?.err) {
     return NextResponse.json({

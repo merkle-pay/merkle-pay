@@ -23,7 +23,7 @@ export function PaymentsDialogs() {
       {currentRow && (
         <>
           <PaymentsMutateDrawer
-            key={`payment-update-${currentRow.id}`}
+            key={`payment-update-${currentRow.mpid}`}
             open={open === 'update'}
             onOpenChange={() => {
               setOpen('update')
@@ -35,11 +35,11 @@ export function PaymentsDialogs() {
           />
 
           <ConfirmDialog
-            key='payment-delete'
+            key='payment-archive'
             destructive
-            open={open === 'delete'}
+            open={open === 'archive'}
             onOpenChange={() => {
-              setOpen('delete')
+              setOpen('archive')
               setTimeout(() => {
                 setCurrentRow(null)
               }, 500)
@@ -50,7 +50,7 @@ export function PaymentsDialogs() {
                 setCurrentRow(null)
               }, 500)
               toast({
-                title: 'The following payment has been deleted:',
+                title: 'The following payment has been archived:',
                 description: (
                   <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
                     <code className='text-white'>
@@ -61,15 +61,14 @@ export function PaymentsDialogs() {
               })
             }}
             className='max-w-md'
-            title={`Delete this payment: ${currentRow.id} ?`}
+            title={`Archive this payment: ${currentRow.mpid} ?`}
             desc={
               <>
-                You are about to delete a payment with the ID{' '}
-                <strong>{currentRow.id}</strong>. <br />
-                This action cannot be undone.
+                You are about to archive a payment with the MPID{' '}
+                <strong>{currentRow.mpid}</strong>. <br />
               </>
             }
-            confirmText='Delete'
+            confirmText='Archive'
           />
         </>
       )}

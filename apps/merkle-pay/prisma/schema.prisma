@@ -34,6 +34,7 @@ model Payment {
   referencePublicKey String        @unique
   mpid               String        @unique
   raw                Json
+  txId               String?
 }
 
 model Boss {

@@ -8,6 +8,7 @@ import {
   IconExclamationCircle,
 } from '@tabler/icons-react'
 
+// !TODO: make sure it fits business needs
 export const labels = [
   {
     value: 'bug',

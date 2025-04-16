@@ -1,5 +1,6 @@
 import { Payment } from "src/types/payment";
 import { PaymentStatus, prisma } from "../utils/prisma";
+import { PrismaClientKnownRequestError } from "../../prisma/client/runtime/library";
 
 export const createPaymentService = async (
   payment: Payment,
@@ -63,4 +64,30 @@ export const updatePaymentStatus = async (
     data: { status },
   });
   return p;
+};
+
+export const updatePaymentTxIdIfNotSet = async ({
+  mpid,
+  txId,
+}: {
+  mpid: string;
+  txId: string;
+}) => {
+  try {
+    const p = await prisma.payment.update({
+      where: { mpid, OR: [{ txId: null }, { txId: "" }] },
+      data: { txId },
+    });
+    return p;
+  } catch (error) {
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      console.log(`Payment with mpid ${mpid} not found or txId already set.`);
+      return null;
+    }
+    console.error("Error updating payment txId:", error);
+    return null;
+  }
 };

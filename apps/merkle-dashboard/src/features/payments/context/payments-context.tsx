@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Payment } from '../data/schema'
 
-type PaymentsDialogType = 'create' | 'update' | 'delete' | 'import'
+type PaymentsDialogType = 'create' | 'update' | 'import' | 'export' | 'archive'
 
 interface PaymentsContextType {
   open: PaymentsDialogType | null
