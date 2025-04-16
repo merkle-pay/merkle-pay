@@ -23,12 +23,12 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { Task } from '../data/schema'
+import { Payment } from '../data/schema'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  currentRow?: Task
+  currentRow?: Payment
 }
 
 const formSchema = z.object({
@@ -37,12 +37,16 @@ const formSchema = z.object({
   label: z.string().min(1, 'Please select a label.'),
   priority: z.string().min(1, 'Please choose a priority.'),
 })
-type TasksForm = z.infer<typeof formSchema>
+type PaymentsForm = z.infer<typeof formSchema>
 
-export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
+export function PaymentsMutateDrawer({
+  open,
+  onOpenChange,
+  currentRow,
+}: Props) {
   const isUpdate = !!currentRow
 
-  const form = useForm<TasksForm>({
+  const form = useForm<PaymentsForm>({
     resolver: zodResolver(formSchema),
     defaultValues: currentRow ?? {
       title: '',
@@ -52,7 +56,7 @@ export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
     },
   })
 
-  const onSubmit = (data: TasksForm) => {
+  const onSubmit = (data: PaymentsForm) => {
     // do something with the form data
     onOpenChange(false)
     form.reset()
@@ -76,17 +80,17 @@ export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
     >
       <SheetContent className='flex flex-col'>
         <SheetHeader className='text-left'>
-          <SheetTitle>{isUpdate ? 'Update' : 'Create'} Task</SheetTitle>
+          <SheetTitle>{isUpdate ? 'Update' : 'Create'} Payment</SheetTitle>
           <SheetDescription>
             {isUpdate
-              ? 'Update the task by providing necessary info.'
-              : 'Add a new task by providing necessary info.'}
+              ? 'Update the payment by providing necessary info.'
+              : 'Add a new payment by providing necessary info.'}
             Click save when you&apos;re done.
           </SheetDescription>
         </SheetHeader>
         <Form {...form}>
           <form
-            id='tasks-form'
+            id='payments-form'
             onSubmit={form.handleSubmit(onSubmit)}
             className='flex-1 space-y-5'
           >
@@ -205,7 +209,7 @@ export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
           <SheetClose asChild>
             <Button variant='outline'>Close</Button>
           </SheetClose>
-          <Button form='tasks-form' type='submit'>
+          <Button form='payments-form' type='submit'>
             Save changes
           </Button>
         </SheetFooter>

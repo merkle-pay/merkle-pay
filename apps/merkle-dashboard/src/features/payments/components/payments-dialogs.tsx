@@ -1,20 +1,20 @@
 import { toast } from '@/hooks/use-toast'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { usePaymentsContext } from '../context/payments-context'
-import { TasksImportDialog } from './tasks-import-dialog'
-import { TasksMutateDrawer } from './tasks-mutate-drawer'
+import { PaymentsImportDialog } from './payments-import-dialog'
+import { PaymentsMutateDrawer } from './payments-mutate-drawer'
 
 export function PaymentsDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = usePaymentsContext()
   return (
     <>
-      <TasksMutateDrawer
+      <PaymentsMutateDrawer
         key='payment-create'
         open={open === 'create'}
         onOpenChange={() => setOpen('create')}
       />
 
-      <TasksImportDialog
+      <PaymentsImportDialog
         key='payments-import'
         open={open === 'import'}
         onOpenChange={() => setOpen('import')}
@@ -22,7 +22,7 @@ export function PaymentsDialogs() {
 
       {currentRow && (
         <>
-          <TasksMutateDrawer
+          <PaymentsMutateDrawer
             key={`payment-update-${currentRow.id}`}
             open={open === 'update'}
             onOpenChange={() => {
