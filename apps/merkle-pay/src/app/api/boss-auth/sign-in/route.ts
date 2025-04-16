@@ -52,6 +52,14 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 30,
     });
 
+    response.cookies.set("isAuthenticated", "true", {
+      httpOnly: false, // <<< Make it readable by JS
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
     return response;
   } catch (error) {
     console.log("error", error);
