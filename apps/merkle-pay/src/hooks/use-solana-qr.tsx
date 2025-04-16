@@ -3,7 +3,7 @@ import { createQROptions } from "@solana/pay";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { logoSvg } from "../utils/logo";
 import QRCodeStyling from "@solana/qr-code-styling";
-import { createPaymentService } from "src/services/payment";
+import { createPaymentQuery } from "src/queries/payment";
 import { Payment } from "src/types/payment";
 import { AntibotToken } from "src/types/antibot";
 
@@ -66,7 +66,7 @@ export const useSolanaQR = ({
 
         try {
           // Replace with your actual API call
-          const { data, error } = await createPaymentService(
+          const { data, error } = await createPaymentQuery(
             payment,
             antibotToken.token
           );

@@ -10,7 +10,7 @@ catalogs:
     clsx: ^2.1.1
     better-auth: ^1.2.7
     jose: ^6.0.10
-    next: 15.2.3
+    next: ^15.2.3
     react: ^18
     react-dom: ^18
     react-icons: ^5.5.0
@@ -21,7 +21,7 @@ catalogs:
     "@types/react": ^18
     "@types/react-dom": ^18
     eslint: ^9
-    eslint-config-next: 15.2.2
+    eslint-config-next: ^15.2.2
     nanoid: ^5.1.5
     sass: ^1.86.0
     prisma: ^6.6.0

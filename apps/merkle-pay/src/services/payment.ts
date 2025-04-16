@@ -2,26 +2,6 @@ import { Payment } from "src/types/payment";
 import { PaymentStatus, prisma } from "../utils/prisma";
 import { PrismaClientKnownRequestError } from "../../prisma/client/runtime/library";
 
-export const createPaymentService = async (
-  payment: Payment,
-  turnstileToken: string
-) => {
-  const res = await fetch("/api/payment/init", {
-    method: "POST",
-    body: JSON.stringify({ payment }),
-    headers: {
-      "Content-Type": "application/json",
-      "mp-antibot-token": turnstileToken,
-    },
-  });
-  const json = await res.json();
-
-  return {
-    data: json.data,
-    error: json.code !== 200 ? json.message : null,
-  };
-};
-
 export const createPayment = async ({
   payment,
   referencePublicKey,
