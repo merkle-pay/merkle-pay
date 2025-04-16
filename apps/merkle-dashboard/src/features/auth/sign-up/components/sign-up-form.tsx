@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { AntibotToken } from '@/types/antibot'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,9 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { signUp } from '../../utils'
 
-type SignUpFormProps = HTMLAttributes<HTMLDivElement>
+type SignUpFormProps = HTMLAttributes<HTMLDivElement> & {
+  antibotToken: AntibotToken
+}
 
 const formSchema = z
   .object({
@@ -48,7 +51,11 @@ const formSchema = z
     path: ['confirmPassword'],
   })
 
-export function SignUpForm({ className, ...props }: SignUpFormProps) {
+export function SignUpForm({
+  className,
+  antibotToken,
+  ...props
+}: SignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
@@ -63,10 +70,28 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
   })
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!antibotToken.isInitialized) {
+      return
+    }
+
+    if (antibotToken.isExpired) {
+      toast({
+        title: 'Turnstile token expired',
+      })
+      return
+    }
+
+    if (antibotToken.error) {
+      toast({
+        title: antibotToken.error,
+      })
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const json = await signUp(data)
+      const json = await signUp(data, antibotToken)
 
       if (json.code === 201) {
         navigate({ to: '/sign-in' })

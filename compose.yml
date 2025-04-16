@@ -29,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: apps/merkle-dashboard/Dockerfile
+      args:
+        - VITE_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
     volumes:
       - dashboard-dist:/app/apps/merkle-dashboard/dist
 

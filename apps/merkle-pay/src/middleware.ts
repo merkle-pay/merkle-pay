@@ -4,7 +4,12 @@ import { isHuman } from "./utils/is-human";
 
 export async function middleware(request: NextRequest) {
   // Check if the request path matches the one we want to protect
-  if (request.nextUrl.pathname.startsWith("/api/payment")) {
+  if (
+    request.nextUrl.pathname.startsWith("/api/payment") ||
+    request.nextUrl.pathname.startsWith("/api/boss-auth/sign-in") ||
+    request.nextUrl.pathname.startsWith("/api/boss-auth/sign-up") ||
+    request.nextUrl.pathname.startsWith("/api/boss-auth/sign-out")
+  ) {
     const turnstileToken = request.headers.get("mp-antibot-token");
 
     if (!turnstileToken) {

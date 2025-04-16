@@ -1,8 +1,22 @@
+import { useState } from 'react'
+import { AntibotToken } from '@/types/antibot'
 import { Card } from '@/components/ui/card'
+import { CfTurnstile } from '../../../components/cf-turnstile'
 import AuthLayout from '../auth-layout'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn() {
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+
+  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
+    token: '',
+    error: '',
+    isExpired: true,
+    isInitialized: false,
+  })
+  const handleAntibotToken = (params: AntibotToken) => {
+    setAntibotToken((prev) => ({ ...prev, ...params }))
+  }
   return (
     <AuthLayout>
       <Card className='p-6'>
@@ -12,7 +26,11 @@ export default function SignIn() {
             Enter email and password below to login
           </p>
         </div>
-        <UserAuthForm />
+        <UserAuthForm antibotToken={antibotToken} />
+        <CfTurnstile
+          siteKey={siteKey}
+          handleVerification={handleAntibotToken}
+        />
         <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
           By clicking login, you agree to our{' '}
           <a

@@ -1,9 +1,24 @@
+import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { AntibotToken } from '@/types/antibot'
 import { Card } from '@/components/ui/card'
+import { CfTurnstile } from '../../../components/cf-turnstile'
 import AuthLayout from '../auth-layout'
 import { SignUpForm } from './components/sign-up-form'
 
 export default function SignUp() {
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+
+  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
+    token: '',
+    error: '',
+    isExpired: true,
+    isInitialized: false,
+  })
+  const handleAntibotToken = (params: AntibotToken) => {
+    setAntibotToken((prev) => ({ ...prev, ...params }))
+  }
+
   return (
     <AuthLayout>
       <Card className='p-6'>
@@ -22,7 +37,11 @@ export default function SignUp() {
             </Link>
           </p>
         </div>
-        <SignUpForm />
+        <SignUpForm antibotToken={antibotToken} />
+        <CfTurnstile
+          siteKey={siteKey}
+          handleVerification={handleAntibotToken}
+        />
         <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
           By creating an account, you agree to our{' '}
           <a

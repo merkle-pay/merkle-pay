@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "catalog:dashboard",
+    "@marsidev/react-turnstile": "catalog:dashboard",
     "@radix-ui/react-alert-dialog": "catalog:dashboard",
     "@radix-ui/react-avatar": "catalog:dashboard",
     "@radix-ui/react-checkbox": "catalog:dashboard",

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { AntibotToken } from '@/types/antibot'
 import { jwtDecode } from 'jwt-decode'
 import { useAuth, AuthUser } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
@@ -21,7 +22,9 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { signIn } from '../../utils'
 
-type UserAuthFormProps = HTMLAttributes<HTMLDivElement>
+type UserAuthFormProps = HTMLAttributes<HTMLDivElement> & {
+  antibotToken: AntibotToken
+}
 
 const formSchema = z.object({
   email: z
@@ -38,7 +41,11 @@ const formSchema = z.object({
     }),
 })
 
-export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+export function UserAuthForm({
+  className,
+  antibotToken,
+  ...props
+}: UserAuthFormProps) {
   const auth = useAuth()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
@@ -52,10 +59,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   })
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!antibotToken.isInitialized) {
+      return
+    }
+
+    if (antibotToken.isExpired) {
+      toast({
+        title: 'Turnstile token expired',
+      })
+      return
+    }
+
+    if (antibotToken.error) {
+      toast({
+        title: antibotToken.error,
+      })
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const json = await signIn(data)
+      const json = await signIn(data, antibotToken)
 
       if (json.code === 200) {
         const { sessionToken, jwtToken } = json.data
