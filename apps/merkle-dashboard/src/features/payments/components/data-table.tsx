@@ -13,6 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { Loader2 } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -21,18 +22,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { usePaymentsContext } from '../context/payments-context'
 import { DataTablePagination } from './data-table-pagination'
 import { DataTableToolbar } from './data-table-toolbar'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
-  data: TData[]
 }
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
 }: DataTableProps<TData, TValue>) {
+  const { payments, isLoading } = usePaymentsContext()
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
@@ -41,8 +42,8 @@ export function DataTable<TData, TValue>({
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
 
-  const table = useReactTable({
-    data,
+  const table = useReactTable<TData>({
+    data: payments as TData[],
     columns,
     state: {
       sorting,
@@ -107,9 +108,13 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className='flex h-24 items-center justify-center'
                 >
-                  No results.
+                  {isLoading ? (
+                    <Loader2 className='h-10 w-10 animate-spin' />
+                  ) : (
+                    'No results.'
+                  )}
                 </TableCell>
               </TableRow>
             )}

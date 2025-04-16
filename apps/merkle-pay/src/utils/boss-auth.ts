@@ -14,7 +14,23 @@ export const auth = betterAuth({
       provider: "cloudflare-turnstile",
       secretKey: process.env.TURNSTILE_SECRET_KEY!,
     }),
-    jwt(),
+    jwt({
+      jwt: {
+        issuer: process.env.NEXT_PUBLIC_APP_NAME!,
+        audience: process.env.NEXT_PUBLIC_APP_NAME!,
+        expirationTime: "30d",
+        definePayload: ({ user }) => {
+          return {
+            id: user.id,
+            email: user.email,
+            level: user.level,
+            business_name: user.business_name,
+            blockchains: user.blockchains,
+            wallets: user.wallets,
+          };
+        },
+      },
+    }),
     bearer(),
   ],
   user: {
@@ -44,6 +60,7 @@ export const auth = betterAuth({
   session: {
     expiresIn: 30 * 24 * 60 * 60, // 30 days
     storeSessionInDatabase: true,
+    updateAge: 60 * 60 * 24, // 1 day
   },
   emailAndPassword: {
     enabled: true,

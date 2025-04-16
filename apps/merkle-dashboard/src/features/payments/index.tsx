@@ -5,14 +5,13 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { columns } from './components/columns'
 import { DataTable } from './components/data-table'
-import { TasksDialogs } from './components/tasks-dialogs'
-import { TasksPrimaryButtons } from './components/tasks-primary-buttons'
-import TasksProvider from './context/tasks-context'
-import { tasks } from './data/tasks'
+import { PaymentsDialogs } from './components/payments-dialogs'
+import { PaymentsPrimaryButtons } from './components/payments-primary-buttons'
+import PaymentsProvider from './context/payments-context'
 
 export default function Payments() {
   return (
-    <TasksProvider>
+    <PaymentsProvider>
       <Header fixed>
         <Search />
         <div className='ml-auto flex items-center space-x-4'>
@@ -29,14 +28,14 @@ export default function Payments() {
               Here&apos;s a list of your payments for this month!
             </p>
           </div>
-          <TasksPrimaryButtons />
+          <PaymentsPrimaryButtons />
         </div>
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0'>
-          <DataTable data={tasks} columns={columns} />
+          <DataTable columns={columns} />
         </div>
       </Main>
 
-      <TasksDialogs />
-    </TasksProvider>
+      <PaymentsDialogs />
+    </PaymentsProvider>
   )
 }

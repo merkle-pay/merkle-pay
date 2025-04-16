@@ -1,21 +1,21 @@
 import { toast } from '@/hooks/use-toast'
 import { ConfirmDialog } from '@/components/confirm-dialog'
-import { useTasks } from '../context/tasks-context'
+import { usePaymentsContext } from '../context/payments-context'
 import { TasksImportDialog } from './tasks-import-dialog'
 import { TasksMutateDrawer } from './tasks-mutate-drawer'
 
-export function TasksDialogs() {
-  const { open, setOpen, currentRow, setCurrentRow } = useTasks()
+export function PaymentsDialogs() {
+  const { open, setOpen, currentRow, setCurrentRow } = usePaymentsContext()
   return (
     <>
       <TasksMutateDrawer
-        key='task-create'
+        key='payment-create'
         open={open === 'create'}
         onOpenChange={() => setOpen('create')}
       />
 
       <TasksImportDialog
-        key='tasks-import'
+        key='payments-import'
         open={open === 'import'}
         onOpenChange={() => setOpen('import')}
       />
@@ -23,7 +23,7 @@ export function TasksDialogs() {
       {currentRow && (
         <>
           <TasksMutateDrawer
-            key={`task-update-${currentRow.id}`}
+            key={`payment-update-${currentRow.id}`}
             open={open === 'update'}
             onOpenChange={() => {
               setOpen('update')
@@ -35,7 +35,7 @@ export function TasksDialogs() {
           />
 
           <ConfirmDialog
-            key='task-delete'
+            key='payment-delete'
             destructive
             open={open === 'delete'}
             onOpenChange={() => {
@@ -50,7 +50,7 @@ export function TasksDialogs() {
                 setCurrentRow(null)
               }, 500)
               toast({
-                title: 'The following task has been deleted:',
+                title: 'The following payment has been deleted:',
                 description: (
                   <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
                     <code className='text-white'>
@@ -61,10 +61,10 @@ export function TasksDialogs() {
               })
             }}
             className='max-w-md'
-            title={`Delete this task: ${currentRow.id} ?`}
+            title={`Delete this payment: ${currentRow.id} ?`}
             desc={
               <>
-                You are about to delete a task with the ID{' '}
+                You are about to delete a payment with the ID{' '}
                 <strong>{currentRow.id}</strong>. <br />
                 This action cannot be undone.
               </>

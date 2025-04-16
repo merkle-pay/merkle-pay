@@ -1,13 +1,18 @@
 import { z } from 'zod'
 
-// We're keeping a simple non-relational schema here.
-// IRL, you will have a schema for your data models.
-export const taskSchema = z.object({
-  id: z.string(),
-  title: z.string(),
+export const paymentSchema = z.object({
+  id: z.number(),
+  amount: z.number(),
+  token: z.string(),
+  blockchain: z.string(),
+  orderId: z.string(),
   status: z.string(),
-  label: z.string(),
-  priority: z.string(),
+  business_name: z.string(),
+  recipient_address: z.string(),
+  payer_address: z.string().nullable(),
+  referencePublicKey: z.string(),
+  mpid: z.string(),
+  raw: z.any(),
 })
 
-export type Task = z.infer<typeof taskSchema>
+export type Payment = z.infer<typeof paymentSchema>

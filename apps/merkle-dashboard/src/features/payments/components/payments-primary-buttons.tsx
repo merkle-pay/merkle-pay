@@ -1,9 +1,9 @@
 import { IconDownload, IconPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
-import { useTasks } from '../context/tasks-context'
+import { usePaymentsContext } from '../context/payments-context'
 
-export function TasksPrimaryButtons() {
-  const { setOpen } = useTasks()
+export function PaymentsPrimaryButtons() {
+  const { setOpen } = usePaymentsContext()
   return (
     <div className='flex gap-2'>
       <Button

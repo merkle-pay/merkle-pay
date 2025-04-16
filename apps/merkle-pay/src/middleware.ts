@@ -2,67 +2,99 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isHuman } from "./utils/is-human";
 
-const allowedOrigins = new Set(
-  ["http://localhost:9999", process.env.DOMAIN].filter(Boolean)
-);
+const allowedOrigins = ["http://localhost:9999", process.env.DOMAIN_NAME];
 
-const corsHeadersConfig = {
-  "Access-Control-Allow-Credentials": "true",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, mp-antibot-token",
-};
-
-const pathsRequiringTurnstile = [
+const routesRequiringTurnstile = [
   "/api/payment",
   "/api/boss-auth/sign-in",
   "/api/boss-auth/sign-up",
   "/api/boss-auth/sign-out",
 ];
 
+const routesRequiringAuth = ["/api/dashboard"];
+
 export async function middleware(request: NextRequest) {
-  const origin = request.headers.get("origin") ?? "";
-  const isAllowedOrigin = allowedOrigins.has(origin);
-
-  const corsHeaders = isAllowedOrigin
-    ? { "Access-Control-Allow-Origin": origin, ...corsHeadersConfig }
-    : {};
-
   if (request.method === "OPTIONS") {
-    return new NextResponse(null, { status: 204, headers: corsHeaders });
+    const origin = request.headers.get("Origin");
+    if (origin && allowedOrigins.includes(origin)) {
+      const requestHeaders = request.headers.get(
+        "Access-Control-Request-Headers"
+      );
+
+      const allowedHeaders = requestHeaders ?? "*";
+
+      return new NextResponse(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": origin,
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": allowedHeaders,
+          "Access-Control-Allow-Credentials": "true",
+        },
+      });
+    } else {
+      return new NextResponse(null, { status: 403, statusText: "Forbidden" });
+    }
   }
 
-  let response = NextResponse.next();
+  const origin = request.headers.get("Origin");
+  const isOriginAllowed = origin && allowedOrigins.includes(origin);
+  const corsHeaders: Record<string, string> = {};
+  if (isOriginAllowed) {
+    corsHeaders["Access-Control-Allow-Origin"] = origin;
+    corsHeaders["Access-Control-Allow-Methods"] =
+      "GET, POST, PUT, DELETE, OPTIONS";
+    corsHeaders["Access-Control-Allow-Headers"] = "*";
+    corsHeaders["Access-Control-Allow-Credentials"] = "true";
+  }
 
-  const requiresCheck = pathsRequiringTurnstile.some((path) =>
+  const shouldCheckTurnstile = routesRequiringTurnstile.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
 
-  if (requiresCheck) {
+  const shouldCheckAuth = routesRequiringAuth.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  );
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("mp-auth-required", shouldCheckAuth ? "true" : "false");
+
+  if (shouldCheckTurnstile) {
     const turnstileToken = request.headers.get("mp-antibot-token");
     const isTokenValid = turnstileToken && (await isHuman(turnstileToken));
 
     if (!isTokenValid) {
-      const message = !turnstileToken
-        ? "Turnstile token required"
-        : "Human verification failed";
-      console.warn(`Turnstile check failed: ${message}`);
-
-      response = NextResponse.json(
-        { code: 403, data: null, message: message },
+      return NextResponse.json(
+        { code: 403, data: null, message: "Human verification failed" },
         { status: 403, headers: corsHeaders }
       );
     }
   }
 
-  Object.entries(corsHeaders).forEach(([key, value]) => {
-    if (isAllowedOrigin) {
-      response.headers.set(key as string, value as string);
+  if (shouldCheckAuth) {
+    const jwt = request.cookies.get("jwtToken")?.value;
+    if (!jwt) {
+      return NextResponse.json(
+        { code: 401, data: null, message: "Unauthorized" },
+        { status: 401, headers: corsHeaders }
+      );
     }
+  }
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value as string);
   });
 
   return response;
 }
 
+// Configure matcher to apply middleware to all routes, excluding static files and Next.js internals
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: "/api/:path*",
 };

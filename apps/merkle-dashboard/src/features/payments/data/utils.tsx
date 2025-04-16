@@ -6,7 +6,6 @@ import {
   IconCircleCheck,
   IconCircleX,
   IconExclamationCircle,
-  IconStopwatch,
 } from '@tabler/icons-react'
 
 export const labels = [
@@ -26,29 +25,29 @@ export const labels = [
 
 export const statuses = [
   {
-    value: 'backlog',
-    label: 'Backlog',
+    value: 'PENDING',
+    label: 'Pending',
     icon: IconExclamationCircle,
   },
   {
-    value: 'todo',
-    label: 'Todo',
+    value: 'CONFIRMED',
+    label: 'Confirmed',
     icon: IconCircle,
   },
   {
-    value: 'in progress',
-    label: 'In Progress',
-    icon: IconStopwatch,
-  },
-  {
-    value: 'done',
-    label: 'Done',
-    icon: IconCircleCheck,
-  },
-  {
-    value: 'canceled',
-    label: 'Canceled',
+    value: 'FAILED',
+    label: 'Failed',
     icon: IconCircleX,
+  },
+  {
+    value: 'CANCELLED',
+    label: 'Cancelled',
+    icon: IconCircleX,
+  },
+  {
+    value: 'FINALIZED',
+    label: 'Finalized',
+    icon: IconCircleCheck,
   },
 ]
 
