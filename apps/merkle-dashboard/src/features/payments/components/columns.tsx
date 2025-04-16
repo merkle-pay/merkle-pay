@@ -85,7 +85,9 @@ export const columns: ColumnDef<Payment>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Amount' />
     ),
-    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('amount')}</div>,
+    cell: ({ row }) => (
+      <div className='w-[80px]'>{`${row.getValue('amount')} ${row.original.token} (${row.original.blockchain})`}</div>
+    ),
   },
   {
     accessorKey: 'status',
@@ -121,20 +123,71 @@ export const columns: ColumnDef<Payment>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div
-          className='w-[80px] cursor-pointer'
-          onClick={async () => {
-            await navigator.clipboard.writeText(row.getValue('mpid'))
-            toast({
-              title: 'MPID copied to clipboard',
-            })
-          }}
-        >
-          {row.getValue('mpid')}
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className='w-[80px] cursor-pointer truncate'
+                onClick={async () => {
+                  await navigator.clipboard.writeText(row.getValue('mpid'))
+                  toast({
+                    title: 'MPID copied to clipboard',
+                  })
+                }}
+              >
+                {row.getValue('mpid')}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{row.getValue('mpid')}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )
     },
   },
+  {
+    accessorKey: 'createdAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Created At' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-[80px]'>
+        {new Date(row.getValue('createdAt')).toLocaleString().replace(',', '')}
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'recipient_address',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Recipient Address' />
+    ),
+    cell: ({ row }) => (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className='w-[80px] cursor-pointer truncate'
+              onClick={async () => {
+                await navigator.clipboard.writeText(
+                  row.getValue('recipient_address')
+                )
+                toast({
+                  title: 'Recipient Address copied to clipboard',
+                })
+              }}
+            >
+              {row.getValue('recipient_address')}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{row.getValue('recipient_address')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ),
+  },
+
   {
     id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,

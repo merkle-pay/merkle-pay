@@ -23,16 +23,15 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { usePaymentsContext } from '../context/payments-context'
+import { Payment } from '../data/schema'
 import { DataTablePagination } from './data-table-pagination'
 import { DataTableToolbar } from './data-table-toolbar'
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
+interface DataTableProps {
+  columns: ColumnDef<Payment, unknown>[]
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-}: DataTableProps<TData, TValue>) {
+export function DataTable({ columns }: DataTableProps) {
   const { payments, isLoading } = usePaymentsContext()
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -42,8 +41,8 @@ export function DataTable<TData, TValue>({
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
 
-  const table = useReactTable<TData>({
-    data: payments as TData[],
+  const table = useReactTable<Payment>({
+    data: payments,
     columns,
     state: {
       sorting,
