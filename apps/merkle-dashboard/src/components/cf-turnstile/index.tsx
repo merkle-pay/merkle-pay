@@ -4,9 +4,13 @@ import { AntibotToken } from '../../types/antibot'
 export function CfTurnstile({
   siteKey,
   handleVerification,
+  options,
 }: {
   siteKey: string
   handleVerification: (params: AntibotToken) => void
+  options?: {
+    size?: 'flexible'
+  }
 }) {
   return (
     <Turnstile
@@ -35,6 +39,7 @@ export function CfTurnstile({
           isInitialized: true,
         })
       }}
+      options={options && options}
     />
   )
 }

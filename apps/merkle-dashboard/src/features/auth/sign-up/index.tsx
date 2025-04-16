@@ -38,10 +38,15 @@ export default function SignUp() {
           </p>
         </div>
         <SignUpForm antibotToken={antibotToken} />
-        <CfTurnstile
-          siteKey={siteKey}
-          handleVerification={handleAntibotToken}
-        />
+        <div className='mt-4'>
+          <CfTurnstile
+            siteKey={siteKey}
+            handleVerification={handleAntibotToken}
+            options={{
+              size: 'flexible',
+            }}
+          />
+        </div>
         <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
           By creating an account, you agree to our{' '}
           <a

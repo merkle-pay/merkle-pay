@@ -121,7 +121,10 @@ export function SignUpForm({
                 <FormItem className='space-y-1'>
                   <FormLabel>Business Name</FormLabel>
                   <FormControl>
-                    <Input placeholder='Business Name' {...field} />
+                    <Input
+                      placeholder='use comma to separate multiple business names'
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
