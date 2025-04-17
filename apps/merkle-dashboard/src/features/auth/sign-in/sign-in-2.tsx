@@ -1,7 +1,20 @@
+import { useState } from 'react'
+import { AntibotToken } from '@/types/antibot'
 import Logo from '@/assets/logo.svg'
+import { CfTurnstile } from '@/components/cf-turnstile'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn2() {
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
+    token: '',
+    error: '',
+    isExpired: true,
+    isInitialized: false,
+  })
+  const handleAntibotToken = (params: AntibotToken) => {
+    setAntibotToken((prev) => ({ ...prev, ...params }))
+  }
   return (
     <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
       <div className='relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex'>
@@ -50,7 +63,16 @@ export default function SignIn2() {
               to log into your account
             </p>
           </div>
-          <UserAuthForm />
+          <UserAuthForm antibotToken={antibotToken} />
+          <div className='mt-4'>
+            <CfTurnstile
+              siteKey={siteKey}
+              handleVerification={handleAntibotToken}
+              options={{
+                size: 'flexible',
+              }}
+            />
+          </div>
           <p className='px-8 text-center text-sm text-muted-foreground'>
             By clicking login, you agree to our{' '}
             <a
