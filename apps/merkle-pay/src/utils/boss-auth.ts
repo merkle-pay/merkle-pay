@@ -1,7 +1,7 @@
 import { prisma } from "./prisma";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { captcha } from "better-auth/plugins";
+
 import { jwt } from "better-auth/plugins";
 import { bearer } from "better-auth/plugins";
 
@@ -10,10 +10,6 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   plugins: [
-    captcha({
-      provider: "cloudflare-turnstile",
-      secretKey: process.env.TURNSTILE_SECRET_KEY!,
-    }),
     jwt({
       jwt: {
         issuer: process.env.NEXT_PUBLIC_APP_NAME!,
