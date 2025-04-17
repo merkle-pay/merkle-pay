@@ -50,15 +50,14 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 
 ## Getting Started
 
-### Prerequisites
+### Prerequisites for LOCAL DEVELOPMENT
 
 - **Node.js**: v22+ recommended
-- **PNPM**: v9+ recommended (or npm/yarn)
-- **Docker**: Required for the easiest local setup and deployment using the provided `docker-compose.yml`.
+- **PNPM**: v10.6.4
 - **PostgreSQL**: A running instance (local or hosted). Needed for storing merchant and payment request data.
 - **Web3 Wallet**:
   - **Solana:** Phantom, Solflare, etc.
-  - **EVM (Polygon/Arbitrum/zkSync):** MetaMask, Rabby, Frame, etc.
+  - **EVM (Polygon/Arbitrum/zkSync):** coming soon
 
 ### Why PostgreSQL?
 
@@ -67,7 +66,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 - **Structured Querying**: SQL provides powerful and standard ways to query and analyze payment data as the platform grows.
 - **Mature Ecosystem**: Excellent tooling and ORM support (e.g., Prisma) in the Node.js/TypeScript ecosystem.
 
-### Installation & Setup
+### Installation & Setup for LOCAL DEVELOPMENT
 
 1.  **Clone the Repository**
 
@@ -80,7 +79,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     _(Using PNPM is recommended if you have a monorepo structure)_
 
     ```bash
-    # Using make (if defined in Makefile)
+    # Using make
     make i
     # Or manually with pnpm
     pnpm install
@@ -88,47 +87,24 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 
 3.  **Configure Environment Variables**
 
-    - Copy the example environment files:
+    - setup the environment files:
+
       ```bash
-      # Adjust paths based on your project structure (e.g., if using apps/*)
-      cp .env.example .env
-      # If using separate apps in a monorepo:
-      # cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-      # cp apps/merkle-dashboard/.env.example apps/merkle-dashboard/.env
-      ```
-    - **Edit `.env`** (or the specific app `.env` files) and set the following:
+      # you need two .env files for local development
 
-      ```dotenv
-      # Example .env content - Adjust based on .env.example
-
-
-      # env variables starting with NEXT_PUBLIC_ can be used in the client
-      NEXT_PUBLIC_SOLANA_WALLETS=
-      NEXT_PUBLIC_BUSINESS_NAME="Merkle Pay Demo"
-      NEXT_PUBLIC_TOKEN_OPTIONS=USDT,USDC,SOL
-      NEXT_PUBLIC_BLOCKCHAIN_OPTIONS=solana
-
-      # Database Connection String
-      DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-
-      BETTER_AUTH_SECRET=
-      BETTER_AUTH_URL=
-
-      # env variables starting with NEXT_PUBLIC_ can be used in the client
-      NEXT_PUBLIC_TURNSTILE_SITE_KEY=
-      TURNSTILE_SECRET_KEY=
-
-      # Add any other required variables (API keys, JWT secrets, etc.)
-      # ...
+      # no.1
+      cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+      # no.2
+      touch apps/merkle-dashboard/.env.development
+      // VITE_TURNSTILE_SITE_KEY=YOUR_CLOUDFLARE_TURNSTILE_SITE_KEY
+      // VITE_DEV=true
       ```
 
-    - Ensure your PostgreSQL server is running and accessible with the credentials provided in `DATABASE_URL`.
+4.  **Database Migration**
 
-4.  **Database Migration (if using an ORM like Prisma)**
-
-    - _(Assuming Prisma)_ Apply the database schema:
+    - Apply the database schema:
       ```bash
-      # In the package/app where Prisma schema is defined
+      cd apps/merkle-pay
       make prisma-fmt
       make prisma-gen
       make prisma-migrate NAME=MY_MIGRATION_NAME
@@ -136,29 +112,21 @@ Wallet compatibility ensures a smooth payment experience for your customers.
       ```
 
 5.  **Run Locally**
-    - **Using Docker (Recommended for easy DB setup):**
-      _(Ensure you have a `docker-compose.yml` that sets up the app and a PostgreSQL container)_
-      ```bash
-      docker compose up --build
-      ```
-    - **Running Manually:**
-      ```bash
-      make dev
-      ```
+    ```bash
+    make dev
+    ```
 
 ---
 
-## Deployment
+## Deployment for PRODUCTION
 
-_(Add specific deployment instructions here later - e.g., Docker deployment notes, Vercel instructions, etc.)_
-
-**Note on Vercel:** Deploying applications requiring PostgreSQL on Vercel typically involves using Vercel Postgres or connecting to external managed database providers like Neon, Supabase, Aiven, etc. Ensure your RPC Node connections are securely configured in your deployment environment variables.
+- coming soon
 
 ---
 
 ## Contributing
 
-PRs and Issues are warmly welcomed!
+- PRs and Issues are warmly welcomed!
 
 ---
 
