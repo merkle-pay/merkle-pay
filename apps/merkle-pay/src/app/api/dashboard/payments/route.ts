@@ -4,16 +4,19 @@ import { verifyJwt } from "src/utils/verify-jwt";
 
 export async function GET(request: NextRequest) {
   const jwt = request.cookies.get("jwtToken")?.value;
+  const mpAuthRequired = request.headers.get("mp-auth-required");
 
   try {
-    const isVerified = await verifyJwt(jwt!);
+    if (mpAuthRequired === "true") {
+      const isVerified = await verifyJwt(jwt ?? "");
 
-    if (!isVerified) {
-      return NextResponse.json({
-        code: 401,
-        data: [],
-        message: "Unauthorized",
-      });
+      if (!isVerified) {
+        return NextResponse.json({
+          code: 401,
+          data: [],
+          message: "Unauthorized",
+        });
+      }
     }
 
     const { searchParams } = new URL(request.url);
