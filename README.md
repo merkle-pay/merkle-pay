@@ -54,7 +54,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 
 - **Node.js**: v22+ recommended
 - **PNPM**: v10.6.4
-- **PostgreSQL**: A running instance (local or hosted). Needed for storing merchant and payment request data.
+- **PostgreSQL**: A running instance (local or hosted)
 - **Web3 Wallet**:
   - **Solana:** Phantom, Solflare, etc.
   - **EVM (Polygon/Arbitrum/zkSync):** coming soon
