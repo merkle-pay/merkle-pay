@@ -2,6 +2,16 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+---
+
+<a href="README.md" style="text-decoration: none;"><span style="font-size: larger;">English</span></a> <span> • </span>
+<a href="README_zh-CN.md" style="text-decoration: none;"><span style="font-size: larger;">简体中文</span></a> <span> • </span>
+<a href="README_zh-TW.md" style="text-decoration: none;"><span style="font-size: larger;">繁體中文</span></a> <span> • </span>
+<a href="README_jp.md" style="text-decoration: none;"><span style="font-size: larger;">日本語</span></a><span> • </span>
+<a href="README_kr.md" style="text-decoration: none;"><span style="font-size: larger;">한국어</span></a>
+
+---
+
 **Accept stablecoin payments on Solana, Polygon, Arbitrum, and zkSync with ease—built for creators, indie hackers, and small businesses.**
 
 Merkle Pay is a non-custodial web platform enabling users to quickly set up payment pages for receiving stablecoins like USDT and USDC directly to their own wallets on **multiple blockchains**.
@@ -17,6 +27,7 @@ Merkle Pay is fully open-source under the [MIT license](LICENSE).
 Merkle Pay aims to provide a seamless payment experience across high-throughput, low-fee networks:
 
 - ✅ **Solana**
+- ✅ **TRON** _(Coming Soon)_
 - ✅ **Polygon PoS** _(Coming Soon)_
 - ✅ **Arbitrum One** _(Coming Soon)_
 - ✅ **zkSync Era** _(Coming Soon)_
@@ -84,48 +95,3 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     # Or manually with pnpm
     pnpm install
     ```
-
-3.  **Configure Environment Variables**
-
-    ```bash
-    # you need two .env files for local development
-
-    # no.1
-    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # no.2
-    touch apps/merkle-dashboard/.env.development
-    // VITE_TURNSTILE_SITE_KEY=YOUR_CLOUDFLARE_TURNSTILE_SITE_KEY
-    // VITE_DEV=true
-    ```
-
-4.  **Database Migration**
-
-    ```bash
-    cd apps/merkle-pay
-    make prisma-gen
-    make prisma-migrate NAME=MY_MIGRATION_NAME
-    make prisma-deploy # password is yesyesyes
-    ```
-
-5.  **Run Locally**
-    ```bash
-    make dev
-    ```
-
----
-
-## Deployment for PRODUCTION
-
-- coming soon
-
----
-
-## Contributing
-
-- PRs and Issues are warmly welcomed!
-
----
-
-## License
-
-Merkle Pay is licensed under the [MIT License](LICENSE).
