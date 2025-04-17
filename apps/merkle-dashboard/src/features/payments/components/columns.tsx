@@ -60,13 +60,27 @@ export const columns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: 'blockchain',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Blockchain' />
+    ),
+    cell: ({ row }) => (
+      <div className='w-[80px]'>{row.getValue('blockchain')}</div>
+    ),
+  },
+  {
+    accessorKey: 'token',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Token' />
+    ),
+    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('token')}</div>,
+  },
+  {
     accessorKey: 'amount',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Amount' />
     ),
-    cell: ({ row }) => (
-      <div className='w-[80px]'>{`${row.getValue('amount')} ${row.original.token} (${row.original.blockchain})`}</div>
-    ),
+    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('amount')}</div>,
   },
   {
     accessorKey: 'status',
