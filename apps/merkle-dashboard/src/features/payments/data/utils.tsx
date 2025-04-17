@@ -1,9 +1,6 @@
-import {
-  IconCircle,
-  IconCircleCheck,
-  IconCircleX,
-  IconExclamationCircle,
-} from '@tabler/icons-react'
+import { FaClock, FaCheck, FaTimes, FaBan, FaLock } from 'react-icons/fa'
+import { RiMoneyDollarCircleFill } from 'react-icons/ri'
+import { SiSolana, SiEthereum, SiBitcoin, SiTether } from 'react-icons/si'
 
 // !TODO: make sure it fits business needs
 export const labels = [
@@ -25,26 +22,62 @@ export const statuses = [
   {
     value: 'PENDING',
     label: 'Pending',
-    icon: IconExclamationCircle,
+    icon: FaClock,
   },
   {
     value: 'CONFIRMED',
     label: 'Confirmed',
-    icon: IconCircle,
+    icon: FaCheck,
   },
   {
     value: 'FAILED',
     label: 'Failed',
-    icon: IconCircleX,
+    icon: FaTimes,
   },
   {
     value: 'CANCELLED',
     label: 'Cancelled',
-    icon: IconCircleX,
+    icon: FaBan,
   },
   {
     value: 'FINALIZED',
     label: 'Finalized',
-    icon: IconCircleCheck,
+    icon: FaLock,
+  },
+]
+
+export const blockchains = [
+  {
+    value: 'ethereum',
+    label: 'Ethereum',
+    icon: SiEthereum,
+  },
+  {
+    value: 'solana',
+    label: 'Solana',
+    icon: SiSolana,
+  },
+  {
+    value: 'bitcoin',
+    label: 'Bitcoin',
+    icon: SiBitcoin,
+  },
+]
+
+export const tokens = [
+  {
+    value: 'USDT',
+    label: 'USDT',
+    icon: SiTether,
+  },
+  {
+    value: 'USDC',
+    label: 'USDC',
+    icon: RiMoneyDollarCircleFill,
+  },
+  {
+    value: 'SOL',
+    label: 'SOL',
+    icon: SiSolana,
   },
 ]

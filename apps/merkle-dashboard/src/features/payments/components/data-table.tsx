@@ -105,15 +105,14 @@ export function DataTable({ columns }: DataTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='flex h-24 items-center justify-center'
-                >
-                  {isLoading ? (
-                    <Loader2 className='h-10 w-10 animate-spin' />
-                  ) : (
-                    'No results.'
-                  )}
+                <TableCell colSpan={columns.length} className='h-24'>
+                  <div className='flex h-full w-full items-center justify-center'>
+                    {isLoading ? (
+                      <Loader2 className='h-10 w-10 animate-spin' />
+                    ) : (
+                      'No results.'
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             )}

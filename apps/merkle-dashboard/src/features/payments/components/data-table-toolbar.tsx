@@ -2,7 +2,7 @@ import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { statuses } from '../data/utils'
+import { blockchains, statuses, tokens } from '../data/utils'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
 
@@ -28,25 +28,31 @@ export function DataTableToolbar<TData>({
           className='h-8 w-[150px] lg:w-[250px]'
         />
         <div className='flex gap-x-2'>
-          {table.getColumn('status') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('status')}
-              title='Status'
-              options={statuses}
-            />
-          )}
-          {table.getColumn('business_name') && (
-            <Input
-              placeholder='Filter business name...'
-              value={businessNameFilter}
-              onChange={(event) => {
-                table
-                  .getColumn('business_name')
-                  ?.setFilterValue(event.target.value)
-              }}
-              className='h-8 w-[150px] lg:w-[250px]'
-            />
-          )}
+          <DataTableFacetedFilter
+            column={table.getColumn('status')}
+            title='Status'
+            options={statuses}
+          />
+          <DataTableFacetedFilter
+            column={table.getColumn('blockchain')}
+            title='Blockchain'
+            options={blockchains}
+          />
+          <DataTableFacetedFilter
+            column={table.getColumn('token')}
+            title='Token'
+            options={tokens}
+          />
+          <Input
+            placeholder='Filter business name...'
+            value={businessNameFilter}
+            onChange={(event) => {
+              table
+                .getColumn('business_name')
+                ?.setFilterValue(event.target.value)
+            }}
+            className='h-8 w-[150px] lg:w-[250px]'
+          />
         </div>
         {isFiltered && (
           <Button

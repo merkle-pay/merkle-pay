@@ -49,6 +49,7 @@
     "react-day-picker": "catalog:dashboard",
     "react-dom": "catalog:dashboard",
     "react-hook-form": "catalog:dashboard",
+    "react-icons": "catalog:dashboard",
     "recharts": "catalog:dashboard",
     "tailwind-merge": "catalog:dashboard",
     "tailwindcss-animate": "catalog:dashboard",
