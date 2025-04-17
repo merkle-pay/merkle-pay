@@ -33,7 +33,7 @@ const checkOnChainStatus = (payment: Payment) => {
 
 const getExplorerUrl = (payment: Payment): string | null => {
   const blockchain = payment.blockchain.toLowerCase()
-  const txId = payment.mpid
+  const txId = payment.txId
 
   if (!txId) return null
 

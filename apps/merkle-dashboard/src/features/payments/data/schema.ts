@@ -14,6 +14,7 @@ export const paymentSchema = z.object({
   mpid: z.string(),
   raw: z.any(),
   createdAt: z.string(),
+  txId: z.string().nullable(),
 })
 
 export type Payment = z.infer<typeof paymentSchema>

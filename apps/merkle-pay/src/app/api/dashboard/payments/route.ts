@@ -37,6 +37,9 @@ export async function GET(request: NextRequest) {
       prisma.payment.findMany({
         skip: _page * _pageSize,
         take: _pageSize,
+        orderBy: {
+          createdAt: "desc",
+        },
       }),
       prisma.payment.count(),
     ]);
