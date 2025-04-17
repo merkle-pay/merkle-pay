@@ -23,31 +23,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const mpid = searchParams.get("mpid");
 
-  if (!mpid) {
-    return NextResponse.json({
-      code: 400,
-      data: null,
-      message: "mpid is required",
-    });
-  }
+  const { payment, result } = await validatePayment(mpid);
 
-  const payment: PaymentTable | null = await getPaymentByMpid(mpid);
-
-  if (!payment) {
-    return NextResponse.json({
-      code: 404,
-      data: null,
-      message: "payment not found",
-    });
-  }
-
-  // If already settled, return immediately
-  if (SETTLED_TX_STATUSES.has(payment.status)) {
-    return NextResponse.json({
-      code: 200,
-      data: { status: payment.status },
-      message: `Payment is already ${payment.status}`,
-    });
+  if (result || !payment) {
+    return NextResponse.json(result);
   }
 
   const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
@@ -178,3 +157,51 @@ export async function GET(request: NextRequest) {
     message: `Payment confirmed at level: ${REQUIRED_CONFIRMATION_LEVEL}`,
   });
 }
+
+const validatePayment = async (mpid: string | null) => {
+  let result: {
+    code: number;
+    data: { status: PaymentStatus } | null;
+    message: string;
+  } | null = null;
+
+  if (!mpid) {
+    result = {
+      code: 400,
+      data: null,
+      message: "mpid is required",
+    };
+    return {
+      payment: null,
+      result,
+    };
+  }
+
+  const payment: PaymentTable | null = await getPaymentByMpid(mpid);
+
+  if (!payment) {
+    result = {
+      code: 404,
+      data: null,
+      message: "payment not found",
+    };
+
+    return {
+      payment,
+      result,
+    };
+  }
+
+  if (SETTLED_TX_STATUSES.has(payment.status)) {
+    result = {
+      code: 200,
+      data: { status: payment.status },
+      message: `Payment is already ${payment.status}`,
+    };
+  }
+
+  return {
+    payment,
+    result,
+  };
+};
