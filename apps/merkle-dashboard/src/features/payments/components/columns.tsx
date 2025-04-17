@@ -38,35 +38,14 @@ export const columns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'referencePublicKey',
+    accessorKey: 'business_name',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Reference Public Key' />
+      <DataTableColumnHeader column={column} title='Business Name' />
     ),
     cell: ({ row }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className='w-[80px] cursor-pointer truncate'
-              onClick={async () => {
-                await navigator.clipboard.writeText(
-                  row.getValue('referencePublicKey')
-                )
-                toast({
-                  title: 'Reference Public Key copied to clipboard',
-                })
-              }}
-            >
-              {row.getValue('referencePublicKey')}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{row.getValue('referencePublicKey')}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <div className='w-[80px]'>{row.getValue('business_name')}</div>
     ),
-    enableSorting: false,
+    enableSorting: true,
     enableHiding: false,
   },
   {
@@ -77,7 +56,7 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => (
       <div className='w-[80px]'>{row.getValue('orderId')}</div>
     ),
-    enableSorting: false,
+    enableSorting: true,
     enableHiding: false,
   },
   {
@@ -116,36 +95,7 @@ export const columns: ColumnDef<Payment>[] = [
       return value.includes(row.getValue(id))
     },
   },
-  {
-    accessorKey: 'mpid',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='MPID' />
-    ),
-    cell: ({ row }) => {
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className='w-[80px] cursor-pointer truncate'
-                onClick={async () => {
-                  await navigator.clipboard.writeText(row.getValue('mpid'))
-                  toast({
-                    title: 'MPID copied to clipboard',
-                  })
-                }}
-              >
-                {row.getValue('mpid')}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{row.getValue('mpid')}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )
-    },
-  },
+
   {
     accessorKey: 'createdAt',
     header: ({ column }) => (

@@ -24,13 +24,6 @@ interface DataTableRowActionsProps {
   row: Row<Payment>
 }
 
-const checkOnChainStatus = (payment: Payment) => {
-  toast({
-    title: 'Status Check',
-    description: `Checking status for ${payment.mpid} (Not implemented yet).`,
-  })
-}
-
 const getExplorerUrl = (payment: Payment): string | null => {
   const blockchain = payment.blockchain.toLowerCase()
   const txId = payment.txId
@@ -76,11 +69,27 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             </DropdownMenuShortcut>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => checkOnChainStatus(payment)}>
-          Check Status
+
+        <DropdownMenuItem
+          onClick={async () => {
+            await navigator.clipboard.writeText(payment.mpid)
+            toast({
+              title: 'MPID Copied',
+            })
+          }}
+        >
+          Copy MPID
         </DropdownMenuItem>
-        <DropdownMenuItem>Make a copy</DropdownMenuItem>
-        <DropdownMenuItem>Favorite</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={async () => {
+            await navigator.clipboard.writeText(payment.referencePublicKey)
+            toast({
+              title: 'Reference Public Key Copied',
+            })
+          }}
+        >
+          Copy Reference Public Key
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
