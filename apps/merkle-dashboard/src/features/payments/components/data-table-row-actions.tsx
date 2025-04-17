@@ -70,7 +70,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
       <DropdownMenuContent align='end' className='w-[160px]'>
         {explorerUrl && (
           <DropdownMenuItem onClick={() => window.open(explorerUrl, '_blank')}>
-            View on Explorer
+            {`View on ${payment.blockchain ?? ''} explorer`}
             <DropdownMenuShortcut>
               <IconExternalLink size={16} />
             </DropdownMenuShortcut>
