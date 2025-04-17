@@ -87,29 +87,25 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 
 3.  **Configure Environment Variables**
 
-    - setup the environment files:
+    ```bash
+    # you need two .env files for local development
 
-      ```bash
-      # you need two .env files for local development
-
-      # no.1
-      cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-      # no.2
-      touch apps/merkle-dashboard/.env.development
-      // VITE_TURNSTILE_SITE_KEY=YOUR_CLOUDFLARE_TURNSTILE_SITE_KEY
-      // VITE_DEV=true
-      ```
+    # no.1
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    # no.2
+    touch apps/merkle-dashboard/.env.development
+    // VITE_TURNSTILE_SITE_KEY=YOUR_CLOUDFLARE_TURNSTILE_SITE_KEY
+    // VITE_DEV=true
+    ```
 
 4.  **Database Migration**
 
-    - Apply the database schema:
-      ```bash
-      cd apps/merkle-pay
-      make prisma-fmt
-      make prisma-gen
-      make prisma-migrate NAME=MY_MIGRATION_NAME
-      make prisma-deploy # password is yesyesyes
-      ```
+    ```bash
+    cd apps/merkle-pay
+    make prisma-gen
+    make prisma-migrate NAME=MY_MIGRATION_NAME
+    make prisma-deploy # password is yesyesyes
+    ```
 
 5.  **Run Locally**
     ```bash
