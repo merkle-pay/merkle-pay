@@ -1,7 +1,4 @@
 import {
-  IconArrowDown,
-  IconArrowRight,
-  IconArrowUp,
   IconCircle,
   IconCircleCheck,
   IconCircleX,
@@ -49,23 +46,5 @@ export const statuses = [
     value: 'FINALIZED',
     label: 'Finalized',
     icon: IconCircleCheck,
-  },
-]
-
-export const priorities = [
-  {
-    label: 'Low',
-    value: 'low',
-    icon: IconArrowDown,
-  },
-  {
-    label: 'Medium',
-    value: 'medium',
-    icon: IconArrowRight,
-  },
-  {
-    label: 'High',
-    value: 'high',
-    icon: IconArrowUp,
   },
 ]

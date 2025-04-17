@@ -2,7 +2,7 @@ import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { priorities, statuses } from '../data/utils'
+import { statuses } from '../data/utils'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
 
@@ -15,6 +15,8 @@ export function DataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
   const globalFilter = table.getState().globalFilter
+  const businessNameFilter =
+    (table.getColumn('business_name')?.getFilterValue() as string) ?? ''
 
   return (
     <div className='flex items-center justify-between'>
@@ -33,11 +35,16 @@ export function DataTableToolbar<TData>({
               options={statuses}
             />
           )}
-          {table.getColumn('priority') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('priority')}
-              title='Priority'
-              options={priorities}
+          {table.getColumn('business_name') && (
+            <Input
+              placeholder='Filter business name...'
+              value={businessNameFilter}
+              onChange={(event) => {
+                table
+                  .getColumn('business_name')
+                  ?.setFilterValue(event.target.value)
+              }}
+              className='h-8 w-[150px] lg:w-[250px]'
             />
           )}
         </div>
