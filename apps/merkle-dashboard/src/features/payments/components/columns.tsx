@@ -45,6 +45,8 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => (
       <div className='w-[80px]'>{row.getValue('business_name')}</div>
     ),
+    enableGrouping: true,
+    enableMultiSort: true,
     enableSorting: true,
     enableHiding: false,
   },
@@ -67,6 +69,10 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => (
       <div className='w-[80px]'>{row.getValue('blockchain')}</div>
     ),
+    enableGrouping: true,
+    enableMultiSort: true,
+    enableSorting: true,
+    enableHiding: false,
   },
   {
     accessorKey: 'token',
@@ -74,6 +80,10 @@ export const columns: ColumnDef<Payment>[] = [
       <DataTableColumnHeader column={column} title='Token' />
     ),
     cell: ({ row }) => <div className='w-[80px]'>{row.getValue('token')}</div>,
+    enableGrouping: true,
+    enableMultiSort: true,
+    enableSorting: true,
+    enableHiding: false,
   },
   {
     accessorKey: 'amount',
@@ -81,6 +91,7 @@ export const columns: ColumnDef<Payment>[] = [
       <DataTableColumnHeader column={column} title='Amount' />
     ),
     cell: ({ row }) => <div className='w-[80px]'>{row.getValue('amount')}</div>,
+    enableHiding: false,
   },
   {
     accessorKey: 'status',
@@ -108,6 +119,10 @@ export const columns: ColumnDef<Payment>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
+    enableGrouping: true,
+    enableMultiSort: true,
+    enableSorting: true,
+    enableHiding: false,
   },
 
   {
@@ -120,6 +135,7 @@ export const columns: ColumnDef<Payment>[] = [
         {new Date(row.getValue('createdAt')).toLocaleString().replace(',', '')}
       </div>
     ),
+    enableHiding: false,
   },
   {
     accessorKey: 'recipient_address',
@@ -150,8 +166,11 @@ export const columns: ColumnDef<Payment>[] = [
         </Tooltip>
       </TooltipProvider>
     ),
+    enableGrouping: true,
+    enableMultiSort: true,
+    enableSorting: true,
+    enableHiding: false,
   },
-
   {
     id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,
