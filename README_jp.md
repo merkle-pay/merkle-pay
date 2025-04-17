@@ -114,7 +114,6 @@ _（将来的には追加のチェーンへの対応が追加される可能性�
     ```bash
     cd apps/merkle-pay
     make prisma-gen
-    make prisma-migrate NAME=あなたの_マイグレーション名
     make prisma-deploy # パスワードは yesyesyes
     ```
 

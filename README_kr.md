@@ -114,7 +114,6 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
     ```bash
     cd apps/merkle-pay
     make prisma-gen
-    make prisma-migrate NAME=MY_MIGRATION_NAME
     make prisma-deploy # 비밀번호는 yesyesyes 입니다
     ```
 

@@ -114,7 +114,6 @@ _（未來可能會增加對其他鏈的支援。）_
     ```bash
     cd apps/merkle-pay
     make prisma-gen
-    make prisma-migrate NAME=您的_遷移名稱
     make prisma-deploy # 密碼是 yesyesyes
     ```
 

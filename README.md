@@ -95,3 +95,47 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     # Or manually with pnpm
     pnpm install
     ```
+
+3.  **Configure Environment Variables**
+
+    ```bash
+    # you need two .env files for local development
+
+    # no.1
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    # no.2
+    touch apps/merkle-dashboard/.env.development
+    // VITE_TURNSTILE_SITE_KEY=YOUR_CLOUDFLARE_TURNSTILE_SITE_KEY
+    // VITE_DEV=true
+    ```
+
+4.  **Database Migration**
+
+    ```bash
+    cd apps/merkle-pay
+    make prisma-gen
+    make prisma-deploy # password is yesyesyes
+    ```
+
+5.  **Run Locally**
+    ```bash
+    make dev
+    ```
+
+---
+
+## Deployment for PRODUCTION
+
+- coming soon
+
+---
+
+## Contributing
+
+- PRs and Issues are warmly welcomed!
+
+---
+
+## License
+
+Merkle Pay is licensed under the [MIT License](LICENSE).
