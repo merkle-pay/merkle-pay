@@ -10,9 +10,6 @@
 # Linting Targets
 .PHONY: lint lint-pay lint-dashboard
 
-# Docker Targets
-.PHONY: d-up d-stop d-restart d-down d-clean
-
 # Variables
 PAY_DIR := apps/merkle-pay
 DASHBOARD_DIR := apps/merkle-dashboard
@@ -26,11 +23,6 @@ help:
 	@echo "  build           - Build pay and dashboard"
 	@echo "  lint            - Lint pay and dashboard"
 	@echo "  clean           - Remove node_modules and build artifacts"
-	@echo "  d-up            - Build Docker Compose images and start containers"
-	@echo "  d-stop          - Stop Docker Compose containers"
-	@echo "  d-restart       - Restart Docker Compose containers"
-	@echo "  d-down          - Stop and remove Docker compose containers"
-	@echo "  d-clean         - Clean all Docker resources, including images, containers, volumes, and networks"
 	@echo "  tag TAG=<name>  - Create a Git tag or list all local tags if no TAG is provided"
 	@echo "  tags            - Push all Git tags to the remote repository"
 	@echo "  tree            - Generate directory tree of the project"
@@ -53,8 +45,9 @@ build: i
 build-pay:
 	pnpm --filter merkle-pay build
 
-build-dashboard:
+build-dashboard: build-pay
 	pnpm --filter merkle-dashboard build
+	mv $(DASHBOARD_DIR)/dist $(PAY_DIR)/publish/dashboard
 
 lint:
 	$(MAKE) -j2 lint-pay lint-dashboard
@@ -90,19 +83,6 @@ tree:
 	@command -v tree >/dev/null 2>&1 || { echo "Error: tree command not found"; exit 1; }
 	tree -I node_modules > tree.txt
 
-d-up:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) up -d
+ 
 
-d-stop:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) stop
-
-d-restart:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) restart
-
-d-down:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) down
-
-# Warning: Deletes all Docker resources and Caddy data/config
-d-clean:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) down -v --rmi all --remove-orphans
-	rm -rf caddy/data/caddy caddy/config/caddy
+ 
