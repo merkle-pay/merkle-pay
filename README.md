@@ -87,7 +87,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     ```
 
 2.  **Install Dependencies**
-    _(Using PNPM is recommended if you have a monorepo structure)_
+    _(Recommended to use make)_
 
     ```bash
     # Using make
