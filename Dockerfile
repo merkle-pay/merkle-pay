@@ -1,39 +1,46 @@
-# syntax = docker/dockerfile:1
+FROM node:22-alpine AS pay-builder
 
-# Adjust NODE_VERSION as desired
-ARG NODE_VERSION=20.18.0
-FROM node:${NODE_VERSION}-slim as base
-
-LABEL fly_launch_runtime="NodeJS"
-
-# NodeJS app lives here
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV=production
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/merkle-pay ./apps/merkle-pay
+RUN npm install -g pnpm@10.6.4 && pnpm install --frozen-lockfile
+RUN cd apps/merkle-pay && pnpm prisma generate && pnpm --filter merkle-pay build
 
 
-# Throw-away build stage to reduce size of final image
-FROM base as build
+# Build stage
+FROM node:22-alpine AS dashboard-builder
+WORKDIR /app
 
-# Install packages needed to build node modules
-RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+ARG VITE_TURNSTILE_SITE_KEY
 
-# Install node modules
-COPY --link package.json .
-RUN npm install
+ENV VITE_TURNSTILE_SITE_KEY=$VITE_TURNSTILE_SITE_KEY
 
-# Copy application code
-COPY --link . .
-
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/merkle-dashboard ./apps/merkle-dashboard
+RUN npm install -g pnpm@10.6.4 && pnpm install --frozen-lockfile
+RUN cd apps/merkle-dashboard && pnpm --filter merkle-dashboard build
 
 
-# Final stage for app image
-FROM base
+# production stage
+FROM node:22-alpine 
+WORKDIR /app
 
-# Copy built application
-COPY --from=build /app /app
+COPY --from=pay-builder /app/apps/merkle-pay/.next ./apps/merkle-pay/.next
+COPY --from=pay-builder /app/apps/merkle-pay/public ./apps/merkle-pay/public
+COPY --from=pay-builder /app/apps/merkle-pay/prisma ./apps/merkle-pay/prisma
+COPY --from=pay-builder /app/apps/merkle-pay/package.json ./apps/merkle-pay/package.json
 
-# Start the server by default, this can be overwritten at runtime
-CMD [ "npm", "run", "start" ]
+COPY --from=pay-builder /app/package.json ./package.json
+COPY --from=pay-builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pay-builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+
+RUN npm install -g pnpm@10.6.4 && pnpm --dir apps/merkle-pay install --prod --frozen-lockfile
+
+COPY --from=dashboard-builder /app/apps/merkle-dashboard/dist ./apps/merkle-pay/public/dashboard
+
+EXPOSE 3000
+# Explicitly disable entrypoint to prevent npm run start
+ENTRYPOINT []
+# Debug and run pnpm start
+CMD ["/bin/sh", "-c", "echo 'Running pnpm start' && pnpm --version && pnpm --filter merkle-pay start"]

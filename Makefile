@@ -34,6 +34,8 @@ help:
 	@echo "  tag TAG=<name>  - Create a Git tag or list all local tags if no TAG is provided"
 	@echo "  tags            - Push all Git tags to the remote repository"
 	@echo "  tree            - Generate directory tree of the project"
+	@echo "  so-build        - Build merkle-pay standalone image"
+	@echo "  so-run          - Run merkle-pay standalone container"
 
 i:
 	pnpm install
@@ -106,3 +108,12 @@ d-down:
 d-clean:
 	docker compose $(DOCKER_COMPOSE_ENV_FILE) down -v --rmi all --remove-orphans
 	rm -rf caddy/data/caddy caddy/config/caddy
+
+# merkle-pay standalone image
+.PHONY: so-build so-run
+
+so-build:
+	docker build --build-arg VITE_TURNSTILE_SITE_KEY=$(TURNSTILE_SITE_KEY) -t merkle-pay-standalone .
+
+so-run:
+	docker run -d -p 3000:3000 --name mp-standalone --env-file $(PAY_DIR)/.env merkle-pay-standalone
