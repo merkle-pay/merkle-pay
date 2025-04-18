@@ -36,6 +36,8 @@ help:
 	@echo "  tree            - Generate directory tree of the project"
 	@echo "  so-build        - Build merkle-pay standalone image"
 	@echo "  so-run          - Run merkle-pay standalone container"
+	@echo "  so-push         - Push merkle-pay standalone image to remote repository"
+
 
 i:
 	pnpm install
@@ -110,10 +112,13 @@ d-clean:
 	rm -rf caddy/data/caddy caddy/config/caddy
 
 # merkle-pay standalone image
-.PHONY: so-build so-run
+.PHONY: so-build so-run so-push
 
 so-build:
 	docker build --build-arg VITE_TURNSTILE_SITE_KEY=$(TURNSTILE_SITE_KEY) -t merkle-pay-standalone .
 
 so-run:
 	docker run -d -p 3000:3000 --name mp-standalone --env-file $(PAY_DIR)/.env merkle-pay-standalone
+
+so-push:
+	git push so main
