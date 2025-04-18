@@ -25,10 +25,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push
-        id: docker_build # Add an id for potential future use
+        id: docker_build
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: | # Use multi-line input for tags
+          tags: |
             ${{ vars.DOCKER_USERNAME }}/merkle-pay:${{ github.ref_name }}
             ${{ vars.DOCKER_USERNAME }}/merkle-pay:latest
+          platforms: linux/amd64,linux/arm64
