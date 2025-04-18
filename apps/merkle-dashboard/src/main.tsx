@@ -85,6 +85,12 @@ declare module '@tanstack/react-router' {
   }
 }
 
+declare global {
+  interface Window {
+    CF_TURNSTILE_SITE_KEY: string | undefined
+  }
+}
+
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)

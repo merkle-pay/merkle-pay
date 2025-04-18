@@ -115,7 +115,7 @@ d-clean:
 .PHONY: so-build so-run so-push
 
 so-build:
-	docker build --build-arg VITE_TURNSTILE_SITE_KEY=$(TURNSTILE_SITE_KEY) -t merkle-pay-standalone .
+	docker build -t merkle-pay-standalone .
 
 so-run:
 	docker run -d -p 3000:3000 --name mp-standalone --env-file $(PAY_DIR)/.env merkle-pay-standalone

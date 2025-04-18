@@ -6,7 +6,7 @@ import AuthLayout from '../auth-layout'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn() {
-  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+  const siteKey = window.CF_TURNSTILE_SITE_KEY ?? ''
 
   const [antibotToken, setAntibotToken] = useState<AntibotToken>({
     token: '',
