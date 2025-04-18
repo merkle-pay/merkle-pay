@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isHuman } from "./utils/is-human";
 
-const allowedOrigins = ["http://localhost:9999", process.env.DOMAIN_NAME];
+const allowedOrigins = ["http://localhost:9999", process.env.DOMAIN];
 
 const routesRequiringTurnstile = [
   "/api/payment",
