@@ -20,7 +20,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const blockchainOptions =
     process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.split(",") ?? [];
   const tokenOptions = process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.split(",") ?? [];
-  const returnUrlFrom = process.env.NEXT_PUBLIC_RETURN_URL ?? "";
+  const returnUrl = process.env.NEXT_PUBLIC_RETURN_URL ?? "";
 
   return (
     <Layout
@@ -28,7 +28,7 @@ export default function App({ Component, pageProps }: AppProps) {
       businessName={businessName}
       tokenOptions={tokenOptions}
       blockchainOptions={blockchainOptions}
-      returnUrl={returnUrlFrom}
+      returnUrl={returnUrl}
     >
       <Component {...pageProps} />
     </Layout>
