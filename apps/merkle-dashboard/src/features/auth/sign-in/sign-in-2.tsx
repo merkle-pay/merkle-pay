@@ -5,7 +5,7 @@ import { CfTurnstile } from '@/components/cf-turnstile'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn2() {
-  const siteKey = window.CF_TURNSTILE_SITE_KEY ?? ''
+  const siteKey = window.mpGlobal?.turnstileSiteKey ?? ''
   const [antibotToken, setAntibotToken] = useState<AntibotToken>({
     token: '',
     error: '',

@@ -87,7 +87,9 @@ declare module '@tanstack/react-router' {
 
 declare global {
   interface Window {
-    CF_TURNSTILE_SITE_KEY: string | undefined
+    mpGlobal: {
+      turnstileSiteKey: string | undefined
+    }
   }
 }
 

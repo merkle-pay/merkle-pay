@@ -8,7 +8,11 @@ export default function Document() {
         {turnstileSiteKey && (
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.CF_TURNSTILE_SITE_KEY = "${turnstileSiteKey}";`,
+              __html: `
+                window.mpGlobal = {
+                  turnstileSiteKey: "${turnstileSiteKey}",
+                };
+              `,
             }}
           />
         )}
