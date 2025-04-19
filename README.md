@@ -27,6 +27,10 @@ Merkle Pay is fully open-source under the [MIT license](LICENSE).
 Merkle Pay aims to provide a seamless payment experience across high-throughput, low-fee networks:
 
 - ✅ **Solana**
+  - Phantom
+  - Solflare
+- ✅ **Base** _(Coming Soon)_
+- ✅ **Sui** _(Coming Soon)_
 - ✅ **TRON** _(Coming Soon)_
 - ✅ **Polygon PoS** _(Coming Soon)_
 - ✅ **Arbitrum One** _(Coming Soon)_

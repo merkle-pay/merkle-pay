@@ -27,6 +27,8 @@ Merkle Pay 根据 [MIT 许可证](LICENSE) 完全开源。
 Merkle Pay 旨在在高吞吐量、低费用的网络上提供无缝的支付体验：
 
 - ✅ **Solana**
+- ✅ **Base** _(即将推出)_
+- ✅ **Sui** _(即将推出)_
 - ✅ **TRON** _(即将推出)_
 - ✅ **Polygon PoS** _(即将推出)_
 - ✅ **Arbitrum One** _(即将推出)_
