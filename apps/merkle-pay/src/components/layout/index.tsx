@@ -56,7 +56,7 @@ export const Layout = ({
           <Image src="/logo.png" alt="logo" width={64} height={64} />
         </NextLink>
         <Typography.Title heading={5} className={styles.title}>
-          Merkle Pay
+          {businessNameFromEnv || businessNameFromUrl || "Merkle Pay"}
         </Typography.Title>
       </ArcoLayout.Header>
       <ArcoLayout.Content className={styles.content}>
