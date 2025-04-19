@@ -26,7 +26,6 @@ export const Layout = ({
   tokenOptions: string[];
   blockchainOptions: string[];
   returnUrl: string;
-  supportedBlockchains: string[];
 }) => {
   const router = useRouter();
   const returnUrlFromUrl = router.query.returnUrl as string;
