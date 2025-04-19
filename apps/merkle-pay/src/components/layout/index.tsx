@@ -42,10 +42,6 @@ export const Layout = ({
   useEffect(() => {
     if (!router.isReady) return;
 
-    if (!businessNameFromEnv && !businessNameFromUrl) {
-      throw new Error("Business name is not set");
-    }
-
     setSolanaWallets(solanaWallets);
     setBusinessName(businessNameFromEnv || businessNameFromUrl);
     setTokenOptions(tokenOptions);
