@@ -103,12 +103,11 @@ _（未来可能会增加对其他链的支持。）_
     ```bash
     # 本地开发需要两个 .env 文件
 
-    # 第一个
+    # 步骤 1
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # 第二个
+    # 步骤 2
     touch apps/merkle-dashboard/.env.development
-    # VITE_TURNSTILE_SITE_KEY=你的Cf Turnstile 站点密钥
-    # VITE_DEV=true
+    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
     ```
 
 4.  **数据库迁移**
@@ -127,9 +126,33 @@ _（未来可能会增加对其他链的支持。）_
 
 ---
 
-## 生产环境部署
+### 生产环境部署
 
-- 即将推出
+0.  **安装 docker**
+
+    ```bash
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+    ```
+
+1.  **克隆仓库**
+
+    ```bash
+    git clone https://github.com/yourusername/merkle-pay.git
+    cd merkle-pay
+    ```
+
+2.  **配置环境变量**
+
+    ```bash
+    # 编辑 .env 文件并添加您的环境变量
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    ```
+
+3.  **运行**
+    ```bash
+    make d-up
+    ```
 
 ---
 

@@ -103,12 +103,11 @@ _（将来的には追加のチェーンへの対応が追加される可能性�
     ```bash
     # ローカル開発には 2 つの .env ファイルが必要です
 
-    # 1 つ目
+    # ステップ 1
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # 2 つ目
+    # ステップ 2
     touch apps/merkle-dashboard/.env.development
-    # VITE_TURNSTILE_SITE_KEY=あなたの_CLOUDFLARE_TURNSTILE_サイトキー
-    # VITE_DEV=true
+    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
     ```
 
 4.  **データベースマイグレーション**
@@ -127,9 +126,33 @@ _（将来的には追加のチェーンへの対応が追加される可能性�
 
 ---
 
-## 本番環境へのデプロイ
+### 本番環境へのデプロイ
 
-- 近日対応予定
+0.  **docker をインストールする**
+
+    ```bash
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+    ```
+
+1.  **リポジトリをクローンする**
+
+    ```bash
+    git clone https://github.com/yourusername/merkle-pay.git
+    cd merkle-pay
+    ```
+
+2.  **環境変数を設定する**
+
+    ```bash
+    # .env ファイルを編集して環境変数を追加します
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    ```
+
+3.  **実行する**
+    ```bash
+    make d-up
+    ```
 
 ---
 

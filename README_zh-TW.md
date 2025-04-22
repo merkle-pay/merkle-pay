@@ -103,12 +103,11 @@ _（未來可能會增加對其他鏈的支援。）_
     ```bash
     # 本地開發需要兩個 .env 檔案
 
-    # 第一個
+    # 步驟 1
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # 第二個
+    # 步驟 2
     touch apps/merkle-dashboard/.env.development
-    # VITE_TURNSTILE_SITE_KEY=您的_Cloudflare_Turnstile_站點金鑰
-    # VITE_DEV=true
+    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
     ```
 
 4.  **資料庫遷移**
@@ -127,9 +126,33 @@ _（未來可能會增加對其他鏈的支援。）_
 
 ---
 
-## 生產環境部署
+### 生產環境部署
 
-- 即將推出
+0.  **安裝 docker**
+
+    ```bash
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+    ```
+
+1.  **克隆儲存庫**
+
+    ```bash
+    git clone https://github.com/yourusername/merkle-pay.git
+    cd merkle-pay
+    ```
+
+2.  **設定環境變數**
+
+    ```bash
+    # 編輯 .env 檔案並加入您的環境變數
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    ```
+
+3.  **執行**
+    ```bash
+    make d-up
+    ```
 
 ---
 

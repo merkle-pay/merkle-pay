@@ -99,3 +99,71 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     # Or manually with pnpm
     pnpm install
     ```
+
+3.  **Configure Environment Variables**
+
+    ```bash
+    # you need two .env files for local development
+
+    # step 1
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    # step 2
+    touch apps/merkle-dashboard/.env.development
+    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
+    ```
+
+4.  **Database Migration**
+
+    ```bash
+    cd apps/merkle-pay
+    make prisma-gen
+    make prisma-migrate NAME=MY_MIGRATION_NAME
+    make prisma-deploy # password is yesyesyes
+    ```
+
+5.  **Run Locally**
+    ```bash
+    make dev
+    ```
+
+---
+
+### Deployment for PRODUCTION
+
+0.  **Install docker**
+
+    ```bash
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+    ```
+
+1.  **Clone the Repository**
+
+    ```bash
+    git clone https://github.com/yourusername/merkle-pay.git
+    cd merkle-pay
+    ```
+
+2.  **Configure Environment Variables**
+
+    ```bash
+    # edit .env file and add your env vars
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    ```
+
+3.  **Run Locally**
+    ```bash
+    make d-up
+    ```
+
+---
+
+## Contributing
+
+- PRs and Issues are warmly welcomed!
+
+---
+
+## License
+
+Merkle Pay is licensed under the [MIT License](LICENSE).

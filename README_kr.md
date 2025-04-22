@@ -103,12 +103,11 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
     ```bash
     # 로컬 개발에는 두 개의 .env 파일이 필요합니다
 
-    # 첫 번째
+    # 단계 1
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # 두 번째
+    # 단계 2
     touch apps/merkle-dashboard/.env.development
-    # VITE_TURNSTILE_SITE_KEY=YOUR_CLOUDFLARE_TURNSTILE_SITE_KEY
-    # VITE_DEV=true
+    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
     ```
 
 4.  **데이터베이스 마이그레이션**
@@ -127,9 +126,33 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 
 ---
 
-## 프로덕션 환경 배포
+### 프로덕션 환경 배포
 
-- 출시 예정
+0.  **docker 설치**
+
+    ```bash
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+    ```
+
+1.  **저장소 복제**
+
+    ```bash
+    git clone https://github.com/yourusername/merkle-pay.git
+    cd merkle-pay
+    ```
+
+2.  **환경 변수 구성**
+
+    ```bash
+    # .env 파일을 편집하고 환경 변수를 추가하세요
+    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    ```
+
+3.  **실행**
+    ```bash
+    make d-up
+    ```
 
 ---
 
