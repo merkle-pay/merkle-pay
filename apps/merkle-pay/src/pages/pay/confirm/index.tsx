@@ -14,6 +14,7 @@ import {
   MEMO_PROGRAM_ID,
   SOLANA_RPC_ENDPOINT,
   SplTokens,
+  validatePhantomExtensionPayment,
 } from "src/utils/solana";
 import {
   LAMPORTS_PER_SOL,
@@ -68,36 +69,20 @@ export default function PaymentConfirmPage() {
 
   const handlePayWithPhantom = async () => {
     // 1. --- Pre-checks ---
-    if (!phantomSolana) {
-      console.error("Phantom wallet not detected.");
+    const { isValid, error } = validatePhantomExtensionPayment({
+      phantomSolana,
+      payment,
+    });
+    if (!isValid || error) {
+      setPhantomExtensionError(error || "Invalid payment details.");
       return;
     }
-    if (!payment) {
-      console.error("Payment details not found.");
-      return;
-    }
-    const { recipient_address, amount, orderId, token } = payment; // Destructure needed payment details
-
-    if (!recipient_address || !amount || !orderId || !token) {
-      console.error(
-        "Required payment details (recipient, amount, orderId, token) are missing."
-      );
-      return;
-    }
-
-    if (
-      SplTokens[token as keyof typeof SplTokens] === undefined &&
-      token !== "SOL"
-    ) {
-      console.error("Invalid token.");
-      return;
-    }
-
-    setIsPaying(true);
 
     try {
+      setIsPaying(true);
+      const { recipient_address, amount, orderId, token } = payment;
       // 2. --- Connect & Get Public Key ---
-      const { publicKey } = await phantomSolana.connect({
+      const { publicKey } = await phantomSolana!.connect({
         onlyIfTrusted: false,
       }); // Ensure connection prompt if needed
       if (!publicKey) {
@@ -111,6 +96,7 @@ export default function PaymentConfirmPage() {
       const instructions: TransactionInstruction[] = [];
 
       // 4a. Memo Instruction
+
       const memoInstruction = new TransactionInstruction({
         keys: [{ pubkey: publicKey, isSigner: true, isWritable: true }],
         programId: MEMO_PROGRAM_ID,
@@ -138,14 +124,14 @@ export default function PaymentConfirmPage() {
         );
       } else {
         // SPL Token Transfer
-        const mintPubKey = new PublicKey(
-          SplTokens[token as keyof typeof SplTokens].mint
-        );
-        const tokenDecimals =
-          SplTokens[token as keyof typeof SplTokens].decimals; // Assert decimals exist (checked above)
+        const { mint, decimals } = SplTokens[token as keyof typeof SplTokens];
+        const mintPubKey = new PublicKey(mint);
 
         // Calculate token amount based on decimals
-        const tokenAmount = Math.round(amount * Math.pow(10, tokenDecimals));
+        const tokenAmount = new BigNumber(amount)
+          .multipliedBy(Math.pow(10, decimals))
+          .integerValue()
+          .toNumber();
         if (tokenAmount <= 0) {
           throw new Error("Invalid amount for token transfer.");
         }
@@ -170,6 +156,9 @@ export default function PaymentConfirmPage() {
             TOKEN_PROGRAM_ID // Token program ID
           )
         );
+        console.log(
+          `Prepared token transfer: ${tokenAmount} ${token} to ${recipient_address}`
+        );
       }
 
       // 5. --- Create Transaction ---
@@ -184,7 +173,7 @@ export default function PaymentConfirmPage() {
       // 7. --- Sign and Send ---
       console.log("Requesting signature and sending transaction...");
       const { signature } =
-        await phantomSolana.signAndSendTransaction(transaction);
+        await phantomSolana!.signAndSendTransaction(transaction);
       console.log(`Transaction submitted with signature: ${signature}`);
       console.log("Waiting for transaction confirmation...");
       await connection.confirmTransaction(

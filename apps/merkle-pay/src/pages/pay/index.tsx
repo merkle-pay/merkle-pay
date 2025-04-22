@@ -237,6 +237,16 @@ export default function PayPage({
           field="orderId"
           required
           className={styles.formItem}
+          validateStatus={
+            !!router.query.orderId?.length && router.query.orderId?.length > 100
+              ? "error"
+              : undefined
+          }
+          help={
+            !!router.query.orderId?.length && router.query.orderId?.length > 100
+              ? "Order ID is too long for memo instruction (max 100 characters)."
+              : undefined
+          }
         >
           <Input />
         </Form.Item>

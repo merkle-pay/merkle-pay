@@ -1,6 +1,8 @@
 import type { Cluster } from "@solana/web3.js";
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import { PaymentStatus } from "./prisma";
+import { Payment } from "src/types/payment";
+import { PhantomSolanaProvider } from "src/types/global";
 /**
  * Establish a connection to the cluster
  */
@@ -66,3 +68,55 @@ export const MEMO_PROGRAM_ID = new PublicKey(
 
 export const SOLANA_RPC_ENDPOINT =
   process.env.NEXT_PUBLIC_SOLANA_RPC_ENDPOINT || clusterApiUrl("mainnet-beta"); // Or "devnet", "testnet"
+
+export const validatePhantomExtensionPayment = ({
+  phantomSolana,
+  payment,
+}: {
+  phantomSolana: PhantomSolanaProvider | null;
+  payment: Payment;
+}) => {
+  if (!phantomSolana) {
+    return {
+      isValid: false,
+      error: "Phantom wallet not detected.",
+    };
+  }
+  if (!payment) {
+    return {
+      isValid: false,
+      error: "Payment details not found.",
+    };
+  }
+
+  const { recipient_address, amount, orderId, token } = payment;
+
+  if (!recipient_address || !amount || !orderId || !token) {
+    return {
+      isValid: false,
+      error:
+        "Required payment details (recipient, amount, orderId, token) are missing.",
+    };
+  }
+  if (orderId.length > 100) {
+    return {
+      isValid: false,
+      error: "Order ID is too long for memo instruction (max 100 characters).",
+    };
+  }
+
+  if (
+    SplTokens[token as keyof typeof SplTokens] === undefined &&
+    token !== "SOL"
+  ) {
+    return {
+      isValid: false,
+      error: "Invalid token.",
+    };
+  }
+
+  return {
+    isValid: true,
+    error: null,
+  };
+};
