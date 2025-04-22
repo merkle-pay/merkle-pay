@@ -21,6 +21,7 @@ services:
       - BETTER_AUTH_URL=${BETTER_AUTH_URL}
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
       - ENABLE_SIGNUP=${ENABLE_SIGNUP}
+      - NEXT_PUBLIC_SOLANA_RPC_ENDPOINT=${NEXT_PUBLIC_SOLANA_RPC_ENDPOINT} #optional
     networks:
       - merkle-network
 

@@ -49,3 +49,20 @@
   min-width: 300px;
   min-height: 300px;
 }
+
+.phantomButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 260px;
+  height: 260px;
+
+  background-image: url("/Phantom.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  button {
+    height: 50px;
+  }
+}

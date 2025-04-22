@@ -7,13 +7,13 @@
 // }
 // "https://api-v3.raydium.io/mint/price?mints=So11111111111111111111111111111111111111112"
 
-import { SplTokens } from "./solana";
+import { NativeSolanaToken } from "./solana";
 
 // sol price in USDT
 export const solRealTimePrice = async (): Promise<number | null> => {
   const response = await fetch(
-    `https://api-v3.raydium.io/mint/price?mints=${SplTokens.SOL}`
+    `https://api-v3.raydium.io/mint/price?mints=${NativeSolanaToken.mint}`
   );
   const json = await response.json();
-  return json.success ? json.data[SplTokens.SOL] : null;
+  return json.success ? json.data[NativeSolanaToken.mint] : null;
 };

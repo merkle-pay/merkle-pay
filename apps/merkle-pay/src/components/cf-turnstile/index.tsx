@@ -2,15 +2,16 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import { AntibotToken } from "src/types/antibot";
 
 export function CfTurnstile({
-  siteKey,
   handleVerification,
 }: {
-  siteKey: string;
   handleVerification: (params: AntibotToken) => void;
 }) {
+  const turnstileSiteKey =
+    typeof window !== "undefined" && window.mpGlobal.turnstileSiteKey;
+
   return (
     <Turnstile
-      siteKey={siteKey}
+      siteKey={turnstileSiteKey || ""}
       onSuccess={(token) => {
         handleVerification({
           token,

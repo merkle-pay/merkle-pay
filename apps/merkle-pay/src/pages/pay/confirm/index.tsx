@@ -9,14 +9,33 @@ import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/cf-turnstile";
 import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
+import {
+  getPhantomSolana,
+  MEMO_PROGRAM_ID,
+  SOLANA_RPC_ENDPOINT,
+  SplTokens,
+} from "src/utils/solana";
+import {
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  Transaction,
+  TransactionInstruction,
+  SystemProgram,
+  Connection,
+} from "@solana/web3.js";
+import {
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 
-export default function PaymentConfirmPage({
-  turnstileSiteKey,
-}: {
-  turnstileSiteKey: string;
-}) {
+export default function PaymentConfirmPage() {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
+
+  const phantomSolana = getPhantomSolana();
+
+  const [isPaying, setIsPaying] = useState(false);
 
   const [turnstileToken, setTurnstileToken] = useState<AntibotToken>({
     token: "",
@@ -37,12 +56,181 @@ export default function PaymentConfirmPage({
   const {
     qrCodeRef,
     paymentRecord,
-    isLoading,
+    isLoading: isLoadingQR,
     error: qrCodeError,
   } = useSolanaQR({
     payment,
     antibotToken: turnstileToken,
   });
+
+  const handlePayWithPhantom = async () => {
+    // 1. --- Pre-checks ---
+    if (!phantomSolana) {
+      console.error("Phantom wallet not detected.");
+      return;
+    }
+    if (!payment) {
+      console.error("Payment details not found.");
+      return;
+    }
+    const { recipient_address, amount, orderId, token } = payment; // Destructure needed payment details
+
+    if (!recipient_address || !amount || !orderId || !token) {
+      console.error(
+        "Required payment details (recipient, amount, orderId, token) are missing."
+      );
+      return;
+    }
+
+    if (
+      SplTokens[token as keyof typeof SplTokens] === undefined &&
+      token !== "SOL"
+    ) {
+      console.error("Invalid token.");
+      return;
+    }
+
+    setIsPaying(true);
+
+    try {
+      // 2. --- Connect & Get Public Key ---
+      const { publicKey } = await phantomSolana.connect({
+        onlyIfTrusted: false,
+      }); // Ensure connection prompt if needed
+      if (!publicKey) {
+        throw new Error("Wallet connection failed or rejected.");
+      }
+
+      // 3. --- Initialize Connection ---
+      const connection = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
+
+      // 4. --- Create Instructions ---
+      const instructions: TransactionInstruction[] = [];
+
+      // 4a. Memo Instruction
+      const memoInstruction = new TransactionInstruction({
+        keys: [{ pubkey: publicKey, isSigner: true, isWritable: true }],
+        programId: MEMO_PROGRAM_ID,
+        data: Buffer.from(orderId, "utf8"),
+      });
+      instructions.push(memoInstruction);
+
+      // 4b. Payment Instruction (SOL or SPL)
+      const recipientPubKey = new PublicKey(recipient_address);
+
+      if (token === "SOL") {
+        // SOL Transfer
+        const lamports = Math.round(amount * LAMPORTS_PER_SOL); // Ensure integer lamports
+        if (lamports <= 0) throw new Error("Invalid amount for SOL transfer.");
+
+        instructions.push(
+          SystemProgram.transfer({
+            fromPubkey: publicKey,
+            toPubkey: recipientPubKey,
+            lamports: lamports,
+          })
+        );
+        console.log(
+          `Prepared SOL transfer: ${lamports} lamports to ${recipient_address}`
+        );
+      } else {
+        // SPL Token Transfer
+        const mintPubKey = new PublicKey(
+          SplTokens[token as keyof typeof SplTokens].mint
+        );
+        const tokenDecimals =
+          SplTokens[token as keyof typeof SplTokens].decimals; // Assert decimals exist (checked above)
+
+        // Calculate token amount based on decimals
+        const tokenAmount = Math.round(amount * Math.pow(10, tokenDecimals));
+        if (tokenAmount <= 0) {
+          throw new Error("Invalid amount for token transfer.");
+        }
+
+        // Get Associated Token Accounts
+        const senderTokenAccount = await getAssociatedTokenAddress(
+          mintPubKey,
+          publicKey
+        );
+        const recipientTokenAccount = await getAssociatedTokenAddress(
+          mintPubKey,
+          recipientPubKey
+        );
+
+        console.log(`Prepared SPL Token transfer:`);
+        console.log(`  Amount: ${tokenAmount} (smallest unit)`);
+        console.log(`  Mint: ${mintPubKey.toBase58()}`);
+        console.log(`  Sender ATA: ${senderTokenAccount.toBase58()}`);
+        console.log(`  Recipient ATA: ${recipientTokenAccount.toBase58()}`);
+
+        // Check if recipient ATA exists, if not, dApp usually shouldn't create it (wallet handles?)
+        // For simplicity here, we assume it exists or Phantom handles creation if needed.
+        // More robust check: const recipientAccountInfo = await connection.getAccountInfo(recipientTokenAccount);
+
+        instructions.push(
+          createTransferInstruction(
+            senderTokenAccount, // from
+            recipientTokenAccount, // to
+            publicKey, // owner/signer (sender's wallet)
+            tokenAmount, // amount (in smallest unit)
+            [], // multiSigners
+            TOKEN_PROGRAM_ID // Token program ID
+          )
+        );
+      }
+
+      // 5. --- Create Transaction ---
+      const transaction = new Transaction().add(...instructions);
+      transaction.feePayer = publicKey;
+
+      // 6. --- Fetch Blockhash ---
+      const { blockhash } = await connection.getLatestBlockhash("confirmed");
+      transaction.recentBlockhash = blockhash;
+      console.log(`Using blockhash: ${blockhash}`);
+
+      // 7. --- Sign and Send ---
+      console.log("Requesting signature and sending transaction...");
+      const { signature } =
+        await phantomSolana.signAndSendTransaction(transaction);
+      console.log(`Transaction submitted with signature: ${signature}`);
+      console.log("Waiting for transaction confirmation...");
+      await connection.confirmTransaction(
+        {
+          signature,
+          blockhash: transaction.recentBlockhash,
+          lastValidBlockHeight: (await connection.getLatestBlockhash())
+            .lastValidBlockHeight,
+        },
+        "confirmed"
+      );
+      console.log("Transaction confirmed.");
+
+      // 8. --- Navigate on Success ---
+      // Use payment.orderId or paymentRecord.mpid depending on what status page expects
+      router.push(`/pay/status?mpid=${orderId}`);
+    } catch (error: unknown) {
+      console.error("Phantom payment failed:", error);
+      let errorMessage = "Phantom payment failed.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+      // Try to provide more specific user messages for common errors
+      if (errorMessage.includes("User rejected the request")) {
+        errorMessage = "Transaction rejected in wallet.";
+      } else if (errorMessage.includes("Failed to fetch")) {
+        errorMessage =
+          "Network error. Please check your connection or RPC endpoint.";
+      } else if (errorMessage.includes("Account not found")) {
+        errorMessage =
+          "Token account not found. Ensure the recipient has an account for this token.";
+      }
+      console.error(errorMessage);
+    } finally {
+      setIsPaying(false); // Stop loading indicator regardless of outcome
+    }
+  };
 
   return (
     <Space direction="vertical" size={8} className={styles.container}>
@@ -52,7 +240,7 @@ export default function PaymentConfirmPage({
       <Typography.Title heading={6} className={styles.subtitle}>
         Please scan the QR code with your Phantom or Solflare wallet
       </Typography.Title>
-      {isLoading && (
+      {isLoadingQR && (
         <div className={styles.loading}>
           <Spin size={48} tip="Generating Payment QR Code..." />
         </div>
@@ -68,11 +256,23 @@ export default function PaymentConfirmPage({
           />
         </div>
       )}
-      <div id="qr-code-container" ref={qrCodeRef} />
-      <CfTurnstile
-        siteKey={turnstileSiteKey}
-        handleVerification={handleTurnstileTokenVerification}
-      />
+      <Space size={8}>
+        <div id="qr-code-container" ref={qrCodeRef} />
+        {!!phantomSolana && (
+          <div className={styles.phantomButton}>
+            <Button
+              type="primary"
+              size="large"
+              onClick={handlePayWithPhantom}
+              disabled={isLoadingQR || isPaying}
+            >
+              Pay with Phantom <br />
+              Wallet Extension
+            </Button>
+          </div>
+        )}
+      </Space>
+      <CfTurnstile handleVerification={handleTurnstileTokenVerification} />
       <Space size={8} className={styles.buttons}>
         <Button
           type="outline"
@@ -83,6 +283,7 @@ export default function PaymentConfirmPage({
         >
           Back to Payment Form
         </Button>
+
         <Button
           type="primary"
           onClick={() => {
@@ -90,20 +291,12 @@ export default function PaymentConfirmPage({
               router.push(`/pay/status?mpid=${paymentRecord.mpid}`);
             }
           }}
-          loading={isLoading}
-          disabled={!paymentRecord.mpid}
+          loading={isPaying}
+          disabled={!paymentRecord.mpid || isPaying}
         >
-          I have finished paying on my wallet
+          I have paid
         </Button>
       </Space>
     </Space>
   );
 }
-
-export const getServerSideProps = async () => {
-  return {
-    props: {
-      turnstileSiteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "",
-    },
-  };
-};

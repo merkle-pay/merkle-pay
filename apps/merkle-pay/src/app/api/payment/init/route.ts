@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       memo: payment.orderId,
       message: payment.message,
       splToken: new PublicKey(
-        SplTokens[parsedJson.data.payment.token as keyof typeof SplTokens]
+        SplTokens[parsedJson.data.payment.token as keyof typeof SplTokens].mint
       ),
     });
 
