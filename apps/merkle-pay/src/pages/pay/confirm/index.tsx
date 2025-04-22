@@ -36,6 +36,9 @@ export default function PaymentConfirmPage() {
   const phantomSolana = getPhantomSolana();
 
   const [isPaying, setIsPaying] = useState(false);
+  const [phantomExtensionError, setPhantomExtensionError] = useState<
+    string | null
+  >(null);
 
   const [turnstileToken, setTurnstileToken] = useState<AntibotToken>({
     token: "",
@@ -157,16 +160,6 @@ export default function PaymentConfirmPage() {
           recipientPubKey
         );
 
-        console.log(`Prepared SPL Token transfer:`);
-        console.log(`  Amount: ${tokenAmount} (smallest unit)`);
-        console.log(`  Mint: ${mintPubKey.toBase58()}`);
-        console.log(`  Sender ATA: ${senderTokenAccount.toBase58()}`);
-        console.log(`  Recipient ATA: ${recipientTokenAccount.toBase58()}`);
-
-        // Check if recipient ATA exists, if not, dApp usually shouldn't create it (wallet handles?)
-        // For simplicity here, we assume it exists or Phantom handles creation if needed.
-        // More robust check: const recipientAccountInfo = await connection.getAccountInfo(recipientTokenAccount);
-
         instructions.push(
           createTransferInstruction(
             senderTokenAccount, // from
@@ -207,9 +200,8 @@ export default function PaymentConfirmPage() {
 
       // 8. --- Navigate on Success ---
       // Use payment.orderId or paymentRecord.mpid depending on what status page expects
-      router.push(`/pay/status?mpid=${orderId}`);
+      router.push(`/pay/status?mpid=${paymentRecord.mpid}`);
     } catch (error: unknown) {
-      console.error("Phantom payment failed:", error);
       let errorMessage = "Phantom payment failed.";
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -226,7 +218,7 @@ export default function PaymentConfirmPage() {
         errorMessage =
           "Token account not found. Ensure the recipient has an account for this token.";
       }
-      console.error(errorMessage);
+      setPhantomExtensionError(errorMessage);
     } finally {
       setIsPaying(false); // Stop loading indicator regardless of outcome
     }
@@ -245,20 +237,20 @@ export default function PaymentConfirmPage() {
           <Spin size={48} tip="Generating Payment QR Code..." />
         </div>
       )}
-      {qrCodeError && (
+      {(qrCodeError || phantomExtensionError) && (
         <div className={styles.error}>
           <Alert
             closable={false}
             style={{ marginBottom: 20 }}
             type="error"
             title="Error"
-            content={qrCodeError}
+            content={qrCodeError || phantomExtensionError}
           />
         </div>
       )}
       <Space size={8}>
         <div id="qr-code-container" ref={qrCodeRef} />
-        {!!phantomSolana && (
+        {!!phantomSolana && !phantomExtensionError && (
           <div className={styles.phantomButton}>
             <Button
               type="primary"
