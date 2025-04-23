@@ -30,12 +30,29 @@ export interface PhantomSolanaProvider {
   on(event: string, listener: (...args: any[]) => void): this;
   off(event: string, listener: (...args: any[]) => void): this;
   // Add other methods/properties if known
+  request: (params: { method: string; params?: any }) => Promise<any>;
+}
+
+export interface PhantomEthereumProvider {
+  chainId: string;
+  handleNotification: (...args: any[]) => void;
+  initializeMetamaskExplainer: () => Promise<void>;
+  isMetaMask: boolean;
+  isMetamaskExplainerEnabled: boolean;
+  isPhantom: boolean;
+  networkVersion: string;
+  removeAllListeners: (...args: any[]) => void;
+  request: (...args: any[]) => Promise<void>;
+  selectedAddress: string | null;
+  on: (event: string, callback: (...args: any[]) => void) => void;
+  off: (event: string, callback: (...args: any[]) => void) => void;
 }
 
 declare global {
   interface Window {
     phantom?: {
       solana?: PhantomSolanaProvider;
+      ethereum?: PhantomEthereumProvider;
     };
   }
 }
