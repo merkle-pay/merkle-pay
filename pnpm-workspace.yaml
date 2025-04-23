@@ -7,9 +7,10 @@ catalogs:
     "@solana/spl-token": ^0.4.13
     "@solana/qr-code-styling": ^1.6.0
     "@solana/pay": ^0.2.5
+    better-auth: ^1.2.7
+    bs58: ^6.0.0
     bignumber.js: ^9.2.1
     clsx: ^2.1.1
-    better-auth: ^1.2.7
     jose: ^6.0.10
     next: ^15.2.3
     react: ^18

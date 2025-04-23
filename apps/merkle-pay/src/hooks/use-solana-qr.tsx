@@ -6,6 +6,7 @@ import QRCodeStyling from "@solana/qr-code-styling";
 import { createPaymentQuery } from "src/queries/payment";
 import { Payment } from "src/types/payment";
 import { AntibotToken } from "src/types/antibot";
+import { PaymentTableRecord } from "src/utils/prisma";
 
 export const useSolanaQR = ({
   payment,
@@ -14,14 +15,32 @@ export const useSolanaQR = ({
   payment: Payment;
   antibotToken: AntibotToken;
 }) => {
-  const [paymentRecord, setPaymentRecord] = useState<{
-    mpid: string | null;
-    orderId: string | null;
-    urlForQrCode: string | null;
-  }>({
-    mpid: null,
-    orderId: null,
+  const [paymentRecord, setPaymentRecord] = useState<
+    Pick<
+      PaymentTableRecord,
+      | "id"
+      | "mpid"
+      | "orderId"
+      | "referencePublicKey"
+      | "recipient_address"
+      | "amount"
+      | "token"
+      | "blockchain"
+    > & {
+      urlForQrCode: string | null;
+      returnUrl: string;
+    }
+  >({
+    id: 0,
+    mpid: "",
+    orderId: "",
     urlForQrCode: null,
+    referencePublicKey: "",
+    recipient_address: "",
+    amount: 0,
+    token: "",
+    blockchain: "",
+    returnUrl: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,13 +96,21 @@ export const useSolanaQR = ({
             return;
           }
 
-          setPaymentRecord(data);
+          // ! potential issue here, if the data is any
+          setPaymentRecord({ ...data, returnUrl: payment.returnUrl });
         } catch (err) {
           setError(err instanceof Error ? err.message : "Unknown error");
           setPaymentRecord({
-            mpid: null,
-            orderId: null,
+            id: 0,
+            mpid: "",
+            orderId: "",
             urlForQrCode: null,
+            referencePublicKey: "",
+            recipient_address: "",
+            amount: 0,
+            token: "",
+            blockchain: "",
+            returnUrl: "",
           });
         } finally {
           setIsLoading(false);

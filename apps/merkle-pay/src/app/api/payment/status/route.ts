@@ -4,7 +4,7 @@ import {
   updatePaymentStatus,
   updatePaymentTxIdIfNotSet,
 } from "src/services/payment";
-import { PaymentStatus, PaymentTable } from "src/utils/prisma";
+import { PaymentStatus, PaymentTableRecord } from "src/utils/prisma";
 
 import {
   Connection,
@@ -70,7 +70,7 @@ const validatePayment = async (mpid: string | null) => {
     };
   }
 
-  const payment: PaymentTable | null = await getPaymentByMpid(mpid);
+  const payment: PaymentTableRecord | null = await getPaymentByMpid(mpid);
 
   if (!payment) {
     result = {

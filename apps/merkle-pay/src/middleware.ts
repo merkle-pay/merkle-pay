@@ -11,6 +11,10 @@ const routesRequiringTurnstile = [
   "/api/boss-auth/sign-out",
 ];
 
+const routesSkippingTurnstile = [
+  "/api/payment/phantom/dapp-encryption-public-key",
+];
+
 const routesRequiringAuth = ["/api/dashboard"];
 
 export async function middleware(request: NextRequest) {
@@ -49,9 +53,13 @@ export async function middleware(request: NextRequest) {
     corsHeaders["Access-Control-Allow-Credentials"] = "true";
   }
 
-  const shouldCheckTurnstile = routesRequiringTurnstile.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
+  const shouldCheckTurnstile =
+    routesRequiringTurnstile.some((path) =>
+      request.nextUrl.pathname.startsWith(path)
+    ) &&
+    !routesSkippingTurnstile.some((path) =>
+      request.nextUrl.pathname.startsWith(path)
+    );
 
   const shouldCheckAuth = routesRequiringAuth.some((path) =>
     request.nextUrl.pathname.startsWith(path)

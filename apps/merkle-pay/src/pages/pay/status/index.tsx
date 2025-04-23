@@ -180,9 +180,7 @@ export default function PaymentStatusPage(props: Props) {
       {status.value && (
         <Typography.Text>
           Payment Status: {status.value}
-          {status.isFetching && status.value === PaymentStatus.PENDING && (
-            <Spin size={24} style={{ marginLeft: 8 }} />
-          )}
+          {status.isFetching && <Spin size={24} style={{ marginLeft: 8 }} />}
         </Typography.Text>
       )}
       {status.error && (

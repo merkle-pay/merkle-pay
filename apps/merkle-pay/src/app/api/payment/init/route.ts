@@ -65,8 +65,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       code: 200,
       data: {
-        mpid: createdPayment.mpid,
         urlForQrCode: url,
+        referencePublicKeyString: referencePublicKeyString,
+        ...createdPayment,
       },
       message: null,
     });

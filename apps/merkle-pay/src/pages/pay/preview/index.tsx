@@ -16,7 +16,7 @@ export default function PaymentPreviewPage() {
   const { payment: paymentValueFromStore, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobileLayout = useMediaQuery("(max-width: 768px)");
 
   const {
     success,
@@ -47,7 +47,7 @@ export default function PaymentPreviewPage() {
       <h1>Payment Preview</h1>
       <Descriptions
         column={1}
-        layout={isMobile ? "vertical" : "horizontal"}
+        layout={isMobileLayout ? "vertical" : "horizontal"}
         data={[
           {
             label: "Payer",

@@ -10,12 +10,16 @@ import { CfTurnstile } from "../../../components/cf-turnstile";
 import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
 import {
+  createPhantomPaymentDeepLink,
   getPhantomSolana,
   sendSolanaPaymentWithPhantom,
 } from "src/utils/solana";
 
 import { Message } from "@arco-design/web-react";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
+import { useMediaQuery } from "@react-hookz/web";
+import { generateDappEncryptionPublicKey } from "src/queries/solana";
+
 export default function PaymentConfirmPage({
   turnstileSiteKey,
 }: {
@@ -26,6 +30,7 @@ export default function PaymentConfirmPage({
 
   const phantomSolana = getPhantomSolana();
   const { isMobileDevice } = useIsMobileDevice();
+  const isMobileLayout = useMediaQuery("(max-width: 768px)");
 
   const [isPaying, setIsPaying] = useState(false);
   const [phantomExtensionError, setPhantomExtensionError] = useState<
@@ -58,7 +63,7 @@ export default function PaymentConfirmPage({
     antibotToken: turnstileToken,
   });
 
-  const handlePaySolanaWithPhantom = async () => {
+  const handlePaySolanaWithPhantomExtension = async () => {
     setIsPaying(true);
     const result = await sendSolanaPaymentWithPhantom({
       phantomSolana,
@@ -84,6 +89,58 @@ export default function PaymentConfirmPage({
     }
   };
 
+  const log = (message: string) => {
+    setPhantomExtensionError(message);
+  };
+
+  const handlePaySolanaWithPhantomApp = async () => {
+    // ! TODO: verify payment record
+    // const { error } = await verifyPaymentRecord(paymentRecord);
+    // if (error) {
+    //   Message.error(error);
+    //   return;
+    // }
+
+    try {
+      const { dAppPublicKey } = await generateDappEncryptionPublicKey({
+        mpid: paymentRecord.mpid,
+        orderId: paymentRecord.orderId,
+        paymentId: paymentRecord.id,
+        log,
+      });
+
+      if (!dAppPublicKey) {
+        return;
+      }
+
+      const appUrl =
+        typeof window !== "undefined" ? window.location.origin : "";
+
+      const deepLink = await createPhantomPaymentDeepLink(
+        {
+          recipient_address: paymentRecord.recipient_address,
+          amount: paymentRecord.amount,
+          token: paymentRecord.token,
+          blockchain: paymentRecord.blockchain,
+          orderId: paymentRecord.orderId,
+          mpid: paymentRecord.mpid,
+          referencePublicKey: paymentRecord.referencePublicKey,
+        },
+        {
+          dappEncryptionPublicKey: dAppPublicKey,
+          appUrl,
+          log,
+        }
+      );
+      if (deepLink) {
+        window.open(deepLink, "_blank");
+        // log(deepLink);
+      }
+    } catch (error) {
+      setPhantomExtensionError((error as Error).message);
+    }
+  };
+
   return (
     <Space direction="vertical" size={8} className={styles.container}>
       <Typography.Title className={styles.title}>
@@ -104,7 +161,7 @@ export default function PaymentConfirmPage({
           />
         </div>
       )}
-      <Space size={8}>
+      <Space size={8} direction={isMobileLayout ? "vertical" : "horizontal"}>
         {isLoadingQR || !paymentRecord.urlForQrCode ? (
           <div className={styles.loading}>
             <Spin size={48} tip="Generating Payment QR Code..." />
@@ -113,12 +170,18 @@ export default function PaymentConfirmPage({
           <div id="qr-code-container" ref={qrCodeRef} />
         )}
 
-        {!phantomExtensionError && (
+        {(isMobileDevice || phantomSolana) && (
           <div className={styles.phantomButton}>
             <Button
               type="primary"
               size="large"
-              onClick={handlePaySolanaWithPhantom}
+              onClick={async () => {
+                if (isMobileDevice) {
+                  await handlePaySolanaWithPhantomApp();
+                } else {
+                  await handlePaySolanaWithPhantomExtension();
+                }
+              }}
               disabled={isLoadingQR || isPaying}
             >
               Pay with Phantom <br />

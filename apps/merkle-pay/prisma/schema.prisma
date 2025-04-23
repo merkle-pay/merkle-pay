@@ -37,6 +37,18 @@ model Payment {
   txId               String?
 }
 
+model PhantomDeepLink {
+  id         Int      @id @default(autoincrement())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  mpid       String
+  orderId    String
+  paymentId  Int
+  expiresAt  DateTime
+}
+
 model Boss {
   id            String    @id
   name          String
