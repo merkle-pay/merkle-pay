@@ -1,5 +1,20 @@
 import type { Cluster } from "@solana/web3.js";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import {
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  Transaction,
+  TransactionInstruction,
+  SystemProgram,
+  Connection,
+  TransactionSignature,
+  clusterApiUrl,
+} from "@solana/web3.js";
+import {
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
+
 import { PaymentStatus } from "./prisma";
 import { Payment } from "src/types/payment";
 import { PhantomSolanaProvider } from "src/types/global";
@@ -121,4 +136,163 @@ export const validatePhantomExtensionPayment = ({
     isValid: true,
     error: null,
   };
+};
+
+export const sendSolanaPaymentWithPhantom = async ({
+  phantomSolana,
+  payment,
+}: {
+  phantomSolana: PhantomSolanaProvider | null;
+  payment: Payment;
+}) => {
+  const result: {
+    phantomExtensionError: string | null;
+    regularError: string | null;
+    successMessage: string | null;
+    signature: TransactionSignature | null;
+  } = {
+    phantomExtensionError: null,
+    regularError: null,
+    successMessage: null,
+    signature: null,
+  };
+
+  // 1. --- Pre-checks ---
+  const { isValid, error } = validatePhantomExtensionPayment({
+    phantomSolana,
+    payment,
+  });
+  if (!isValid || error) {
+    result.phantomExtensionError = error || "Invalid payment details.";
+    return result;
+  }
+
+  try {
+    const { recipient_address, amount, orderId, token } = payment;
+    // 2. --- Connect & Get Public Key ---
+    const { publicKey } = await phantomSolana!.connect({
+      onlyIfTrusted: false,
+    }); // Ensure connection prompt if needed
+    if (!publicKey) {
+      throw new Error("Wallet connection failed or rejected.");
+    }
+
+    // 3. --- Initialize Connection ---
+    const connection = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
+
+    // 4. --- Create Instructions ---
+    const instructions: TransactionInstruction[] = [];
+
+    // 4a. Memo Instruction
+
+    const memoInstruction = new TransactionInstruction({
+      keys: [{ pubkey: publicKey, isSigner: true, isWritable: true }],
+      programId: MEMO_PROGRAM_ID,
+      data: Buffer.from(orderId, "utf8"),
+    });
+    instructions.push(memoInstruction);
+
+    // 4b. Payment Instruction (SOL or SPL)
+    const recipientPubKey = new PublicKey(recipient_address);
+
+    if (token === "SOL") {
+      // SOL Transfer
+      const lamports = Math.round(amount * LAMPORTS_PER_SOL); // Ensure integer lamports
+      if (lamports <= 0) throw new Error("Invalid amount for SOL transfer.");
+
+      instructions.push(
+        SystemProgram.transfer({
+          fromPubkey: publicKey,
+          toPubkey: recipientPubKey,
+          lamports: lamports,
+        })
+      );
+      console.log(
+        `Prepared SOL transfer: ${lamports} lamports to ${recipient_address}`
+      );
+    } else {
+      // SPL Token Transfer
+      const { mint, decimals } = SplTokens[token as keyof typeof SplTokens];
+      const mintPubKey = new PublicKey(mint);
+
+      // Calculate token amount based on decimals
+      const tokenAmount = new BigNumber(amount)
+        .multipliedBy(Math.pow(10, decimals))
+        .integerValue()
+        .toNumber();
+      if (tokenAmount <= 0) {
+        throw new Error("Invalid amount for token transfer.");
+      }
+
+      // Get Associated Token Accounts
+      const senderTokenAccount = await getAssociatedTokenAddress(
+        mintPubKey,
+        publicKey
+      );
+      const recipientTokenAccount = await getAssociatedTokenAddress(
+        mintPubKey,
+        recipientPubKey
+      );
+
+      instructions.push(
+        createTransferInstruction(
+          senderTokenAccount, // from
+          recipientTokenAccount, // to
+          publicKey, // owner/signer (sender's wallet)
+          tokenAmount, // amount (in smallest unit)
+          [], // multiSigners
+          TOKEN_PROGRAM_ID // Token program ID
+        )
+      );
+      console.log(
+        `Prepared token transfer: ${tokenAmount} ${token} to ${recipient_address}`
+      );
+    }
+
+    // 5. --- Create Transaction ---
+    const transaction = new Transaction().add(...instructions);
+    transaction.feePayer = publicKey;
+
+    // 6. --- Fetch Blockhash ---
+    const { blockhash } = await connection.getLatestBlockhash("confirmed");
+    transaction.recentBlockhash = blockhash;
+    console.log(`Using blockhash: ${blockhash}`);
+
+    // 7. --- Sign and Send ---
+    console.log("Requesting signature and sending transaction...");
+    const { signature }: { signature: TransactionSignature } =
+      await phantomSolana!.signAndSendTransaction(transaction);
+    console.log(`Transaction submitted with signature: ${signature}`);
+
+    // 8. --- Confirmation (Optional but kept for immediate feedback) ---
+    console.log("Waiting for transaction confirmation...");
+    const signatureResult = await connection.confirmTransaction(
+      {
+        signature,
+        blockhash: transaction.recentBlockhash,
+        lastValidBlockHeight: (await connection.getLatestBlockhash())
+          .lastValidBlockHeight,
+      },
+      "confirmed"
+    );
+
+    if (signatureResult.value.err) {
+      result.regularError = "Transaction failed.";
+      return result;
+    }
+
+    result.successMessage = `Payment sent successfully!`;
+    result.signature = signature;
+    return result;
+  } catch (error: unknown) {
+    let errorMessage = "Phantom payment failed.";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    }
+
+    result.regularError = errorMessage;
+  }
+  return result;
 };
