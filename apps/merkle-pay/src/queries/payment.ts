@@ -1,4 +1,3 @@
-import { AntibotToken } from "src/types/antibot";
 import { Payment, PaymentStatusApiResponse } from "src/types/payment";
 
 export const createPaymentQuery = async (
@@ -23,7 +22,7 @@ export const createPaymentQuery = async (
 
 export const fetchPaymentStatusQuery = async (
   mpid: string | null,
-  antibotToken: AntibotToken
+  antibotToken: string
 ) => {
   if (!mpid) {
     return {
@@ -35,7 +34,7 @@ export const fetchPaymentStatusQuery = async (
   const response = await fetch(`/api/payment/status?mpid=${mpid}`, {
     headers: {
       "Content-Type": "application/json",
-      "mp-antibot-token": antibotToken.token,
+      "mp-antibot-token": antibotToken,
     },
   });
 

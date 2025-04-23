@@ -70,13 +70,11 @@ export default function PaymentStatusPage(props: Props) {
         if (antibotToken.error) return;
         if (!antibotToken.token) return;
         if (!mpid) return;
-        if (antibotTokenHasBeenUsed) {
-          return;
-        }
+        if (antibotTokenHasBeenUsed) return;
 
         tryStatusRef.current++;
 
-        const result = await fetchPaymentStatusQuery(mpid, antibotToken);
+        const result = await fetchPaymentStatusQuery(mpid, antibotToken.token);
         setAntibotTokenHasBeenUsed(true);
 
         if (result.error || !result.data) {
@@ -144,7 +142,6 @@ export default function PaymentStatusPage(props: Props) {
     antibotToken.isInitialized,
     antibotToken.isExpired,
     antibotToken.error,
-    antibotToken,
     needPolling,
     antibotTokenHasBeenUsed,
   ]);
