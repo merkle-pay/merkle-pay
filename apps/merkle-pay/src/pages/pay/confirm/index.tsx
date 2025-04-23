@@ -7,7 +7,7 @@ import styles from "./index.module.scss";
 import { useSolanaQR } from "../../../hooks/use-solana-qr";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/cf-turnstile";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AntibotToken } from "src/types/antibot";
 import {
   getPhantomSolana,
@@ -23,14 +23,21 @@ import {
   TransactionInstruction,
   SystemProgram,
   Connection,
+  TransactionSignature,
 } from "@solana/web3.js";
 import {
   createTransferInstruction,
   getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
+import BigNumber from "bignumber.js";
+import { Message } from "@arco-design/web-react";
 
-export default function PaymentConfirmPage() {
+export default function PaymentConfirmPage({
+  turnstileSiteKey,
+}: {
+  turnstileSiteKey: string;
+}) {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
@@ -66,6 +73,9 @@ export default function PaymentConfirmPage() {
     payment,
     antibotToken: turnstileToken,
   });
+
+  // TODO: set it to true when the user has used the turnstile token
+  const turnstileTokenHasBeenUsedRef = useRef<boolean>(false);
 
   const handlePayWithPhantom = async () => {
     // 1. --- Pre-checks ---
@@ -172,9 +182,14 @@ export default function PaymentConfirmPage() {
 
       // 7. --- Sign and Send ---
       console.log("Requesting signature and sending transaction...");
-      const { signature } =
+      const { signature }: { signature: TransactionSignature } =
         await phantomSolana!.signAndSendTransaction(transaction);
       console.log(`Transaction submitted with signature: ${signature}`);
+      Message.success(
+        `Transaction sent! Signature: ${signature.substring(0, 10)}...`
+      );
+
+      // 8. --- Confirmation (Optional but kept for immediate feedback) ---
       console.log("Waiting for transaction confirmation...");
       await connection.confirmTransaction(
         {
@@ -185,11 +200,15 @@ export default function PaymentConfirmPage() {
         },
         "confirmed"
       );
-      console.log("Transaction confirmed.");
+      console.log("Transaction confirmed by node.");
+      Message.success(`Transaction confirmed!`);
 
-      // 8. --- Navigate on Success ---
-      // Use payment.orderId or paymentRecord.mpid depending on what status page expects
-      router.push(`/pay/status?mpid=${paymentRecord.mpid}`);
+      // 9. --- Navigate on Success ---
+      // Pass both mpid (orderId) and signature to the status page
+      const searchParams = new URLSearchParams();
+      searchParams.set("mpid", paymentRecord.mpid || "");
+      searchParams.set("txId", signature);
+      router.push(`/pay/status?${searchParams.toString()}`);
     } catch (error: unknown) {
       let errorMessage = "Phantom payment failed.";
       if (error instanceof Error) {
@@ -209,7 +228,7 @@ export default function PaymentConfirmPage() {
       }
       setPhantomExtensionError(errorMessage);
     } finally {
-      setIsPaying(false); // Stop loading indicator regardless of outcome
+      setIsPaying(false);
     }
   };
 
@@ -253,7 +272,11 @@ export default function PaymentConfirmPage() {
           </div>
         )}
       </Space>
-      <CfTurnstile handleVerification={handleTurnstileTokenVerification} />
+      <CfTurnstile
+        siteKey={turnstileSiteKey}
+        handleVerification={handleTurnstileTokenVerification}
+        hasBeenUsed={turnstileTokenHasBeenUsedRef.current}
+      />
       <Space size={8} className={styles.buttons}>
         <Button
           type="outline"
@@ -281,3 +304,10 @@ export default function PaymentConfirmPage() {
     </Space>
   );
 }
+
+export const getServerSideProps = async () => {
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+  return {
+    props: { turnstileSiteKey },
+  };
+};

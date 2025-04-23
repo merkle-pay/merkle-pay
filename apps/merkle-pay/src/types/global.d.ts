@@ -34,10 +34,6 @@ export interface PhantomSolanaProvider {
 
 declare global {
   interface Window {
-    mpGlobal: {
-      turnstileSiteKey: string | undefined;
-    };
-
     phantom?: {
       solana?: PhantomSolanaProvider;
     };

@@ -35,6 +35,14 @@ export const getPaymentByMpid = async (mpid: string) => {
   return p;
 };
 
+export const updatePaymentTxId = async (mpid: string, txId: string) => {
+  const p = await prisma.payment.update({
+    where: { mpid },
+    data: { txId },
+  });
+  return p;
+};
+
 export const updatePaymentStatus = async ({
   mpid,
   status,

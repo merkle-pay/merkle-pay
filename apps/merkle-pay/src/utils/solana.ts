@@ -40,6 +40,8 @@ export const SETTLED_TX_STATUSES = new Set<PaymentStatus>([
   PaymentStatus.CANCELLED,
 ]);
 
+export const MAX_TRY_STATUS = 5;
+
 export const MERKLE_PAY_EXPIRE_TIME = 1000 * 60 * 60 * 2; // 2 hours
 
 export const POLLING_INTERVAL_MS = 2000; // Check every 2 seconds

@@ -1,17 +1,19 @@
-import { getPaymentByMpid } from "src/services/payment";
+import { getPaymentByMpid, updatePaymentTxId } from "src/services/payment";
 import styles from "./index.module.scss";
-import { Space, Typography, Spin } from "@arco-design/web-react";
+import { Space, Typography, Spin, Link } from "@arco-design/web-react";
 import { GetServerSidePropsContext } from "next";
-import { SETTLED_TX_STATUSES, MERKLE_PAY_EXPIRE_TIME } from "src/utils/solana";
-import { useEffect, useState, useRef } from "react";
+import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { PaymentStatus } from "src/utils/prisma";
-import { PaymentStatusApiResponse } from "src/types/payment";
+
 import { AntibotToken } from "src/types/antibot";
 import { CfTurnstile } from "src/components/cf-turnstile";
+import { fetchPaymentStatusQuery } from "src/queries/payment";
 
 type Props = {
   status: PaymentStatus | null;
   mpid: string | null;
+  txId: string | null;
   error: string | null;
   needPolling: boolean;
   turnstileSiteKey: string;
@@ -21,8 +23,9 @@ export default function PaymentStatusPage(props: Props) {
   const {
     status: initialStatus,
     mpid,
+    txId,
     error: initialError,
-    needPolling: initialNeedPolling,
+    needPolling,
     turnstileSiteKey,
   } = props;
 
@@ -30,10 +33,11 @@ export default function PaymentStatusPage(props: Props) {
     initialStatus
   );
   const [displayError, setDisplayError] = useState<string | null>(initialError);
-  const [isPollingActive, setIsPollingActive] =
-    useState<boolean>(initialNeedPolling);
+  const [isPollingActive, setIsPollingActive] = useState<boolean>(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const tryStatusRef = useRef<number>(0);
+  const turnstileTokenHasBeenUsedRef = useRef<boolean>(false);
 
   const [antibotToken, setAntibotToken] = useState<AntibotToken>({
     token: "",
@@ -42,63 +46,42 @@ export default function PaymentStatusPage(props: Props) {
     isInitialized: false,
   });
 
-  const handleAntibotToken = (params: AntibotToken) => {
+  console.log("antibotToken", antibotToken);
+
+  const handleAntibotToken = useCallback((params: AntibotToken) => {
     setAntibotToken((prev) => ({ ...prev, ...params }));
-  };
+  }, []);
 
   useEffect(() => {
     const fetchStatus = async () => {
-      if (!mpid) {
-        setDisplayError("MPID missing, cannot poll status.");
-        setIsPollingActive(false);
-        return;
-      }
-
-      if (!antibotToken.isInitialized) {
-        return;
-      }
-
-      if (antibotToken.isExpired) {
-        setDisplayError("Turnstile token expired");
-        return;
-      }
-
-      if (antibotToken.error) {
-        setDisplayError(antibotToken.error);
-        return;
-      }
-
-      if (!antibotToken.token) {
-        setDisplayError("Turnstile token missing");
-        return;
-      }
-
       try {
-        const response = await fetch(`/api/payment/status?mpid=${mpid}`, {
-          headers: {
-            "Content-Type": "application/json",
-            "mp-antibot-token": antibotToken.token,
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
+        if (!antibotToken.isInitialized) return;
+        if (antibotToken.isExpired) return;
+        if (antibotToken.error) return;
+        if (!antibotToken.token) return;
+        if (!mpid) return;
+        if (turnstileTokenHasBeenUsedRef.current) {
+          return;
         }
-        const result: PaymentStatusApiResponse = await response.json();
 
-        if (!result.data) {
-          console.warn("API returned OK but no status data:", result);
-          setDisplayError(
-            result.message || "Received unexpected data from API."
-          );
+        tryStatusRef.current++;
+
+        setIsPollingActive(true);
+
+        const result = await fetchPaymentStatusQuery(mpid, antibotToken);
+        turnstileTokenHasBeenUsedRef.current = true;
+
+        if (result.error || !result.data) {
+          setDisplayError(result.error || "Failed to fetch status.");
+          setIsPollingActive(false);
           return;
         }
 
         const newStatus = result.data.status;
-        setDisplayStatus(newStatus);
-        setDisplayError(null);
 
         if (SETTLED_TX_STATUSES.has(newStatus)) {
-          console.log(`Polling stopped: Status settled to ${newStatus}`);
+          setDisplayStatus(newStatus);
+          setDisplayError(null);
           setIsPollingActive(false);
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -106,49 +89,57 @@ export default function PaymentStatusPage(props: Props) {
           }
         }
       } catch (error) {
-        console.error("Polling error:", error);
         setDisplayError(
           error instanceof Error ? error.message : "Failed to fetch status."
         );
+        setIsPollingActive(false);
+      } finally {
+        if (tryStatusRef.current >= MAX_TRY_STATUS) {
+          setDisplayError(
+            "Max try status reached, please contact support if the status is not settled."
+          );
+        }
       }
     };
 
-    if (isPollingActive && mpid) {
-      console.log("Starting polling...");
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    if (mpid && needPolling && !txId) {
       intervalRef.current = setInterval(fetchStatus, 3000);
-    } else {
-      if (intervalRef.current) {
-        console.log("Clearing interval as polling is inactive.");
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
     }
 
     return () => {
       if (intervalRef.current) {
-        console.log(
-          "Clearing interval on component unmount/dependency change."
-        );
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
   }, [
-    isPollingActive,
     mpid,
+    txId,
     antibotToken.token,
-    antibotToken.isExpired,
     antibotToken.isInitialized,
+    antibotToken.isExpired,
     antibotToken.error,
+    antibotToken,
+    needPolling,
   ]);
 
   return (
     <Space direction="vertical" size="medium" className={styles.container}>
       <Typography.Title>Payment Status</Typography.Title>
       <Typography.Text>Payment MPID: {mpid ?? "Not found"}</Typography.Text>
+      {txId && (
+        <Space direction="horizontal" size="medium">
+          <Typography.Text>Payment TXID: {txId}</Typography.Text>
+          <Link href={`https://solscan.io/tx/${txId}`} target="_blank">
+            View on Solscan
+          </Link>
+        </Space>
+      )}
       {displayStatus && (
         <Typography.Text>
           Payment Status: {displayStatus}
@@ -162,6 +153,7 @@ export default function PaymentStatusPage(props: Props) {
       )}
       <CfTurnstile
         siteKey={turnstileSiteKey}
+        hasBeenUsed={turnstileTokenHasBeenUsedRef.current}
         handleVerification={handleAntibotToken}
       />
     </Space>
@@ -171,43 +163,60 @@ export default function PaymentStatusPage(props: Props) {
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const { mpid } = context.query;
+  const { mpid, txId, txid } = context.query;
+
+  const _txId = txId || txid;
+
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
-  if (typeof mpid !== "string" || !mpid) {
+  if (
+    typeof mpid !== "string" ||
+    !mpid ||
+    (!!_txId && typeof _txId !== "string")
+  ) {
     return {
       props: {
         status: null,
         mpid: null,
-        error: "MPID is required",
+        txId: null,
+        error: "Invalid query parameters",
         needPolling: false,
         turnstileSiteKey,
       },
     };
   }
 
-  const payment = await getPaymentByMpid(mpid as string);
+  const payment = await getPaymentByMpid(mpid);
 
-  if (!payment) {
+  // if the payment is not found
+  // or the txId is not the same as the one in the query
+  // return an error
+  if (!payment || (!!payment.txId && payment.txId !== _txId)) {
     return {
       props: {
         status: null,
         mpid,
-        error: "Payment not found",
+        txId: null,
+        error: "Payment not found or txId mismatch",
         needPolling: false,
         turnstileSiteKey,
       },
     };
   }
 
-  const needPolling =
-    !SETTLED_TX_STATUSES.has(payment.status) &&
-    new Date(payment.createdAt).getTime() + MERKLE_PAY_EXPIRE_TIME > Date.now();
+  // if the payment is found and the txId is null or empty
+  // update the txId
+  if (!payment.txId && _txId) {
+    await updatePaymentTxId(mpid, _txId);
+  }
+
+  const needPolling = !SETTLED_TX_STATUSES.has(payment.status);
 
   return {
     props: {
       status: payment.status,
       mpid,
+      txId: payment.txId ?? null,
       error: null,
       needPolling,
       turnstileSiteKey,

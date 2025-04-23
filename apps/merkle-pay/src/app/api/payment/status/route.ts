@@ -11,12 +11,12 @@ import {
   PublicKey,
   ConfirmedSignatureInfo,
   ParsedTransactionWithMeta,
-  clusterApiUrl,
 } from "@solana/web3.js";
 
 import {
   REQUIRED_CONFIRMATION_LEVEL,
   SETTLED_TX_STATUSES,
+  SOLANA_RPC_ENDPOINT,
 } from "src/utils/solana";
 
 export async function GET(request: NextRequest) {
@@ -112,7 +112,7 @@ const findTransactionStatusOnChain = async ({
     message: string;
   } | null = null;
 
-  const connection = new Connection(clusterApiUrl("mainnet-beta"), "confirmed");
+  const connection = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
   let tx: ParsedTransactionWithMeta | null = null;
   let signature: string | null = txId; // Start with existing txId if available
 
