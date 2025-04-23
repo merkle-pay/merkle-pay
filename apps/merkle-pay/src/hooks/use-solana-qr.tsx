@@ -16,9 +16,11 @@ export const useSolanaQR = ({
 }) => {
   const [paymentRecord, setPaymentRecord] = useState<{
     mpid: string | null;
+    orderId: string | null;
     urlForQrCode: string | null;
   }>({
     mpid: null,
+    orderId: null,
     urlForQrCode: null,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -80,6 +82,7 @@ export const useSolanaQR = ({
           setError(err instanceof Error ? err.message : "Unknown error");
           setPaymentRecord({
             mpid: null,
+            orderId: null,
             urlForQrCode: null,
           });
         } finally {

@@ -15,7 +15,7 @@ import {
 } from "src/utils/solana";
 
 import { Message } from "@arco-design/web-react";
-
+import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 export default function PaymentConfirmPage({
   turnstileSiteKey,
 }: {
@@ -25,6 +25,7 @@ export default function PaymentConfirmPage({
   const router = useRouter();
 
   const phantomSolana = getPhantomSolana();
+  const { isMobileDevice } = useIsMobileDevice();
 
   const [isPaying, setIsPaying] = useState(false);
   const [phantomExtensionError, setPhantomExtensionError] = useState<
@@ -91,11 +92,7 @@ export default function PaymentConfirmPage({
       <Typography.Title heading={6} className={styles.subtitle}>
         Please scan the QR code with supported wallets: Phantom, Solflare
       </Typography.Title>
-      {isLoadingQR && (
-        <div className={styles.loading}>
-          <Spin size={48} tip="Generating Payment QR Code..." />
-        </div>
-      )}
+
       {(qrCodeError || phantomExtensionError) && (
         <div className={styles.error}>
           <Alert
@@ -108,8 +105,15 @@ export default function PaymentConfirmPage({
         </div>
       )}
       <Space size={8}>
-        <div id="qr-code-container" ref={qrCodeRef} />
-        {!!phantomSolana && !phantomExtensionError && (
+        {isLoadingQR || !paymentRecord.urlForQrCode ? (
+          <div className={styles.loading}>
+            <Spin size={48} tip="Generating Payment QR Code..." />
+          </div>
+        ) : (
+          <div id="qr-code-container" ref={qrCodeRef} />
+        )}
+
+        {!phantomExtensionError && (
           <div className={styles.phantomButton}>
             <Button
               type="primary"
@@ -118,7 +122,7 @@ export default function PaymentConfirmPage({
               disabled={isLoadingQR || isPaying}
             >
               Pay with Phantom <br />
-              Wallet Extension
+              {isMobileDevice ? "Mobile App" : "Wallet Extension"}
             </Button>
           </div>
         )}
