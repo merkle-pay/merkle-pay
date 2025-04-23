@@ -64,8 +64,6 @@ export async function middleware(request: NextRequest) {
     const turnstileToken = request.headers.get("mp-antibot-token");
     const isTokenValid = turnstileToken && (await isHuman(turnstileToken));
 
-    console.log("turnstileToken", turnstileToken);
-    console.log("isTokenValid", isTokenValid);
     if (!isTokenValid) {
       return NextResponse.json(
         { code: 403, data: null, message: "Human verification failed" },

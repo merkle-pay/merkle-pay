@@ -6,20 +6,21 @@ export function CfTurnstile({
   siteKey,
   handleVerification,
   hasBeenUsed,
+  setHasBeenUsed,
 }: {
   siteKey: string;
   handleVerification: (params: AntibotToken) => void;
   hasBeenUsed?: boolean;
+  setHasBeenUsed?: (params: boolean) => void;
 }) {
   const ref = useRef<TurnstileInstance | null>(null);
 
   useEffect(() => {
     if (hasBeenUsed === true) {
       ref.current?.reset();
-      const x = ref.current?.getResponse();
-      console.log("x", x);
+      setHasBeenUsed?.(false);
     }
-  }, [hasBeenUsed]);
+  }, [hasBeenUsed, setHasBeenUsed]);
 
   return (
     <Turnstile

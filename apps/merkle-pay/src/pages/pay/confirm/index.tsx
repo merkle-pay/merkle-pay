@@ -7,7 +7,7 @@ import styles from "./index.module.scss";
 import { useSolanaQR } from "../../../hooks/use-solana-qr";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/cf-turnstile";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
 import {
   getPhantomSolana,
@@ -73,9 +73,6 @@ export default function PaymentConfirmPage({
     payment,
     antibotToken: turnstileToken,
   });
-
-  // TODO: set it to true when the user has used the turnstile token
-  const turnstileTokenHasBeenUsedRef = useRef<boolean>(false);
 
   const handlePayWithPhantom = async () => {
     // 1. --- Pre-checks ---
@@ -275,7 +272,6 @@ export default function PaymentConfirmPage({
       <CfTurnstile
         siteKey={turnstileSiteKey}
         handleVerification={handleTurnstileTokenVerification}
-        hasBeenUsed={turnstileTokenHasBeenUsedRef.current}
       />
       <Space size={8} className={styles.buttons}>
         <Button

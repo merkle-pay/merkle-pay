@@ -44,7 +44,7 @@ export default function PaymentStatusPage(props: Props) {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const tryStatusRef = useRef<number>(0);
-  const turnstileTokenHasBeenUsedRef = useRef<boolean>(false);
+  const [hasBeenUsed, setHasBeenUsed] = useState<boolean>(false);
 
   const [antibotToken, setAntibotToken] = useState<AntibotToken>({
     token: "",
@@ -52,8 +52,6 @@ export default function PaymentStatusPage(props: Props) {
     isExpired: true,
     isInitialized: false,
   });
-
-  console.log("antibotToken", antibotToken);
 
   const handleAntibotToken = useCallback((params: AntibotToken) => {
     setAntibotToken((prev) => ({ ...prev, ...params }));
@@ -67,16 +65,17 @@ export default function PaymentStatusPage(props: Props) {
         if (antibotToken.error) return;
         if (!antibotToken.token) return;
         if (!mpid) return;
-        if (turnstileTokenHasBeenUsedRef.current) {
+        if (hasBeenUsed) {
           return;
         }
 
         tryStatusRef.current++;
+        console.log("tryStatusRef.current", tryStatusRef.current);
 
         setIsPollingActive(true);
 
         const result = await fetchPaymentStatusQuery(mpid, antibotToken);
-        turnstileTokenHasBeenUsedRef.current = true;
+        setHasBeenUsed(true);
 
         if (result.error || !result.data) {
           setDisplayError(result.error || "Failed to fetch status.");
@@ -105,6 +104,8 @@ export default function PaymentStatusPage(props: Props) {
           setDisplayError(
             "Max try status reached, please contact support if the status is not settled."
           );
+          setIsPollingActive(false);
+          setHasBeenUsed(false);
         }
       }
     };
@@ -114,7 +115,7 @@ export default function PaymentStatusPage(props: Props) {
       intervalRef.current = null;
     }
 
-    if (mpid && needPolling && !txId) {
+    if (mpid && needPolling && !txId && tryStatusRef.current < MAX_TRY_STATUS) {
       intervalRef.current = setInterval(fetchStatus, 3000);
     }
 
@@ -133,6 +134,7 @@ export default function PaymentStatusPage(props: Props) {
     antibotToken.error,
     antibotToken,
     needPolling,
+    hasBeenUsed,
   ]);
 
   return (
@@ -170,8 +172,9 @@ export default function PaymentStatusPage(props: Props) {
       )}
       <CfTurnstile
         siteKey={turnstileSiteKey}
-        hasBeenUsed={turnstileTokenHasBeenUsedRef.current}
+        hasBeenUsed={hasBeenUsed}
         handleVerification={handleAntibotToken}
+        setHasBeenUsed={setHasBeenUsed}
       />
     </Space>
   );
