@@ -19,6 +19,7 @@ import {
   SOLANA_RPC_ENDPOINT,
 } from "src/utils/solana";
 
+// ! bug: sometimes, txId cannot be updated to db, even if it's found on chain and the status is confirmed
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const mpid = searchParams.get("mpid");
