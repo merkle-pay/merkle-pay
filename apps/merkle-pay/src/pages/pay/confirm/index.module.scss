@@ -17,6 +17,10 @@
     font-size: 1.5rem;
   }
 
+  .subtitle {
+    text-decoration: underline;
+  }
+
   .buttons {
     display: flex;
     gap: 8px;
@@ -65,4 +69,12 @@
   button {
     height: 50px;
   }
+}
+
+.checkStatusButton {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }

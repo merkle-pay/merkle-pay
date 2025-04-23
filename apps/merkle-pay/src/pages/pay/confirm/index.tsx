@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import styles from "./index.module.scss";
 
 import { useSolanaQR } from "../../../hooks/use-solana-qr";
-import { IconArrowLeft } from "@arco-design/web-react/icon";
+import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/cf-turnstile";
 import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
@@ -235,7 +235,7 @@ export default function PaymentConfirmPage({
         Payment Confirmation
       </Typography.Title>
       <Typography.Title heading={6} className={styles.subtitle}>
-        Please scan the QR code with your Phantom or Solflare wallet
+        Please scan the QR code with supported wallets: Phantom, Solflare
       </Typography.Title>
       {isLoadingQR && (
         <div className={styles.loading}>
@@ -285,6 +285,7 @@ export default function PaymentConfirmPage({
         </Button>
 
         <Button
+          className={styles.checkStatusButton}
           type="primary"
           onClick={() => {
             if (paymentRecord.mpid) {
@@ -293,8 +294,9 @@ export default function PaymentConfirmPage({
           }}
           loading={isPaying}
           disabled={!paymentRecord.mpid || isPaying}
+          icon={<IconArrowRight />}
         >
-          I have paid
+          I have paid. Check status
         </Button>
       </Space>
     </Space>
