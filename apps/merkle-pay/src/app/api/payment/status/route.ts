@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     mpid: payment.mpid,
     referencePublicKey: payment.referencePublicKey,
     txId: payment.txId,
+    status: payment.status,
   });
 
   if (txResult) {
@@ -100,11 +101,13 @@ const validatePayment = async (mpid: string | null) => {
 const findTransactionStatusOnChain = async ({
   mpid,
   referencePublicKey: referencePublicKeyString,
-  txId,
+  txId: txIdFromDb,
+  status: statusFromDb,
 }: {
   mpid: string;
   referencePublicKey: string;
   txId: string | null;
+  status: PaymentStatus;
 }) => {
   let result: {
     code: number;
@@ -114,7 +117,7 @@ const findTransactionStatusOnChain = async ({
 
   const connection = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
   let tx: ParsedTransactionWithMeta | null = null;
-  let signature: string | null = txId; // Start with existing txId if available
+  let signature: string | null = txIdFromDb; // Start with existing txId if available
 
   // --- Try fetching by known txId first ---
   if (signature) {
@@ -165,8 +168,8 @@ const findTransactionStatusOnChain = async ({
           maxSupportedTransactionVersion: 0,
         });
         // Update payment record with the txId if it wasn't set before
-        if (tx && !txId) {
-          console.log(`Updating payment ${mpid} with txId: ${signature}`);
+        if (tx && !txIdFromDb) {
+          console.log(`Updating payment mpid ${mpid} with txId: ${signature}`);
           // Use signature here because tx.transaction.signatures[0] might differ if it's a different tx type
           await updatePaymentTxIdIfNotSet({
             mpid: mpid,
@@ -184,13 +187,7 @@ const findTransactionStatusOnChain = async ({
         };
       }
     } else {
-      result = {
-        code: 200,
-        data: {
-          status: PaymentStatus.PENDING,
-        },
-        message: "No confirmed signatures found for reference key yet.",
-      };
+      // do nothing
     }
   }
 
@@ -221,6 +218,13 @@ const findTransactionStatusOnChain = async ({
       },
       message: `Transaction ${mpid} failed on-chain: ${JSON.stringify(tx.meta.err)}`,
     };
+  } else {
+    if (statusFromDb === PaymentStatus.PENDING) {
+      await updatePaymentStatus({
+        mpid: mpid,
+        status: PaymentStatus.CONFIRMED,
+      });
+    }
   }
 
   return {

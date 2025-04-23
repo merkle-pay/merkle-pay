@@ -125,7 +125,12 @@ export default function PaymentStatusPage(props: Props) {
       intervalRef.current = null;
     }
 
-    if (mpid && needPolling && !txId && tryStatusRef.current < MAX_TRY_STATUS) {
+    if (
+      mpid &&
+      needPolling &&
+      (status.value === null || !SETTLED_TX_STATUSES.has(status.value)) &&
+      tryStatusRef.current < MAX_TRY_STATUS
+    ) {
       intervalRef.current = setInterval(fetchStatus, 3000);
     }
 
@@ -137,13 +142,13 @@ export default function PaymentStatusPage(props: Props) {
     };
   }, [
     mpid,
-    txId,
     antibotToken.token,
     antibotToken.isInitialized,
     antibotToken.isExpired,
     antibotToken.error,
     needPolling,
     antibotTokenHasBeenUsed,
+    status.value,
   ]);
 
   return (
