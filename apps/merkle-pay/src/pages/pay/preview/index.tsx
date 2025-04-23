@@ -10,10 +10,13 @@ import { paymentSchema } from "../../../types/payment";
 import { fromZodError } from "zod-validation-error";
 import styles from "./index.module.scss";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
+import { useMediaQuery } from "@react-hookz/web";
 
 export default function PaymentPreviewPage() {
   const { payment: paymentValueFromStore, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const {
     success,
@@ -44,6 +47,7 @@ export default function PaymentPreviewPage() {
       <h1>Payment Preview</h1>
       <Descriptions
         column={1}
+        layout={isMobile ? "vertical" : "horizontal"}
         data={[
           {
             label: "Payer",

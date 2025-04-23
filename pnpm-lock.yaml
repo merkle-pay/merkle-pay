@@ -229,6 +229,9 @@ catalogs:
     '@prisma/client':
       specifier: ^6.6.0
       version: 6.6.0
+    '@react-hookz/web':
+      specifier: ^25.1.1
+      version: 25.1.1
     '@solana/pay':
       specifier: ^0.2.5
       version: 0.2.5
@@ -289,6 +292,9 @@ catalogs:
     sass:
       specifier: ^1.86.0
       version: 1.86.3
+    tweetnacl:
+      specifier: ^1.0.3
+      version: 1.0.3
     typescript:
       specifier: ^5
       version: 5.8.3
@@ -531,6 +537,9 @@ importers:
       '@prisma/client':
         specifier: catalog:pay
         version: 6.6.0(prisma@6.6.0(typescript@5.8.3))(typescript@5.8.3)
+      '@react-hookz/web':
+        specifier: catalog:pay
+        version: 25.1.1(js-cookie@3.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@solana/pay':
         specifier: catalog:pay
         version: 0.2.5(bufferutil@4.0.9)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -573,6 +582,9 @@ importers:
       react-icons:
         specifier: catalog:pay
         version: 5.5.0(react@18.3.1)
+      tweetnacl:
+        specifier: catalog:pay
+        version: 1.0.3
       zod:
         specifier: catalog:pay
         version: 3.24.2
@@ -1825,6 +1837,17 @@ packages:
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
 
+  '@react-hookz/web@25.1.1':
+    resolution: {integrity: sha512-o1BA+5Z8PCuAnxF7+2TZI+xGBtzyLw8z/flD8AMeJXILYTM8HkI0g41oM7IW/qjUDKx30HKceQQpCKqFGj+iIw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      js-cookie: ^3.0.5
+      react: ^16.8 || ^17 || ^18 || ^19
+      react-dom: ^16.8 || ^17 || ^18 || ^19
+    peerDependenciesMeta:
+      js-cookie:
+        optional: true
+
   '@rollup/pluginutils@5.1.4':
     resolution: {integrity: sha512-USm05zrsFxYLPdWWq+K3STlWiT/3ELn3RcV5hJMghpeAIhxfsUIg6mt12CBJBInWMV4VneoV7SfGv8xIwo2qNQ==}
     engines: {node: '>=14.0.0'}
@@ -2516,6 +2539,10 @@ packages:
     resolution: {integrity: sha512-hVXaObGI2lGFmrtT77KSbPQ3I+zk9IU500wobjk0+oX59vg/0VqAzABNtt3YSQYgXTC2a/LYxekLfND/wlt0yQ==}
     cpu: [x64]
     os: [win32]
+
+  '@ver0/deep-equal@1.0.0':
+    resolution: {integrity: sha512-XKIlF1i6UJiyTL52mDrSDDgRX7Qr5yJ7ts9zn2liZEmhiAEum4XKrJRAWmHdFwCQeGBU+rb+/b0ldw/9V8lOWw==}
+    engines: {node: '>=18'}
 
   '@vitejs/plugin-react-swc@3.8.1':
     resolution: {integrity: sha512-aEUPCckHDcFyxpwFm0AIkbtv6PpUp3xTb9wYGFjtABynXjCYKkWoxX0AOK9NT9XCrdk6mBBUOeHQS+RKdcNO1A==}
@@ -5977,6 +6004,14 @@ snapshots:
 
   '@radix-ui/rect@1.1.1': {}
 
+  '@react-hookz/web@25.1.1(js-cookie@3.0.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@ver0/deep-equal': 1.0.0
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    optionalDependencies:
+      js-cookie: 3.0.5
+
   '@rollup/pluginutils@5.1.4(rollup@4.39.0)':
     dependencies:
       '@types/estree': 1.0.7
@@ -6772,6 +6807,8 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.4.1':
     optional: true
+
+  '@ver0/deep-equal@1.0.0': {}
 
   '@vitejs/plugin-react-swc@3.8.1(@swc/helpers@0.5.15)(vite@6.2.6(@types/node@22.14.0)(jiti@2.4.2)(sass@1.86.3)(tsx@4.19.3)(yaml@2.7.1))':
     dependencies:
