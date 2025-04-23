@@ -4,9 +4,9 @@ import {
   Space,
   Typography,
   Spin,
-  Link,
   Tooltip,
   Message,
+  Button,
 } from "@arco-design/web-react";
 import { GetServerSidePropsContext } from "next";
 import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
@@ -36,15 +36,18 @@ export default function PaymentStatusPage(props: Props) {
     turnstileSiteKey,
   } = props;
 
-  const [displayStatus, setDisplayStatus] = useState<PaymentStatus | null>(
-    initialStatus
-  );
-  const [displayError, setDisplayError] = useState<string | null>(initialError);
-  const [isPollingActive, setIsPollingActive] = useState<boolean>(false);
+  const [status, setStatus] = useState<{
+    value: PaymentStatus | null;
+    error: string | null;
+    isFetching: boolean;
+  }>({
+    value: initialStatus,
+    error: initialError,
+    isFetching: false,
+  });
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const tryStatusRef = useRef<number>(0);
-  const [hasBeenUsed, setHasBeenUsed] = useState<boolean>(false);
 
   const [antibotToken, setAntibotToken] = useState<AntibotToken>({
     token: "",
@@ -52,6 +55,8 @@ export default function PaymentStatusPage(props: Props) {
     isExpired: true,
     isInitialized: false,
   });
+  const [antibotTokenHasBeenUsed, setAntibotTokenHasBeenUsed] =
+    useState<boolean>(false);
 
   const handleAntibotToken = useCallback((params: AntibotToken) => {
     setAntibotToken((prev) => ({ ...prev, ...params }));
@@ -65,47 +70,54 @@ export default function PaymentStatusPage(props: Props) {
         if (antibotToken.error) return;
         if (!antibotToken.token) return;
         if (!mpid) return;
-        if (hasBeenUsed) {
+        if (antibotTokenHasBeenUsed) {
           return;
         }
 
         tryStatusRef.current++;
-        console.log("tryStatusRef.current", tryStatusRef.current);
-
-        setIsPollingActive(true);
 
         const result = await fetchPaymentStatusQuery(mpid, antibotToken);
-        setHasBeenUsed(true);
+        setAntibotTokenHasBeenUsed(true);
 
         if (result.error || !result.data) {
-          setDisplayError(result.error || "Failed to fetch status.");
-          setIsPollingActive(false);
+          setStatus((prev) => ({
+            ...prev,
+            error: result.error || "Failed to fetch status.",
+            isFetching: false,
+          }));
           return;
         }
 
         const newStatus = result.data.status;
 
         if (SETTLED_TX_STATUSES.has(newStatus)) {
-          setDisplayStatus(newStatus);
-          setDisplayError(null);
-          setIsPollingActive(false);
+          setStatus((prev) => ({
+            ...prev,
+            value: newStatus,
+            error: null,
+            isFetching: false,
+          }));
+
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
         }
       } catch (error) {
-        setDisplayError(
-          error instanceof Error ? error.message : "Failed to fetch status."
-        );
-        setIsPollingActive(false);
+        setStatus((prev) => ({
+          ...prev,
+          error:
+            error instanceof Error ? error.message : "Failed to fetch status.",
+          isFetching: false,
+        }));
       } finally {
         if (tryStatusRef.current >= MAX_TRY_STATUS) {
-          setDisplayError(
-            "Max try status reached, please contact support if the status is not settled."
-          );
-          setIsPollingActive(false);
-          setHasBeenUsed(false);
+          setStatus((prev) => ({
+            ...prev,
+            error:
+              "We have tried to fetch the status of your payment 5 times. Please contact support if the status is not settled.",
+            isFetching: false,
+          }));
         }
       }
     };
@@ -134,7 +146,7 @@ export default function PaymentStatusPage(props: Props) {
     antibotToken.error,
     antibotToken,
     needPolling,
-    hasBeenUsed,
+    antibotTokenHasBeenUsed,
   ]);
 
   return (
@@ -154,27 +166,31 @@ export default function PaymentStatusPage(props: Props) {
               Payment TXID: {`${txId.slice(0, 8)}...${txId.slice(-8)}`}
             </Typography.Text>
           </Tooltip>
-          <Link href={`https://solscan.io/tx/${txId}`} target="_blank">
+          <Button
+            type="outline"
+            href={`https://solscan.io/tx/${txId}`}
+            target="_blank"
+          >
             View on Solscan
-          </Link>
+          </Button>
         </Space>
       )}
-      {displayStatus && (
+      {status.value && (
         <Typography.Text>
-          Payment Status: {displayStatus}
-          {isPollingActive && displayStatus === PaymentStatus.PENDING && (
+          Payment Status: {status.value}
+          {status.isFetching && status.value === PaymentStatus.PENDING && (
             <Spin size={24} style={{ marginLeft: 8 }} />
           )}
         </Typography.Text>
       )}
-      {displayError && (
-        <Typography.Text type="error">Error: {displayError}</Typography.Text>
+      {status.error && (
+        <Typography.Text type="error">Error: {status.error}</Typography.Text>
       )}
       <CfTurnstile
         siteKey={turnstileSiteKey}
-        hasBeenUsed={hasBeenUsed}
+        hasBeenUsed={antibotTokenHasBeenUsed}
         handleVerification={handleAntibotToken}
-        setHasBeenUsed={setHasBeenUsed}
+        setHasBeenUsed={setAntibotTokenHasBeenUsed}
       />
     </Space>
   );
