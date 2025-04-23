@@ -147,21 +147,19 @@ const findTransactionStatusOnChain = async ({
         REQUIRED_CONFIRMATION_LEVEL
       );
     } catch (error) {
-      console.error("Error fetching signatures by reference key:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       result = {
         code: 500,
         data: null,
-        message: "Failed to query transaction signatures by reference key",
+        message: `Failed to query transaction signatures by reference key: ${errorMessage}`,
       };
     }
 
     if (signatures.length > 0) {
-      const signatureInfo = signatures[0];
-      signature = signatureInfo.signature; // Found a potential signature
-      console.log(`Found signature by reference key: ${signature}`);
-
-      // Now fetch the transaction details using the found signature
       try {
+        const signatureInfo = signatures[0];
+        signature = signatureInfo.signature;
         tx = await connection.getParsedTransaction(signature, {
           commitment: REQUIRED_CONFIRMATION_LEVEL,
           maxSupportedTransactionVersion: 0,
@@ -176,19 +174,23 @@ const findTransactionStatusOnChain = async ({
           });
         }
       } catch (error) {
-        console.error(
-          "Error fetching transaction details by found signature:",
-          error
-        );
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         // If fetching the tx details fails here, it's a server-side issue
         result = {
           code: 500,
           data: null,
-          message: "Failed to query transaction details by found signature",
+          message: `Failed to query transaction details by found signature: ${errorMessage}`,
         };
       }
     } else {
-      console.log("No confirmed signatures found for reference key yet.");
+      result = {
+        code: 200,
+        data: {
+          status: PaymentStatus.PENDING,
+        },
+        message: "No confirmed signatures found for reference key yet.",
+      };
     }
   }
 
@@ -198,9 +200,6 @@ const findTransactionStatusOnChain = async ({
     // 1. No txId and no signature found by reference key
     // 2. txId existed but getParsedTransaction returned null (not confirmed/found)
     // 3. Signature found by ref key, but getParsedTransaction returned null
-    console.log(
-      "Transaction not found or not confirmed to required level yet."
-    );
     result = {
       code: 200, // Still a success, just pending
       data: {
@@ -216,7 +215,7 @@ const findTransactionStatusOnChain = async ({
       status: PaymentStatus.FAILED,
     });
     result = {
-      code: 200, // Request succeeded, but tx failed
+      code: 200,
       data: {
         status: PaymentStatus.FAILED,
       },
