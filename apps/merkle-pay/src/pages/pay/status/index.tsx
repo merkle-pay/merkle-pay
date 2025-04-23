@@ -1,6 +1,13 @@
 import { getPaymentByMpid, updatePaymentTxId } from "src/services/payment";
 import styles from "./index.module.scss";
-import { Space, Typography, Spin, Link } from "@arco-design/web-react";
+import {
+  Space,
+  Typography,
+  Spin,
+  Link,
+  Tooltip,
+  Message,
+} from "@arco-design/web-react";
 import { GetServerSidePropsContext } from "next";
 import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -134,7 +141,17 @@ export default function PaymentStatusPage(props: Props) {
       <Typography.Text>Payment MPID: {mpid ?? "Not found"}</Typography.Text>
       {txId && (
         <Space direction="horizontal" size="medium">
-          <Typography.Text>Payment TXID: {txId}</Typography.Text>
+          <Tooltip content={txId}>
+            <Typography.Text
+              className={styles.txIdText}
+              onClick={async () => {
+                await navigator.clipboard.writeText(txId);
+                Message.success("txId copied to clipboard");
+              }}
+            >
+              Payment TXID: {`${txId.slice(0, 8)}...${txId.slice(-8)}`}
+            </Typography.Text>
+          </Tooltip>
           <Link href={`https://solscan.io/tx/${txId}`} target="_blank">
             View on Solscan
           </Link>
@@ -191,7 +208,7 @@ export const getServerSideProps = async (
   // if the payment is not found
   // or the txId is not the same as the one in the query
   // return an error
-  if (!payment || (!!payment.txId && payment.txId !== _txId)) {
+  if (!payment || (!!payment.txId && !!_txId && payment.txId !== _txId)) {
     return {
       props: {
         status: null,

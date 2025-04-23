@@ -9,17 +9,17 @@ export function CfTurnstile({
 }: {
   siteKey: string;
   handleVerification: (params: AntibotToken) => void;
-  hasBeenUsed: boolean;
+  hasBeenUsed?: boolean;
 }) {
   const ref = useRef<TurnstileInstance | null>(null);
 
   useEffect(() => {
-    if (hasBeenUsed) {
+    if (hasBeenUsed === true) {
       ref.current?.reset();
       const x = ref.current?.getResponse();
       console.log("x", x);
     }
-  }, [hasBeenUsed, handleVerification]);
+  }, [hasBeenUsed]);
 
   return (
     <Turnstile
