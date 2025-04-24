@@ -20,8 +20,7 @@ import BigNumber from "bignumber.js";
 import { PaymentStatus, PaymentTableRecord } from "./prisma";
 import { Payment } from "src/types/payment";
 import { PhantomSolanaProvider } from "src/types/global";
-import nacl from "tweetnacl";
-+import bs58 from "bs58";
+
 import { z } from "zod";
 /**
  * Establish a connection to the cluster
@@ -432,13 +431,11 @@ export async function createPhantomPaymentDeepLink(
     //   app_url: "https://demo.merklepay.io",
     // });
 
-    
-
     const params = new URLSearchParams({
       dapp_encryption_public_key: options.dappEncryptionPublicKey,
       nonce: bs58.encode(nacl.randomBytes(24)),
       redirect_link: `${options.appUrl}/phantom/callback`,
-      payload: bs58.encode(encryptedPayload)
+      payload: bs58.encode(encryptedPayload),
     });
 
     return `https://phantom.app/ul/v1/signAndSendTransaction?${params.toString()}`;
@@ -449,29 +446,24 @@ export async function createPhantomPaymentDeepLink(
   }
 }
 
-export function getEncryptionKeysForPhantomDeepLink() {
-  const keypair = nacl.box.keyPair();
-
-  return {
-    publicKey: bs58.encode(keypair.publicKey),
-    privateKey: bs58.encode(keypair.secretKey),
-  };
-}
-
-
-const createTransferTransaction = async ({ phantomWalletPublicKey, connection }) => {
+const createTransferTransaction = async ({
+  phantomWalletPublicKey,
+  connection,
+}) => {
   if (!phantomWalletPublicKey) throw new Error("missing public key from user");
   const transaction = new Transaction().add(
     SystemProgram.transfer({
       fromPubkey: phantomWalletPublicKey,
       toPubkey: phantomWalletPublicKey,
-      lamports: 100
+      lamports: 100,
     })
   );
   transaction.feePayer = phantomWalletPublicKey;
 
   const anyTransaction: any = transaction;
-  anyTransaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  anyTransaction.recentBlockhash = (
+    await connection.getLatestBlockhash()
+  ).blockhash;
   return transaction;
 };
 
@@ -479,12 +471,12 @@ const generatePhantomDeepLink = async ({ session }) => {
   const transaction = await createTransferTransaction();
 
   const serializedTransaction = transaction.serialize({
-    requireAllSignatures: false
+    requireAllSignatures: false,
   });
 
   const payload = {
     session,
-    transaction: bs58.encode(serializedTransaction)
+    transaction: bs58.encode(serializedTransaction),
   };
   const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
 
@@ -492,12 +484,12 @@ const generatePhantomDeepLink = async ({ session }) => {
     dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
     nonce: bs58.encode(nonce),
     redirect_link: onSignAndSendTransactionRedirectLink,
-    payload: bs58.encode(encryptedPayload)
+    payload: bs58.encode(encryptedPayload),
   });
 
   addLog("Sending transaction...");
   const url = buildUrl("signAndSendTransaction", params);
-  return url
+  return url;
 };
 
 const encryptPayload = (payload: any, sharedSecret?: Uint8Array) => {

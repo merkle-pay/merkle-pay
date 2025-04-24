@@ -18,7 +18,11 @@ import {
 import { Message } from "@arco-design/web-react";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 import { useMediaQuery } from "@react-hookz/web";
-import { generateDappEncryptionPublicKey } from "src/queries/solana";
+import {
+  generateAndSaveNaclKeys,
+  generateDappEncryptionPublicKey,
+} from "src/queries/solana";
+import { ls, LS_KEYS } from "src/utils/ls";
 
 export default function PaymentConfirmPage({
   turnstileSiteKey,
@@ -91,6 +95,38 @@ export default function PaymentConfirmPage({
 
   const log = (message: string) => {
     setPhantomExtensionError(message);
+  };
+
+  const connectPhantomApp = async () => {
+    const connectCallbackParams = ls.get(
+      LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS
+    );
+    if (connectCallbackParams) {
+      await handlePaySolanaWithPhantomApp();
+      return;
+    }
+
+    await handleConnectPhantomApp();
+  };
+
+  const handleConnectPhantomApp = async () => {
+    const { dAppPublicKey } = await generateAndSaveNaclKeys({
+      mpid: paymentRecord.mpid,
+      orderId: paymentRecord.orderId,
+      paymentId: paymentRecord.id,
+    });
+
+    const phantomConnectBaseUrl = "https://phantom.app/ul/v1/connect";
+
+    const params = new URLSearchParams({
+      app_url: "https://demo.merklepay.io",
+      dapp_encryption_public_key: dAppPublicKey,
+      redirect_link: `https://demo.merklepay.io/phantom/connect-callback`,
+    });
+
+    const phantomConnectUrl = `${phantomConnectBaseUrl}?${params.toString()}`;
+
+    window.open(phantomConnectUrl, "_blank");
   };
 
   const handlePaySolanaWithPhantomApp = async () => {
@@ -177,7 +213,7 @@ export default function PaymentConfirmPage({
               size="large"
               onClick={async () => {
                 if (isMobileDevice) {
-                  await handlePaySolanaWithPhantomApp();
+                  await connectPhantomApp();
                 } else {
                   await handlePaySolanaWithPhantomExtension();
                 }

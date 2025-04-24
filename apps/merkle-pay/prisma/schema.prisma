@@ -39,7 +39,7 @@ model Payment {
 
 model PhantomDeepLink {
   id         Int      @id @default(autoincrement())
-  publicKey  String
+  publicKey  String 
   privateKey String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

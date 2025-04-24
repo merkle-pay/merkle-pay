@@ -1,13 +1,11 @@
-export const generateDappEncryptionPublicKey = async ({
+export const generateAndSaveNaclKeys = async ({
   mpid,
   orderId,
   paymentId,
-  log,
 }: {
   mpid: string;
   orderId: string;
   paymentId: number;
-  log: (message: string) => void;
 }) => {
   try {
     const response = await fetch(
@@ -24,7 +22,7 @@ export const generateDappEncryptionPublicKey = async ({
     const data = await response.json();
     return data;
   } catch (error) {
-    log((error as Error).message);
+    console.error((error as Error).message);
   }
   return {};
 };

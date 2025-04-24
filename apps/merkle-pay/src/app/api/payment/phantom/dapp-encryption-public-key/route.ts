@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getEncryptionKeysForPhantomDeepLink } from "src/utils/solana";
+import { generateNaclKeysBs58Encoded } from "src/utils/phantom";
 import { prisma } from "src/utils/prisma";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     const { mpid, orderId, paymentId } = schema.parse(json);
 
-    const { publicKey, privateKey } = getEncryptionKeysForPhantomDeepLink();
+    const { publicKey, privateKey } = generateNaclKeysBs58Encoded();
 
     await prisma.phantomDeepLink.create({
       data: {
