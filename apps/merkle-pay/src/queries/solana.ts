@@ -20,9 +20,15 @@ export const generateAndSaveNaclKeys = async ({
       }
     );
     const data = await response.json();
-    return data;
+    return data as {
+      dAppPublicKey?: string;
+      error?: string;
+    };
   } catch (error) {
     console.error((error as Error).message);
   }
-  return {};
+  return {} as {
+    dAppPublicKey?: string;
+    error?: string;
+  };
 };

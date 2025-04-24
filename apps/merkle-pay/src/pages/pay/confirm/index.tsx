@@ -10,7 +10,7 @@ import { CfTurnstile } from "../../../components/cf-turnstile";
 import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
 import {
-  createPhantomPaymentDeepLink,
+  createPhantomPaymentUniversalLink,
   getPhantomSolana,
   sendSolanaPaymentWithPhantom,
 } from "src/utils/solana";
@@ -18,16 +18,17 @@ import {
 import { Message } from "@arco-design/web-react";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 import { useMediaQuery } from "@react-hookz/web";
-import {
-  generateAndSaveNaclKeys,
-  generateDappEncryptionPublicKey,
-} from "src/queries/solana";
+import { generateAndSaveNaclKeys } from "src/queries/solana";
 import { ls, LS_KEYS } from "src/utils/ls";
+import { PhantomConnectCallbackData } from "src/utils/phantom";
+import { PaymentTableRecord } from "src/utils/prisma";
 
 export default function PaymentConfirmPage({
-  turnstileSiteKey,
+  TURNSTILE_SITE_KEY,
+  APP_URL,
 }: {
-  turnstileSiteKey: string;
+  TURNSTILE_SITE_KEY: string;
+  APP_URL: string;
 }) {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
@@ -93,35 +94,74 @@ export default function PaymentConfirmPage({
     }
   };
 
-  const log = (message: string) => {
-    setPhantomExtensionError(message);
-  };
-
-  const connectPhantomApp = async () => {
-    const connectCallbackParams = ls.get(
-      LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS
+  const handlePhantomApp = async () => {
+    const phantomUniversalLinkParams = ls.get(
+      LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS
     );
-    if (connectCallbackParams) {
-      await handlePaySolanaWithPhantomApp();
-      return;
+
+    try {
+      const {
+        dAppPublicKey,
+        paymentRecord,
+        expiry,
+        decryptedConnectCallbackParams,
+      } = JSON.parse(phantomUniversalLinkParams ?? "{}");
+
+      if (
+        dAppPublicKey &&
+        paymentRecord &&
+        expiry &&
+        decryptedConnectCallbackParams &&
+        Date.now() < expiry
+      ) {
+        await handlePaySolanaWithPhantomApp();
+        return;
+      }
+    } catch (error) {
+      console.error(
+        error instanceof Error ? error.message : "Unexpected error"
+      );
     }
 
     await handleConnectPhantomApp();
   };
 
+  // step1: connect phantom app
   const handleConnectPhantomApp = async () => {
-    const { dAppPublicKey } = await generateAndSaveNaclKeys({
+    // ! TODO: verify payment record
+    // const { error } = await verifyPaymentRecord(paymentRecord);
+    // if (error) {
+    //   Message.error(error);
+    //   return;
+    // }
+    const { dAppPublicKey, error } = await generateAndSaveNaclKeys({
       mpid: paymentRecord.mpid,
       orderId: paymentRecord.orderId,
       paymentId: paymentRecord.id,
     });
 
+    if (error || !dAppPublicKey) {
+      Message.error(error || "Failed to generate DApp Encryption Public Key.");
+      return;
+    }
+
+    // store dAppPublicKey and paymentRecord in local storage
+    // and set expiry to 1 hour
+    ls.set(
+      LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS,
+      JSON.stringify({
+        dAppPublicKey,
+        paymentRecord,
+        expiry: Date.now() + 60 * 60 * 1000, // 1 hour
+      })
+    );
+
     const phantomConnectBaseUrl = "https://phantom.app/ul/v1/connect";
 
     const params = new URLSearchParams({
-      app_url: "https://demo.merklepay.io",
+      app_url: APP_URL,
       dapp_encryption_public_key: dAppPublicKey,
-      redirect_link: `https://demo.merklepay.io/phantom/connect-callback`,
+      redirect_link: `${APP_URL}/phantom/connect-callback`,
     });
 
     const phantomConnectUrl = `${phantomConnectBaseUrl}?${params.toString()}`;
@@ -129,30 +169,46 @@ export default function PaymentConfirmPage({
     window.open(phantomConnectUrl, "_blank");
   };
 
+  // step2: pay with phantom app
   const handlePaySolanaWithPhantomApp = async () => {
-    // ! TODO: verify payment record
-    // const { error } = await verifyPaymentRecord(paymentRecord);
-    // if (error) {
-    //   Message.error(error);
-    //   return;
-    // }
-
     try {
-      const { dAppPublicKey } = await generateDappEncryptionPublicKey({
-        mpid: paymentRecord.mpid,
-        orderId: paymentRecord.orderId,
-        paymentId: paymentRecord.id,
-        log,
-      });
+      const {
+        dAppPublicKey,
+        paymentRecord,
+        expiry,
+        decryptedConnectCallbackData,
+      } = JSON.parse(ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS) ?? "{}") as {
+        dAppPublicKey: string;
+        paymentRecord: Pick<
+          PaymentTableRecord,
+          | "id"
+          | "mpid"
+          | "orderId"
+          | "referencePublicKey"
+          | "recipient_address"
+          | "amount"
+          | "token"
+          | "blockchain"
+        > & {
+          urlForQrCode: string | null;
+          returnUrl: string;
+        };
+        expiry: number;
+        decryptedConnectCallbackData: PhantomConnectCallbackData;
+      };
 
-      if (!dAppPublicKey) {
+      if (
+        !dAppPublicKey ||
+        !paymentRecord ||
+        !expiry ||
+        !decryptedConnectCallbackData ||
+        Date.now() >= expiry
+      ) {
+        Message.error("Invalid Phantom Universal Link Params.");
         return;
       }
 
-      const appUrl =
-        typeof window !== "undefined" ? window.location.origin : "";
-
-      const deepLink = await createPhantomPaymentDeepLink(
+      const universalLink = await createPhantomPaymentUniversalLink(
         {
           recipient_address: paymentRecord.recipient_address,
           amount: paymentRecord.amount,
@@ -160,17 +216,15 @@ export default function PaymentConfirmPage({
           blockchain: paymentRecord.blockchain,
           orderId: paymentRecord.orderId,
           mpid: paymentRecord.mpid,
-          referencePublicKey: paymentRecord.referencePublicKey,
         },
         {
           dappEncryptionPublicKey: dAppPublicKey,
-          appUrl,
-          log,
+          appUrl: APP_URL,
+          decryptedConnectCallbackData,
         }
       );
-      if (deepLink) {
-        window.open(deepLink, "_blank");
-        // log(deepLink);
+      if (universalLink) {
+        window.open(universalLink, "_blank");
       }
     } catch (error) {
       setPhantomExtensionError((error as Error).message);
@@ -213,7 +267,7 @@ export default function PaymentConfirmPage({
               size="large"
               onClick={async () => {
                 if (isMobileDevice) {
-                  await connectPhantomApp();
+                  await handlePhantomApp();
                 } else {
                   await handlePaySolanaWithPhantomExtension();
                 }
@@ -227,7 +281,7 @@ export default function PaymentConfirmPage({
         )}
       </Space>
       <CfTurnstile
-        siteKey={turnstileSiteKey}
+        siteKey={TURNSTILE_SITE_KEY}
         handleVerification={handleTurnstileTokenVerification}
       />
       <Space size={8} className={styles.buttons}>
@@ -261,8 +315,9 @@ export default function PaymentConfirmPage({
 }
 
 export const getServerSideProps = async () => {
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+  const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
   return {
-    props: { turnstileSiteKey },
+    props: { TURNSTILE_SITE_KEY, APP_URL },
   };
 };

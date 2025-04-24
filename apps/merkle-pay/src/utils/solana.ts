@@ -16,12 +16,15 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import BigNumber from "bignumber.js";
+import nacl from "tweetnacl";
+import bs58 from "bs58";
 
 import { PaymentStatus, PaymentTableRecord } from "./prisma";
 import { Payment } from "src/types/payment";
 import { PhantomSolanaProvider } from "src/types/global";
 
 import { z } from "zod";
+import { PhantomConnectCallbackData } from "./phantom";
 /**
  * Establish a connection to the cluster
  */
@@ -302,206 +305,89 @@ export const sendSolanaPaymentWithPhantom = async ({
 };
 
 // Standalone function to create Phantom deep link
-export async function createPhantomPaymentDeepLink(
+export async function createPhantomPaymentUniversalLink(
   paymentRecord: Pick<
     PaymentTableRecord,
-    | "mpid"
-    | "recipient_address"
-    | "amount"
-    | "token"
-    | "blockchain"
-    | "orderId"
-    | "referencePublicKey"
+    "mpid" | "recipient_address" | "amount" | "token" | "blockchain" | "orderId"
   >,
   options: {
     dappEncryptionPublicKey: string;
     appUrl: string;
-    log: (message: string) => void;
+    decryptedConnectCallbackData: PhantomConnectCallbackData;
   }
-): Promise<string | undefined> {
-  try {
-    // Validate payment
-    const paymentRecordSchema = z.object({
-      mpid: z.string(),
-      recipient_address: z.string(),
-      amount: z.number().positive(),
-      token: z.string(),
-      blockchain: z.string(),
-      orderId: z.string(),
-      referencePublicKey: z.string(),
-    });
-    const validatedPaymentRecord = paymentRecordSchema.parse(paymentRecord);
+): Promise<string> {
+  // 1) Validate
+  const schema = z.object({
+    mpid: z.string(),
+    recipient_address: z.string(),
+    amount: z.number().positive(),
+    token: z.string(),
+    blockchain: z.literal("solana"),
+    orderId: z.string(),
+  });
+  const { recipient_address, amount, token, orderId } =
+    schema.parse(paymentRecord);
 
-    // Validate blockchain and token
-    if (validatedPaymentRecord.blockchain.toLowerCase() !== "solana") {
-      throw new Error(
-        "Unsupported blockchain: " + validatedPaymentRecord.blockchain
-      );
-    }
+  // 2) Build Solana TX
+  const conn = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
+  const recipientPK = new PublicKey(recipient_address);
+  const payerPK = new PublicKey(
+    options.decryptedConnectCallbackData.public_key
+  );
+  const tx = new Transaction();
+  const { mint, decimals } = SplTokens[token as keyof typeof SplTokens];
 
-    if (
-      SplTokens[validatedPaymentRecord.token as keyof typeof SplTokens] ===
-      undefined
-    ) {
-      throw new Error("Unsupported token: " + validatedPaymentRecord.token);
-    }
-
-    // Use provided connection
-    const connection = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
-    const cluster = "mainnet-beta";
-
-    const recipientPubkey = new PublicKey(
-      validatedPaymentRecord.recipient_address
-    );
-
-    const transaction = new Transaction();
-
-    // Get token mint
-    const { mint, decimals } =
-      SplTokens[validatedPaymentRecord.token as keyof typeof SplTokens];
-
-    // Get associated token accounts
-    const recipientATA = await getAssociatedTokenAddress(
-      new PublicKey(mint),
-      recipientPubkey
-    );
-
-    // Check if recipient ATA exists; add creation instruction if not
-    const recipientATAInfo = await connection.getAccountInfo(recipientATA);
-    if (!recipientATAInfo) {
-      transaction.add(
-        createAssociatedTokenAccountInstruction(
-          new PublicKey(validatedPaymentRecord.referencePublicKey),
-          recipientATA,
-          recipientPubkey,
-          new PublicKey(mint)
-        )
-      );
-    }
-
-    // Convert amount to token units
-    const tokenAmount = new BigNumber(validatedPaymentRecord.amount)
-      .multipliedBy(Math.pow(10, decimals))
-      .integerValue()
-      .toNumber();
-
-    // Add token transfer instruction with placeholder
-    transaction.add(
-      createTransferInstruction(
-        await getAssociatedTokenAddress(
-          new PublicKey(mint),
-          new PublicKey(validatedPaymentRecord.referencePublicKey)
-        ),
-        recipientATA,
-        new PublicKey(validatedPaymentRecord.referencePublicKey),
-        tokenAmount
+  // ensure ATA exists
+  const ata = await getAssociatedTokenAddress(new PublicKey(mint), recipientPK);
+  if (!(await conn.getAccountInfo(ata))) {
+    tx.add(
+      createAssociatedTokenAccountInstruction(
+        payerPK,
+        ata,
+        recipientPK,
+        new PublicKey(mint)
       )
     );
-
-    // Add memo instruction
-    const memo = validatedPaymentRecord.orderId;
-    if (Buffer.from(memo).length > 566) {
-      throw new Error("Memo exceeds 566 bytes");
-    }
-    transaction.add({
-      programId: MEMO_PROGRAM_ID,
-      data: Buffer.from(memo),
-      keys: [],
-    });
-
-    // Set recent blockhash (no feePayer)
-    const { blockhash } = await connection.getLatestBlockhash();
-    transaction.recentBlockhash = blockhash;
-    transaction.feePayer = new PublicKey(
-      validatedPaymentRecord.referencePublicKey
-    );
-
-    // Serialize transaction (unsigned, Phantom will sign)
-    const serializedTransaction = transaction
-      .serialize({ requireAllSignatures: false })
-      .toString("base64");
-
-    // Construct deep link
-    // const params = new URLSearchParams({
-    //   dapp_encryption_public_key: options.dappEncryptionPublicKey,
-    //   nonce: nacl.randomBytes(24),
-    //   redirect_link: `https://demo.merklepay.io/phantom/callback`,
-    //   transaction: serializedTransaction,
-    //   cluster,
-    //   app_url: "https://demo.merklepay.io",
-    // });
-
-    const params = new URLSearchParams({
-      dapp_encryption_public_key: options.dappEncryptionPublicKey,
-      nonce: bs58.encode(nacl.randomBytes(24)),
-      redirect_link: `${options.appUrl}/phantom/callback`,
-      payload: bs58.encode(encryptedPayload),
-    });
-
-    return `https://phantom.app/ul/v1/signAndSendTransaction?${params.toString()}`;
-  } catch (error: unknown) {
-    options.log(
-      `Failed to create Phantom deep link: ${(error as Error).message}`
-    );
   }
+
+  // transfer
+  const amountRaw = new BigNumber(amount)
+    .multipliedBy(10 ** decimals)
+    .integerValue()
+    .toNumber();
+
+  const payerAta = await getAssociatedTokenAddress(
+    new PublicKey(mint),
+    payerPK
+  );
+  tx.add(createTransferInstruction(payerAta, ata, payerPK, amountRaw));
+
+  // memo
+  tx.add({
+    programId: MEMO_PROGRAM_ID,
+    keys: [],
+    data: Buffer.from(orderId),
+  });
+
+  // recent blockhash + feePayer
+  const { blockhash } = await conn.getLatestBlockhash();
+  tx.recentBlockhash = blockhash;
+  tx.feePayer = payerPK;
+
+  // 3) Serialize
+  const serialized = tx
+    .serialize({ requireAllSignatures: false })
+    .toString("base64");
+
+  // 4) Build Universal Link
+  const nonceBytes = nacl.randomBytes(24);
+  const ulParams = new URLSearchParams({
+    dapp_encryption_public_key: options.dappEncryptionPublicKey,
+    nonce: bs58.encode(nonceBytes),
+    redirect_link: `${options.appUrl}/phantom/callback`,
+    transaction: serialized,
+    // cluster: "mainnet-beta" // optional; defaults to mainnet-beta
+  });
+
+  return `https://phantom.app/ul/v1/signAndSendTransaction?${ulParams}`;
 }
-
-const createTransferTransaction = async ({
-  phantomWalletPublicKey,
-  connection,
-}) => {
-  if (!phantomWalletPublicKey) throw new Error("missing public key from user");
-  const transaction = new Transaction().add(
-    SystemProgram.transfer({
-      fromPubkey: phantomWalletPublicKey,
-      toPubkey: phantomWalletPublicKey,
-      lamports: 100,
-    })
-  );
-  transaction.feePayer = phantomWalletPublicKey;
-
-  const anyTransaction: any = transaction;
-  anyTransaction.recentBlockhash = (
-    await connection.getLatestBlockhash()
-  ).blockhash;
-  return transaction;
-};
-
-const generatePhantomDeepLink = async ({ session }) => {
-  const transaction = await createTransferTransaction();
-
-  const serializedTransaction = transaction.serialize({
-    requireAllSignatures: false,
-  });
-
-  const payload = {
-    session,
-    transaction: bs58.encode(serializedTransaction),
-  };
-  const [nonce, encryptedPayload] = encryptPayload(payload, sharedSecret);
-
-  const params = new URLSearchParams({
-    dapp_encryption_public_key: bs58.encode(dappKeyPair.publicKey),
-    nonce: bs58.encode(nonce),
-    redirect_link: onSignAndSendTransactionRedirectLink,
-    payload: bs58.encode(encryptedPayload),
-  });
-
-  addLog("Sending transaction...");
-  const url = buildUrl("signAndSendTransaction", params);
-  return url;
-};
-
-const encryptPayload = (payload: any, sharedSecret?: Uint8Array) => {
-  if (!sharedSecret) throw new Error("missing shared secret");
-
-  const nonce = nacl.randomBytes(24);
-
-  const encryptedPayload = nacl.box.after(
-    Buffer.from(JSON.stringify(payload)),
-    nonce,
-    sharedSecret
-  );
-
-  return [nonce, encryptedPayload];
-};

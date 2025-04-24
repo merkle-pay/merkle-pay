@@ -10,11 +10,7 @@ export function generateNaclKeysBs58Encoded() {
   };
 }
 
-export type PhantomConnectCallbackParams = {
-  phantom_encryption_public_key: string;
-  nonce: string;
-  data: {
-    public_key: string;
-    session: string;
-  };
+export type PhantomConnectCallbackData = {
+  public_key: string;
+  session: string;
 };
