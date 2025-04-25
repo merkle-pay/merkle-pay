@@ -29,6 +29,11 @@ export default function PaymentConfirmPage({
   const { payment, paymentFormUrl, urlForQrCode, paymentTableRecord } =
     usePaymentStore();
   const router = useRouter();
+  const goToUrl = (url: string) => {
+    if (url) {
+      router.push(url);
+    }
+  };
   const { mobilePhantomStep = "connect" } = router.query as {
     mobilePhantomStep: "connect" | "sst";
   };
@@ -63,16 +68,17 @@ export default function PaymentConfirmPage({
   };
 
   const generateQrCode = async () => {
-    if (!urlForQrCode) {
+    if (!urlForQrCode || !paymentTableRecord?.mpid) {
       setAlertMessage({
         type: "error",
-        value: "QR code not generated properly",
+        value: urlForQrCode
+          ? "QR code not generated properly"
+          : "Invalid payment record",
       });
       return;
     }
 
     const logoDataUri = `data:image/svg+xml;base64,${btoa(logoSvg)}`;
-
     const options = createQROptions(urlForQrCode, 300);
     options.image = logoDataUri;
 
@@ -117,18 +123,17 @@ export default function PaymentConfirmPage({
 
       <Space size={8} direction={"vertical"}>
         <WithQRCode qrCodeRef={qrCodeRef} generateQrCode={generateQrCode} />
-        {/* {phantomSolanaProvider && (
+        {phantomSolanaProvider && (
           <WithPhantomExtension
             isPaying={isPaying}
             setIsPaying={setIsPaying}
             setAlertMessage={setAlertMessage}
             phantomSolanaProvider={phantomSolanaProvider}
-            paymentRecord={paymentRecord}
-            isLoadingQR={isLoadingQrCode}
-            router={router}
+            paymentTableRecord={paymentTableRecord}
+            goToUrl={goToUrl}
             payment={payment}
           />
-        )} */}
+        )}
 
         {/* {isMobileDevice && (
           <WithPhantomApp
