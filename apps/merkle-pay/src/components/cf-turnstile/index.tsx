@@ -1,46 +1,44 @@
-import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
-import { useRef, forwardRef, useImperativeHandle } from "react";
-import { AntibotToken } from "src/types/antibot";
+import React, { forwardRef, useRef, useImperativeHandle, Ref } from "react";
+import {
+  Turnstile,
+  TurnstileInstance,
+  TurnstileProps,
+} from "@marsidev/react-turnstile";
 
-type CfTurnstileProps = {
-  siteKey: string;
-  handleTurnstileEvents: (params: AntibotToken) => void;
+export type CfTurnstileHandle = {
+  reset(): void;
+  getResponseAsync(): Promise<string | undefined> | undefined;
 };
 
-export const CfTurnstile = forwardRef<TurnstileInstance, CfTurnstileProps>(
-  ({ siteKey, handleTurnstileEvents }, ref) => {
-    const turnstileRef = useRef<TurnstileInstance>(null);
+export type CfTurnstileProps = {
+  siteKey: string;
+  setToken?: (token: string) => void;
+  options?: TurnstileProps["options"];
+};
 
-    useImperativeHandle(ref, () => turnstileRef.current as TurnstileInstance);
+export const CfTurnstile = forwardRef<CfTurnstileHandle, CfTurnstileProps>(
+  (props, ref: Ref<CfTurnstileHandle>) => {
+    const { siteKey, setToken, options } = props;
+    const innerRef = useRef<TurnstileInstance>(null);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        reset: () => innerRef.current?.reset(),
+        getResponseAsync: () => innerRef.current?.getResponsePromise(),
+      }),
+      []
+    );
 
     return (
       <Turnstile
-        ref={ref}
+        ref={innerRef}
         siteKey={siteKey}
-        onSuccess={(token) => {
-          handleTurnstileEvents({
-            token,
-            error: "",
-            isExpired: false,
-            isInitialized: true,
-          });
-        }}
-        onError={(error) => {
-          handleTurnstileEvents({
-            token: "",
-            error,
-            isExpired: false,
-            isInitialized: true,
-          });
-        }}
-        onExpire={() => {
-          handleTurnstileEvents({
-            token: "",
-            error: "",
-            isExpired: true,
-            isInitialized: true,
-          });
-        }}
+        options={options}
+        onSuccess={(token) => setToken?.(token)}
+        onError={() => innerRef.current?.reset()}
+        onExpire={() => innerRef.current?.reset()}
+        onTimeout={() => innerRef.current?.reset()}
       />
     );
   }

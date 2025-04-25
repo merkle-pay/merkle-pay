@@ -15,7 +15,7 @@ import { useMediaQuery } from "@react-hookz/web";
 import { CfTurnstile } from "src/components/cf-turnstile";
 import { createPaymentTableRecordQuery } from "src/queries/payment";
 import { useRef, useState } from "react";
-import { AntibotToken } from "src/types/antibot";
+
 import { TurnstileInstance } from "@marsidev/react-turnstile";
 
 export default function PaymentPreviewPage({
@@ -42,21 +42,7 @@ export default function PaymentPreviewPage({
 
   const isMobileLayout = useMediaQuery("(max-width: 768px)");
   const [isLoading, setIsLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<AntibotToken>({
-    token: "",
-    error: "",
-    isExpired: true,
-    isInitialized: false,
-  });
-
-  const handleTurnstileEvents = (params: AntibotToken) => {
-    setTurnstileToken((tt) => {
-      return {
-        ...tt,
-        ...params,
-      };
-    });
-  };
+  const [antibotToken, setAntibotToken] = useState<string>("");
 
   const [alertMessage, setAlertMessage] = useState<{
     type: "error" | "success" | null;
@@ -94,38 +80,11 @@ export default function PaymentPreviewPage({
   };
 
   const createPaymentTableRecord = async () => {
-    if (!turnstileToken.isInitialized) {
+    if (!antibotToken) {
       handleResetAntibotToken();
       setAlertMessage({
         type: "error",
         value: "Turnstile token not initialized yet, please try again",
-      });
-      return;
-    }
-
-    if (turnstileToken.error) {
-      handleResetAntibotToken();
-      setAlertMessage({
-        type: "error",
-        value: turnstileToken.error,
-      });
-      return;
-    }
-
-    if (turnstileToken.isExpired) {
-      handleResetAntibotToken();
-      setAlertMessage({
-        type: "error",
-        value: "Turnstile token expired",
-      });
-      return;
-    }
-
-    if (!turnstileToken.token) {
-      handleResetAntibotToken();
-      setAlertMessage({
-        type: "error",
-        value: "Turnstile token missing",
       });
       return;
     }
@@ -157,7 +116,7 @@ export default function PaymentPreviewPage({
       // Replace with your actual API call
       const { data, error } = await createPaymentTableRecordQuery(
         validatedPaymentFormData,
-        turnstileToken.token
+        antibotToken
       );
       if (error || !data) {
         setAlertMessage({
@@ -248,10 +207,7 @@ export default function PaymentPreviewPage({
         size={"medium"}
       />
 
-      <CfTurnstile
-        siteKey={TURNSTILE_SITE_KEY}
-        handleTurnstileEvents={handleTurnstileEvents}
-      />
+      <CfTurnstile siteKey={TURNSTILE_SITE_KEY} setToken={setAntibotToken} />
 
       <Space size={16}>
         <Button

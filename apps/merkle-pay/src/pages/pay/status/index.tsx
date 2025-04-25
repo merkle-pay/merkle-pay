@@ -10,11 +10,10 @@ import {
 } from "@arco-design/web-react";
 import { GetServerSidePropsContext } from "next";
 import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { PaymentStatus } from "src/utils/prisma";
 
-import { AntibotToken } from "src/types/antibot";
-import { CfTurnstile } from "src/components/cf-turnstile";
+import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
 import { fetchPaymentStatusQuery } from "src/queries/payment";
 
 type Props = {
@@ -49,33 +48,20 @@ export default function PaymentStatusPage(props: Props) {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const tryStatusRef = useRef<number>(0);
 
-  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
-    token: "",
-    error: "",
-    isExpired: true,
-    isInitialized: false,
-  });
-  const [antibotTokenHasBeenUsed, setAntibotTokenHasBeenUsed] =
-    useState<boolean>(false);
-
-  const handleAntibotToken = useCallback((params: AntibotToken) => {
-    setAntibotToken((prev) => ({ ...prev, ...params }));
-  }, []);
+  // !TODO: we need to reset the turnstile token after every poll
+  const turnstileRef = useRef<CfTurnstileHandle>(null);
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        if (!antibotToken.isInitialized) return;
-        if (antibotToken.isExpired) return;
-        if (antibotToken.error) return;
-        if (!antibotToken.token) return;
+        const _antibotToken = await turnstileRef.current?.getResponseAsync();
+        if (!_antibotToken) return;
         if (!mpid) return;
-        if (antibotTokenHasBeenUsed) return;
 
         tryStatusRef.current++;
 
-        const result = await fetchPaymentStatusQuery(mpid, antibotToken.token);
-        setAntibotTokenHasBeenUsed(true);
+        const result = await fetchPaymentStatusQuery(mpid, _antibotToken);
+        turnstileRef.current?.reset();
 
         if (result.error || !result.data) {
           setStatus((prev) => ({
@@ -140,16 +126,7 @@ export default function PaymentStatusPage(props: Props) {
         intervalRef.current = null;
       }
     };
-  }, [
-    mpid,
-    antibotToken.token,
-    antibotToken.isInitialized,
-    antibotToken.isExpired,
-    antibotToken.error,
-    needPolling,
-    antibotTokenHasBeenUsed,
-    status.value,
-  ]);
+  }, [mpid, needPolling, status.value]);
 
   return (
     <Space direction="vertical" size="medium" className={styles.container}>
@@ -186,12 +163,7 @@ export default function PaymentStatusPage(props: Props) {
       {status.error && (
         <Typography.Text type="error">Error: {status.error}</Typography.Text>
       )}
-      <CfTurnstile
-        siteKey={turnstileSiteKey}
-        hasBeenUsed={antibotTokenHasBeenUsed}
-        handleVerification={handleAntibotToken}
-        setHasBeenUsed={setAntibotTokenHasBeenUsed}
-      />
+      <CfTurnstile ref={turnstileRef} siteKey={turnstileSiteKey} />
     </Space>
   );
 }
