@@ -1,7 +1,14 @@
-import { Payment, PaymentState, PaymentStore } from "../types/payment";
+import {
+  Payment,
+  PaymentState,
+  PaymentStore,
+  paymentTableRecordSchema,
+} from "../types/payment";
 
 import { create } from "zustand";
 import { RecipientWallet } from "../types/recipient";
+
+import { z } from "zod";
 
 const initialState: PaymentState = {
   // payment will be saved into the database
@@ -22,6 +29,9 @@ const initialState: PaymentState = {
   blockchainOptions: [], // configurable
   returnUrl: "", // configurable
   paymentFormUrl: "",
+  paymentTableRecord: null,
+  urlForQrCode: null,
+  referencePublicKeyString: null,
 };
 
 // Custom hook to use the context
@@ -36,4 +46,10 @@ export const usePaymentStore = create<PaymentStore>((set) => ({
   setBlockchainOptions: (options: string[]) =>
     set({ blockchainOptions: options }),
   setReturnUrl: (url: string) => set({ returnUrl: url }),
+  setPaymentTableRecord: (
+    record: z.infer<typeof paymentTableRecordSchema> | null
+  ) => set({ paymentTableRecord: record }),
+  setUrlForQrCode: (url: string | null) => set({ urlForQrCode: url }),
+  setReferencePublicKeyString: (str: string | null) =>
+    set({ referencePublicKeyString: str }),
 }));

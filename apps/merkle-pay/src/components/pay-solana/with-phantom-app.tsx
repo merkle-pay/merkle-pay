@@ -11,14 +11,17 @@ export const WithPhantomApp = ({
   isLoadingQR,
   isPaying,
   mobilePhantomStep,
-  setRegularError,
+  setAlertMessage,
   paymentRecord,
   APP_URL,
 }: {
   isLoadingQR: boolean;
   isPaying: boolean;
   mobilePhantomStep: "connect" | "sst";
-  setRegularError: (error: string) => void;
+  setAlertMessage: (error: {
+    type: "error" | "success" | null;
+    value: string | null;
+  }) => void;
   paymentRecord: Pick<
     PaymentTableRecord,
     | "id"
@@ -41,17 +44,18 @@ export const WithPhantomApp = ({
     try {
       if (mobilePhantomStep === "connect") {
         await handleConnectPhantomApp();
-        return;
       }
 
       if (mobilePhantomStep === "sst") {
         await handlePaySolanaWithPhantomApp();
-        return;
       }
+
+      throw new Error("Invalid Phantom Step");
     } catch (error) {
-      setRegularError(
-        error instanceof Error ? error.message : "Unexpected error"
-      );
+      setAlertMessage({
+        type: "error",
+        value: error instanceof Error ? error.message : "Unexpected error",
+      });
     }
   };
 
@@ -70,9 +74,10 @@ export const WithPhantomApp = ({
     });
 
     if (error || !dAppPublicKey) {
-      setRegularError(
-        error || "Failed to generate DApp Encryption Public Key."
-      );
+      setAlertMessage({
+        type: "error",
+        value: error || "Failed to generate DApp Encryption Public Key.",
+      });
       return;
     }
 
@@ -135,7 +140,10 @@ export const WithPhantomApp = ({
         !decryptedConnectCallbackData ||
         Date.now() >= expiry
       ) {
-        setRegularError("Invalid Phantom Universal Link Params.");
+        setAlertMessage({
+          type: "error",
+          value: "Invalid Phantom Universal Link Params.",
+        });
         return;
       }
 
@@ -158,7 +166,10 @@ export const WithPhantomApp = ({
         window.open(universalLink, "_blank");
       }
     } catch (error) {
-      setRegularError((error as Error).message);
+      setAlertMessage({
+        type: "error",
+        value: (error as Error).message,
+      });
     }
   };
 

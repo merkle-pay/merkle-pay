@@ -96,6 +96,9 @@ export type PaymentState = {
   blockchainOptions: string[];
   returnUrl: string;
   paymentFormUrl: string;
+  paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
+  urlForQrCode: string | null;
+  referencePublicKeyString: string | null;
 };
 
 export type PaymentActions = {
@@ -106,6 +109,11 @@ export type PaymentActions = {
   setTokenOptions: (options: string[]) => void;
   setBlockchainOptions: (options: string[]) => void;
   setReturnUrl: (url: string) => void;
+  setPaymentTableRecord: (
+    record: z.infer<typeof paymentTableRecordSchema> | null
+  ) => void;
+  setUrlForQrCode: (url: string | null) => void;
+  setReferencePublicKeyString: (str: string | null) => void;
 };
 
 export type PaymentStore = PaymentState & PaymentActions;
@@ -115,3 +123,20 @@ export type PaymentStatusApiResponse = {
   data: { status: PaymentStatus } | null;
   message: string;
 };
+
+export const paymentTableRecordSchema = z.object({
+  id: z.number(),
+  recipient_address: z.string(),
+  amount: z.number().positive(),
+  token: z.string(),
+  blockchain: z.string(),
+  orderId: z.string(),
+  returnUrl: z.string().or(z.null()).optional(),
+  business_name: z.string(),
+  payer_address: z.string().or(z.null()).optional(),
+  referencePublicKey: z.string(),
+  mpid: z.string(),
+  raw: z.any(),
+  txId: z.string().or(z.null()).optional(),
+  status: z.nativeEnum(PaymentStatus),
+});

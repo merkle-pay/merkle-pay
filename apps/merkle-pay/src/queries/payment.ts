@@ -1,25 +1,64 @@
-import { Payment, PaymentStatusApiResponse } from "src/types/payment";
-
+import {
+  Payment,
+  PaymentStatusApiResponse,
+  paymentTableRecordSchema,
+} from "src/types/payment";
+import { z, ZodError } from "zod";
+import { fromZodError } from "zod-validation-error";
 export const createPaymentQuery = async (
   payment: Payment,
   turnstileToken: string
 ) => {
-  const res = await fetch("/api/payment/init", {
-    method: "POST",
-    body: JSON.stringify({ payment }),
-    headers: {
-      "Content-Type": "application/json",
-      "mp-antibot-token": turnstileToken,
-    },
-  });
-  const json = await res.json();
+  try {
+    const res = await fetch("/api/payment/init", {
+      method: "POST",
+      body: JSON.stringify({ payment }),
+      headers: {
+        "Content-Type": "application/json",
+        "mp-antibot-token": turnstileToken,
+      },
+    });
 
-  return {
-    data: json.data,
-    error: json.code !== 200 ? json.message : null,
-  };
+    const json: unknown = await res.json();
+
+    const dataSchema = z.object({
+      urlForQrCode: z.string(),
+      referencePublicKeyString: z.string(),
+      paymentTableRecord: paymentTableRecordSchema,
+    });
+
+    const jsonSchema = z.object({
+      code: z.number(),
+      data: dataSchema.or(z.null()),
+      message: z.string().or(z.null()),
+    });
+
+    const jsonResult = jsonSchema.parse(json);
+
+    if (!jsonResult.data || jsonResult.code !== 200) {
+      return {
+        data: null,
+        error: jsonResult.message,
+      };
+    }
+
+    return {
+      data: jsonResult.data,
+      error: null,
+    };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return {
+        data: null,
+        error: fromZodError(error).message,
+      };
+    }
+    return {
+      data: null,
+      error: `Error creating payment: ${(error as Error).message}`,
+    };
+  }
 };
-
 export const fetchPaymentStatusQuery = async (
   mpid: string | null,
   antibotToken: string

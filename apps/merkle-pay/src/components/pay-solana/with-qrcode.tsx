@@ -6,14 +6,23 @@ import { Button, Space, Typography } from "@arco-design/web-react";
 
 export const WithQRCode = ({
   qrCodeRef,
+  generateQrCode,
 }: {
   qrCodeRef: React.RefObject<HTMLDivElement | null>;
+  generateQrCode: () => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <Space direction="vertical" size={8}>
-      <Button type="primary" long onClick={() => setIsExpanded(!isExpanded)}>
+      <Button
+        type="primary"
+        long
+        onClick={() => {
+          generateQrCode();
+          setIsExpanded(!isExpanded);
+        }}
+      >
         <Typography.Title heading={5}>Scan QR Code</Typography.Title>
       </Button>
 

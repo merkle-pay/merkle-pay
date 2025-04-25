@@ -159,13 +159,11 @@ export const sendSolanaPaymentWithPhantom = async ({
   payment: Payment;
 }) => {
   const result: {
-    phantomExtensionError: string | null;
-    regularError: string | null;
+    alertMessage: string | null;
     successMessage: string | null;
     signature: TransactionSignature | null;
   } = {
-    phantomExtensionError: null,
-    regularError: null,
+    alertMessage: null,
     successMessage: null,
     signature: null,
   };
@@ -176,7 +174,7 @@ export const sendSolanaPaymentWithPhantom = async ({
     payment,
   });
   if (!isValid || error) {
-    result.phantomExtensionError = error || "Invalid payment details.";
+    result.alertMessage = error || "Invalid payment details.";
     return result;
   }
 
@@ -290,7 +288,7 @@ export const sendSolanaPaymentWithPhantom = async ({
     );
 
     if (signatureResult.value.err) {
-      result.regularError = "Transaction failed.";
+      result.alertMessage = "Transaction failed.";
       return result;
     }
 
@@ -305,7 +303,7 @@ export const sendSolanaPaymentWithPhantom = async ({
       errorMessage = error;
     }
 
-    result.regularError = errorMessage;
+    result.alertMessage = errorMessage;
   }
   return result;
 };

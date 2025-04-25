@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       data: {
         urlForQrCode: url,
         referencePublicKeyString: referencePublicKeyString,
-        ...createdPayment,
+        paymentTableRecord: createdPayment,
       },
       message: null,
     });

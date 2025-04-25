@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, Message } from "@arco-design/web-react";
+import { Button } from "@arco-design/web-react";
 import { sendSolanaPaymentWithPhantom } from "src/utils/solana";
 import { PhantomSolanaProvider } from "src/types/global";
 import { PaymentTableRecord } from "src/utils/prisma";
@@ -10,8 +10,8 @@ import { Payment } from "src/types/payment";
 export const WithPhantomExtension = ({
   isPaying,
   setIsPaying,
-  setPhantomExtensionError,
-  setRegularError,
+  setAlertMessage,
+
   phantomSolanaProvider,
   paymentRecord,
   isLoadingQR,
@@ -20,8 +20,11 @@ export const WithPhantomExtension = ({
 }: {
   isPaying: boolean;
   setIsPaying: (isPaying: boolean) => void;
-  setPhantomExtensionError: (error: string) => void;
-  setRegularError: (error: string) => void;
+  setAlertMessage: (error: {
+    type: "error" | "success" | null;
+    value: string | null;
+  }) => void;
+
   phantomSolanaProvider: PhantomSolanaProvider | null;
   paymentRecord: Pick<
     PaymentTableRecord,
@@ -50,7 +53,10 @@ export const WithPhantomExtension = ({
       setIsPaying(false);
     });
     if (result.successMessage && result.signature) {
-      Message.success(result.successMessage);
+      setAlertMessage({
+        type: "success",
+        value: result.successMessage,
+      });
 
       const searchParams = new URLSearchParams();
       searchParams.set("mpid", paymentRecord.mpid || "");
@@ -58,12 +64,11 @@ export const WithPhantomExtension = ({
       router.push(`/pay/status?${searchParams.toString()}`);
     }
 
-    if (result.phantomExtensionError) {
-      setPhantomExtensionError(result.phantomExtensionError);
-    }
-
-    if (result.regularError) {
-      setRegularError(result.regularError);
+    if (result.alertMessage) {
+      setAlertMessage({
+        type: "error",
+        value: result.alertMessage,
+      });
     }
   };
 

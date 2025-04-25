@@ -4,10 +4,9 @@ import { useRouter } from "next/router";
 
 import styles from "./index.module.scss";
 
-import { useSolanaQR } from "../../../hooks/use-solana-qr";
 import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/cf-turnstile";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AntibotToken } from "src/types/antibot";
 import { getPhantomProviders } from "src/utils/solana";
 
@@ -16,6 +15,9 @@ import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 import { WithQRCode } from "src/components/pay-solana/with-qrcode";
 import { WithPhantomExtension } from "src/components/pay-solana/with-phantom-extenstion";
 import { WithPhantomApp } from "src/components/pay-solana/with-phantom-app";
+import QRCodeStyling from "@solana/qr-code-styling";
+import { logoSvg } from "src/utils/logo";
+import { createQROptions } from "@solana/pay";
 
 export default function PaymentConfirmPage({
   TURNSTILE_SITE_KEY,
@@ -24,20 +26,25 @@ export default function PaymentConfirmPage({
   TURNSTILE_SITE_KEY: string;
   APP_URL: string;
 }) {
-  const { payment, paymentFormUrl } = usePaymentStore();
+  const { payment, paymentFormUrl, urlForQrCode, paymentTableRecord } =
+    usePaymentStore();
   const router = useRouter();
   const { mobilePhantomStep = "connect" } = router.query as {
     mobilePhantomStep: "connect" | "sst";
   };
-
+  const qrCodeRef = useRef<HTMLDivElement>(null);
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
 
   const [isPaying, setIsPaying] = useState(false);
-  const [phantomExtensionError, setPhantomExtensionError] = useState<
-    string | null
-  >(null);
-  const [regularError, setRegularError] = useState<string | null>(null);
+
+  const [alertMessage, setAlertMessage] = useState<{
+    type: "error" | "success" | "info" | null;
+    value: string | null;
+  }>({
+    type: null,
+    value: null,
+  });
 
   const [turnstileToken, setTurnstileToken] = useState<AntibotToken>({
     token: "",
@@ -46,7 +53,7 @@ export default function PaymentConfirmPage({
     isInitialized: false,
   });
 
-  const handleTurnstileTokenVerification = (params: AntibotToken) => {
+  const handleTurnstileEvents = (params: AntibotToken) => {
     setTurnstileToken((tt) => {
       return {
         ...tt,
@@ -55,18 +62,52 @@ export default function PaymentConfirmPage({
     });
   };
 
-  const {
-    qrCodeRef,
-    paymentRecord,
-    isLoading: isLoadingQR,
-    error: qrCodeError,
-  } = useSolanaQR({
-    payment,
-    antibotToken: turnstileToken,
-  });
+  const generateQrCode = async () => {
+    if (!urlForQrCode) {
+      setAlertMessage({
+        type: "error",
+        value: "QR code not generated properly",
+      });
+      return;
+    }
+
+    const logoDataUri = `data:image/svg+xml;base64,${btoa(logoSvg)}`;
+
+    const options = createQROptions(urlForQrCode, 300);
+    options.image = logoDataUri;
+
+    const qrCode = new QRCodeStyling(options);
+    const currentRef = qrCodeRef.current;
+    if (qrCode && currentRef) {
+      currentRef.innerHTML = "";
+      qrCode.append(currentRef);
+    } else {
+      setAlertMessage({
+        type: "info",
+        value: "QR code not appended properly",
+      });
+    }
+  };
 
   return (
     <Space direction="vertical" size={8} className={styles.container}>
+      {alertMessage.value && alertMessage.type && (
+        <div className={styles.error}>
+          <Alert
+            closable
+            style={{ marginBottom: 20 }}
+            type={alertMessage.type}
+            title={alertMessage.type.toUpperCase()}
+            content={alertMessage.value}
+            onClose={() => {
+              setAlertMessage({
+                type: null,
+                value: null,
+              });
+            }}
+          />
+        </div>
+      )}
       <Typography.Title className={styles.title}>
         Payment Confirmation
       </Typography.Title>
@@ -74,47 +115,35 @@ export default function PaymentConfirmPage({
         Please scan the QR code with supported wallets: Phantom, Solflare
       </Typography.Title>
 
-      {(qrCodeError || phantomExtensionError || regularError) && (
-        <div className={styles.error}>
-          <Alert
-            closable={false}
-            style={{ marginBottom: 20 }}
-            type="error"
-            title="Error"
-            content={qrCodeError || phantomExtensionError || regularError}
-          />
-        </div>
-      )}
       <Space size={8} direction={"vertical"}>
-        <WithQRCode qrCodeRef={qrCodeRef} />
-        {phantomSolanaProvider && (
+        <WithQRCode qrCodeRef={qrCodeRef} generateQrCode={generateQrCode} />
+        {/* {phantomSolanaProvider && (
           <WithPhantomExtension
             isPaying={isPaying}
             setIsPaying={setIsPaying}
-            setPhantomExtensionError={setPhantomExtensionError}
-            setRegularError={setRegularError}
+            setAlertMessage={setAlertMessage}
             phantomSolanaProvider={phantomSolanaProvider}
             paymentRecord={paymentRecord}
-            isLoadingQR={isLoadingQR}
+            isLoadingQR={isLoadingQrCode}
             router={router}
             payment={payment}
           />
-        )}
+        )} */}
 
-        {isMobileDevice && (
+        {/* {isMobileDevice && (
           <WithPhantomApp
-            isLoadingQR={isLoadingQR}
+            isLoadingQR={isLoadingQrCode}
             isPaying={isPaying}
             mobilePhantomStep={mobilePhantomStep}
-            setRegularError={setRegularError}
+            setAlertMessage={setAlertMessage}
             paymentRecord={paymentRecord}
             APP_URL={APP_URL}
           />
-        )}
+        )} */}
       </Space>
       <CfTurnstile
         siteKey={TURNSTILE_SITE_KEY}
-        handleVerification={handleTurnstileTokenVerification}
+        handleTurnstileEvents={handleTurnstileEvents}
       />
       <Space size={8} className={styles.buttons}>
         <Button
@@ -131,12 +160,12 @@ export default function PaymentConfirmPage({
           className={styles.checkStatusButton}
           type="primary"
           onClick={() => {
-            if (paymentRecord.mpid) {
-              router.push(`/pay/status?mpid=${paymentRecord.mpid}`);
+            if (paymentTableRecord?.mpid) {
+              router.push(`/pay/status?mpid=${paymentTableRecord.mpid}`);
             }
           }}
           loading={isPaying}
-          disabled={!paymentRecord.mpid || isPaying}
+          disabled={!paymentTableRecord?.mpid || isPaying}
           icon={<IconArrowRight />}
         >
           I have paid. Check status

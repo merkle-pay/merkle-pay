@@ -4,12 +4,12 @@ import { AntibotToken } from "src/types/antibot";
 
 export function CfTurnstile({
   siteKey,
-  handleVerification,
+  handleTurnstileEvents,
   hasBeenUsed,
   setHasBeenUsed,
 }: {
   siteKey: string;
-  handleVerification: (params: AntibotToken) => void;
+  handleTurnstileEvents: (params: AntibotToken) => void;
   hasBeenUsed?: boolean;
   setHasBeenUsed?: (params: boolean) => void;
 }) {
@@ -27,7 +27,7 @@ export function CfTurnstile({
       ref={ref}
       siteKey={siteKey}
       onSuccess={(token) => {
-        handleVerification({
+        handleTurnstileEvents({
           token,
           error: "",
           isExpired: false,
@@ -35,7 +35,7 @@ export function CfTurnstile({
         });
       }}
       onError={(error) => {
-        handleVerification({
+        handleTurnstileEvents({
           token: "",
           error,
           isExpired: false,
@@ -43,7 +43,7 @@ export function CfTurnstile({
         });
       }}
       onExpire={() => {
-        handleVerification({
+        handleTurnstileEvents({
           token: "",
           error: "",
           isExpired: true,
