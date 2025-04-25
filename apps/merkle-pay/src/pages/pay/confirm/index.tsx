@@ -1,4 +1,4 @@
-import { Button, Space, Spin, Typography, Alert } from "@arco-design/web-react";
+import { Button, Space, Typography, Alert } from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 
@@ -11,8 +11,7 @@ import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
 import {
   createPhantomPaymentUniversalLink,
-  getPhantomSolana,
-  sendSolanaPaymentWithPhantom,
+  getPhantomProviders,
 } from "src/utils/solana";
 
 import { Message } from "@arco-design/web-react";
@@ -22,6 +21,8 @@ import { generateAndSaveNaclKeys } from "src/queries/solana";
 import { ls, LS_KEYS } from "src/utils/ls";
 import { PhantomConnectCallbackData } from "src/utils/phantom";
 import { PaymentTableRecord } from "src/utils/prisma";
+import { WithQRCode } from "src/components/pay-solana/with-qrcode";
+import { WithPhantomExtension } from "src/components/pay-solana/with-phantom-extenstion";
 
 export default function PaymentConfirmPage({
   TURNSTILE_SITE_KEY,
@@ -33,7 +34,7 @@ export default function PaymentConfirmPage({
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
 
-  const phantomSolana = getPhantomSolana();
+  const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
   const isMobileLayout = useMediaQuery("(max-width: 768px)");
 
@@ -41,6 +42,7 @@ export default function PaymentConfirmPage({
   const [phantomExtensionError, setPhantomExtensionError] = useState<
     string | null
   >(null);
+  const [regularError, setRegularError] = useState<string | null>(null);
 
   const [turnstileToken, setTurnstileToken] = useState<AntibotToken>({
     token: "",
@@ -67,32 +69,6 @@ export default function PaymentConfirmPage({
     payment,
     antibotToken: turnstileToken,
   });
-
-  const handlePaySolanaWithPhantomExtension = async () => {
-    setIsPaying(true);
-    const result = await sendSolanaPaymentWithPhantom({
-      phantomSolana,
-      payment,
-    }).finally(() => {
-      setIsPaying(false);
-    });
-    if (result.successMessage && result.signature) {
-      Message.success(result.successMessage);
-
-      const searchParams = new URLSearchParams();
-      searchParams.set("mpid", paymentRecord.mpid || "");
-      searchParams.set("txId", result.signature);
-      router.push(`/pay/status?${searchParams.toString()}`);
-    }
-
-    if (result.phantomExtensionError) {
-      setPhantomExtensionError(result.phantomExtensionError);
-    }
-
-    if (result.regularError) {
-      Message.error(result.regularError);
-    }
-  };
 
   const handlePhantomApp = async () => {
     const phantomUniversalLinkParams = ls.get(
@@ -240,27 +216,32 @@ export default function PaymentConfirmPage({
         Please scan the QR code with supported wallets: Phantom, Solflare
       </Typography.Title>
 
-      {(qrCodeError || phantomExtensionError) && (
+      {(qrCodeError || phantomExtensionError || regularError) && (
         <div className={styles.error}>
           <Alert
             closable={false}
             style={{ marginBottom: 20 }}
             type="error"
             title="Error"
-            content={qrCodeError || phantomExtensionError}
+            content={qrCodeError || phantomExtensionError || regularError}
           />
         </div>
       )}
       <Space size={8} direction={isMobileLayout ? "vertical" : "horizontal"}>
-        {isLoadingQR || !paymentRecord.urlForQrCode ? (
-          <div className={styles.loading}>
-            <Spin size={48} tip="Generating Payment QR Code..." />
-          </div>
-        ) : (
-          <div id="qr-code-container" ref={qrCodeRef} />
-        )}
+        <WithQRCode qrCodeRef={qrCodeRef} />
+        <WithPhantomExtension
+          isPaying={isPaying}
+          setIsPaying={setIsPaying}
+          setPhantomExtensionError={setPhantomExtensionError}
+          setRegularError={setRegularError}
+          phantomSolanaProvider={phantomSolanaProvider}
+          paymentRecord={paymentRecord}
+          isLoadingQR={isLoadingQR}
+          router={router}
+          payment={payment}
+        />
 
-        {(isMobileDevice || phantomSolana) && (
+        {(isMobileDevice || phantomSolanaProvider) && (
           <div className={styles.phantomButton}>
             <Button
               type="primary"
@@ -268,8 +249,6 @@ export default function PaymentConfirmPage({
               onClick={async () => {
                 if (isMobileDevice) {
                   await handlePhantomApp();
-                } else {
-                  await handlePaySolanaWithPhantomExtension();
                 }
               }}
               disabled={isLoadingQR || isPaying}

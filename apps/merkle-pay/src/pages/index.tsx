@@ -33,8 +33,8 @@ export default function Home() {
             <Typography.Title heading={3}>Multi-Chain Support</Typography.Title>
           </Space>
           <Typography.Paragraph>
-            Process payments on Solana, Polygon, Arbitrum One, and zkSync Era
-            with on-chain transaction records
+            Process payments on Solana, Base, Sui, TRON, Polygon, Arbitrum One,
+            and more with on-chain transaction records
           </Typography.Paragraph>
         </Space>
 

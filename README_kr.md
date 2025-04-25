@@ -12,7 +12,7 @@
 
 ---
 
-**Solana, Polygon, Arbitrum, zkSync에서 스테이블코인 결제를 쉽게 수락하세요—크리에이터, 인디 해커, 소상공인을 위해 제작되었습니다.**
+**Solana, Base, Sui, TRON, Polygon, Arbitrum에서 스테이블코인 결제를 쉽게 수락하세요—크리에이터, 인디 해커, 소상공인을 위해 제작되었습니다.**
 
 Merkle Pay는 사용자가 결제 페이지를 빠르게 설정하여 **여러 블록체인**에서 USDT 및 USDC와 같은 스테이블코인을 자신의 지갑으로 직접 받을 수 있도록 지원하는 비수탁형 웹 플랫폼입니다.
 
@@ -32,7 +32,6 @@ Merkle Pay는 처리량이 높고 수수료가 낮은 네트워크 전반에 걸
 - ✅ **TRON** _(출시 예정)_
 - ✅ **Polygon PoS** _(출시 예정)_
 - ✅ **Arbitrum One** _(출시 예정)_
-- ✅ **zkSync Era** _(출시 예정)_
 
 _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 
@@ -45,14 +44,14 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 - ✅ **Phantom**: 데스크톱(QR 코드 사용) 및 모바일(딥링킹 사용) 모두 권장됩니다. 뛰어난 Solana Pay 지원.
 - ✅ **Solflare**: 데스크톱 및 모바일 모두 권장됩니다. 강력한 Solana Pay 지원.
 - **기타 Solana 지갑**: Solana Pay 표준을 구현하는 지갑은 호환되어야 하지만, v1에서는 Phantom과 Solflare가 주로 테스트된 지갑입니다.
-- **EVM 지갑 (MetaMask 등)**: Polygon, Arbitrum, zkSync 통합이 완료되면 EVM 지갑 지원에 대해 자세히 설명할 예정입니다.
+- **EVM 지갑 (MetaMask 등)**: Base, Polygon, Arbitrum 통합이 완료되면 EVM 지갑 지원에 대해 자세히 설명할 예정입니다.
 
 ## 기능 (v1)
 
-- **멀티체인 지원**: Solana 및 주요 이더리움 레이어 2 네트워크(Polygon, Arbitrum, zkSync Era)에서 결제를 수락합니다.
+- **멀티체인 지원**: Solana 및 주요 이더리움 레이어 2 네트워크(Base, Polygon, Arbitrum)에서 결제를 수락합니다.
 - **즉시 설정**: 지갑 주소와 비즈니스 이름을 입력하면 몇 분 안에 결제 페이지가 준비됩니다.
 - **비수탁형**: 결제는 지불인의 지갑에서 지정된 지갑 주소로 직접 전송됩니다. Merkle Pay는 귀하의 자금을 절대 보유하지 않습니다.
-- **네이티브 결제 표준**: Solana의 경우 Solana Pay를 사용하고 EVM 체인(Polygon, Arbitrum, zkSync)의 경우 EIP-681 URI 스킴을 사용합니다.
+- **네이티브 결제 표준**: Solana의 경우 Solana Pay를 사용하고 EVM 체인(Base, Polygon, Arbitrum)의 경우 EIP-681 URI 스킴을 사용합니다.
 - **스마트 디스플레이**: 각 지원 체인의 인기 있는 지갑(예: Phantom, MetaMask)과 호환되는 QR 코드 및 클릭 가능한 결제 링크를 생성합니다.
 - **신뢰할 수 있는 추적**: 고유한 온체인 식별자(Solana의 `reference` 키, EVM의 경우 컨트랙트를 통한 이벤트 발생 가능성)를 사용하여 강력한 백엔드 검증을 수행합니다. 선택적 `orderId` 매핑을 포함합니다.
 - **실시간 상태**: 실시간 업데이트가 포함된 결제 상태 페이지 (WebSocket 권장).
@@ -70,7 +69,9 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 - **PostgreSQL**: 실행 중인 인스턴스 (로컬 또는 호스팅)
 - **Web3 지갑**:
   - **Solana:** Phantom, Solflare 등
-  - **EVM (Polygon/Arbitrum/zkSync):** 출시 예정
+  - **EVM (Base/Polygon/Arbitrum):** 출시 예정
+  - **Sui:** 출시 예정
+  - **TRON:** 출시 예정
 
 ### 왜 PostgreSQL인가?
 

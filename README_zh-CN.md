@@ -12,7 +12,7 @@
 
 ---
 
-**轻松在 Solana、Polygon、Arbitrum 和 zkSync 上接受稳定币支付——专为创作者、独立开发者和小企业打造。**
+**轻松在 Solana、Base、Sui、TRON、Polygon、Arbitrum 上接受稳定币支付——专为创作者、独立开发者和小企业打造。**
 
 Merkle Pay 是一个非托管的网络平台，用户可以快速设置支付页面，以便在**多个区块链**上直接接收 USDT 和 USDC 等稳定币到自己的钱包。
 
@@ -32,7 +32,6 @@ Merkle Pay 旨在在高吞吐量、低费用的网络上提供无缝的支付体
 - ✅ **TRON** _(即将推出)_
 - ✅ **Polygon PoS** _(即将推出)_
 - ✅ **Arbitrum One** _(即将推出)_
-- ✅ **zkSync Era** _(即将推出)_
 
 _（未来可能会增加对其他链的支持。）_
 
@@ -45,14 +44,14 @@ _（未来可能会增加对其他链的支持。）_
 - ✅ **Phantom**：推荐用于桌面（通过二维码）和移动设备（通过深度链接）。出色的 Solana Pay 支持。
 - ✅ **Solflare**：推荐用于桌面和移动设备。强大的 Solana Pay 支持。
 - **其他 Solana 钱包**：实现 Solana Pay 标准的钱包*应该*兼容，但 Phantom 和 Solflare 是 v1 版本主要测试的钱包。
-- **EVM 钱包 (MetaMask 等)**：随着 Polygon、Arbitrum 和 zkSync 集成的完成，将详细说明对 EVM 钱包的支持。
+- **EVM 钱包 (MetaMask 等)**：随着 Base、Polygon、Arbitrum 集成的完成，将详细说明对 EVM 钱包的支持。
 
 ## 特性 (v1)
 
-- **多链支持**：在 Solana 和领先的以太坊 Layer 2 网络（Polygon、Arbitrum、zkSync Era）上接受付款。
+- **多链支持**：在 Solana 和领先的以太坊 Layer 2 网络（Base、Polygon、Arbitrum）上接受付款。
 - **即时设置**：输入您的钱包地址和企业名称——几分钟内即可准备好支付页面。
 - **非托管**：付款直接从付款人的钱包转到您指定的钱包地址。Merkle Pay 绝不持有您的资金。
-- **原生支付标准**：Solana 使用 Solana Pay，EVM 链（Polygon、Arbitrum、zkSync）使用 EIP-681 URI 方案。
+- **原生支付标准**：Solana 使用 Solana Pay，EVM 链（Base、Polygon、Arbitrum）使用 EIP-681 URI 方案。
 - **智能显示**：生成与每个支持链上的流行钱包（例如 Phantom、MetaMask）兼容的二维码和可点击支付链接。
 - **可靠跟踪**：使用唯一的链上标识符（Solana 上的 `reference` 键，EVM 上可能通过合约的事件发射）进行可靠的后端验证。包括可选的 `orderId` 映射。
 - **实时状态**：具有实时更新的支付状态页面（推荐使用 WebSocket）。
@@ -70,7 +69,9 @@ _（未来可能会增加对其他链的支持。）_
 - **PostgreSQL**：运行中的实例（本地或托管）
 - **Web3 钱包**：
   - **Solana:** Phantom, Solflare 等
-  - **EVM (Polygon/Arbitrum/zkSync):** 即将推出
+  - **EVM (Base/Polygon/Arbitrum):** 即将推出
+  - **Sui:** 即将推出
+  - **TRON:** 即将推出
 
 ### 为什么选择 PostgreSQL？
 

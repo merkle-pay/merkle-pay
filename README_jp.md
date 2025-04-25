@@ -12,7 +12,7 @@
 
 ---
 
-**Solana、Polygon、Arbitrum、zkSync でステーブルコイン決済を簡単に受け入れ—クリエイター、インディーハッカー、スモールビジネス向けに構築。**
+**Solana、Base、Sui、TRON、Polygon、Arbitrum でステーブルコイン決済を簡単に受け入れ—クリエイター、インディーハッカー、スモールビジネス向けに構築。**
 
 Merkle Pay は、ユーザーが支払いページを迅速に設定し、USDT や USDC のようなステーブルコインを**複数のブロックチェーン**上で直接自分のウォレットに受け取ることができる、非管理型のウェブプラットフォームです。
 
@@ -32,7 +32,6 @@ Merkle Pay は、高スループット、低手数料のネットワーク全体
 - ✅ **TRON** _(近日対応予定)_
 - ✅ **Polygon PoS** _(近日対応予定)_
 - ✅ **Arbitrum One** _(近日対応予定)_
-- ✅ **zkSync Era** _(近日対応予定)_
 
 _（将来的には追加のチェーンへの対応が追加される可能性があります。）_
 
@@ -45,14 +44,14 @@ _（将来的には追加のチェーンへの対応が追加される可能性�
 - ✅ **Phantom**: デスクトップ（QR コード経由）とモバイル（ディープリンク経由）の両方に推奨。優れた Solana Pay サポート。
 - ✅ **Solflare**: デスクトップとモバイルの両方に推奨。強力な Solana Pay サポート。
 - **その他の Solana ウォレット**: Solana Pay 標準を実装しているウォレットは互換性があるはずですが、v1 では Phantom と Solflare が主にテストされたウォレットです。
-- **EVM ウォレット (MetaMask など)**: Polygon、Arbitrum、zkSync の統合が完了次第、EVM ウォレットのサポートについて詳細を説明します。
+- **EVM ウォレット (MetaMask など)**: Solana、Base、Sui、TRON、Polygon、Arbitrum の統合が完了次第、EVM ウォレットのサポートについて詳細を説明します。
 
 ## 機能 (v1)
 
-- **マルチチェーン対応**: Solana および主要な Ethereum Layer 2 ネットワーク（Polygon、Arbitrum、zkSync Era）での支払いを受け付けます。
+- **マルチチェーン対応**: Solana および主要な Ethereum Layer 2 ネットワーク（Base、Polygon、Arbitrum）での支払いを受け付けます。
 - **即時セットアップ**: ウォレットアドレスとビジネス名を入力するだけで、数分で支払いページの準備ができます。
 - **非管理型**: 支払いは支払人のウォレットから指定されたウォレットアドレスに直接送金されます。Merkle Pay が資金を保持することはありません。
-- **ネイティブ決済標準**: Solana では Solana Pay を、EVM チェーン（Polygon、Arbitrum、zkSync）では EIP-681 URI スキームを使用します。
+- **ネイティブ決済標準**: Solana では Solana Pay を、EVM チェーン（Base、Polygon、Arbitrum）では EIP-681 URI スキームを使用します。
 - **スマート表示**: 各対応チェーンの人気ウォレット（例：Phantom、MetaMask）と互換性のある QR コードとクリック可能な支払いリンクを生成します。
 - **信頼性の高い追跡**: 固有のオンチェーン識別子（Solana の `reference` キー、EVM のコントラクトからのイベント発行の可能性）を使用して、堅牢なバックエンド検証を行います。オプションの `orderId` マッピングを含みます。
 - **リアルタイムステータス**: リアルタイム更新付きの支払いステータスページ（WebSocket 推奨）。
@@ -70,7 +69,9 @@ _（将来的には追加のチェーンへの対応が追加される可能性�
 - **PostgreSQL**: 実行中のインスタンス（ローカルまたはホスト型）
 - **Web3 ウォレット**:
   - **Solana:** Phantom, Solflare など
-  - **EVM (Polygon/Arbitrum/zkSync):** 近日対応予定
+  - **EVM (Base/Polygon/Arbitrum):** 近日対応予定
+  - **Sui:** 近日対応予定
+  - **TRON:** 近日対応予定
 
 ### なぜ PostgreSQL なのか？
 

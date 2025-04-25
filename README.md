@@ -12,7 +12,7 @@
 
 ---
 
-**Accept stablecoin payments on Solana, Polygon, Arbitrum, and zkSync with ease—built for creators, indie hackers, and small businesses.**
+**Accept stablecoin payments on Solana, Base, Sui, TRON, Polygon, Arbitrum, and more with ease—built for creators, indie hackers, and small businesses.**
 
 Merkle Pay is a non-custodial web platform enabling users to quickly set up payment pages for receiving stablecoins like USDT and USDC directly to their own wallets on **multiple blockchains**.
 
@@ -34,7 +34,6 @@ Merkle Pay aims to provide a seamless payment experience across high-throughput,
 - ✅ **TRON** _(Coming Soon)_
 - ✅ **Polygon PoS** _(Coming Soon)_
 - ✅ **Arbitrum One** _(Coming Soon)_
-- ✅ **zkSync Era** _(Coming Soon)_
 
 _(Support for additional chains may be added in the future.)_
 
@@ -47,14 +46,14 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 - ✅ **Phantom**: Recommended for both desktop (via QR code) and mobile (via deeplinking). Excellent Solana Pay support.
 - ✅ **Solflare**: Recommended for both desktop and mobile. Strong Solana Pay support.
 - **Other Solana Wallets**: Wallets implementing the Solana Pay standard _should_ be compatible, but Phantom and Solflare are the primary tested wallets for v1.
-- **EVM Wallets (MetaMask, etc.)**: Support for EVM wallets will be detailed as Polygon, Arbitrum, and zkSync integration is completed.
+- **EVM Wallets (MetaMask, etc.)**: Support for EVM wallets will be detailed as Base, Polygon, Arbitrum, and more integration is completed.
 
 ## Features (v1)
 
-- **Multi-Chain Support**: Accept payments on Solana and leading Ethereum Layer 2 networks (Polygon, Arbitrum, zkSync Era).
+- **Multi-Chain Support**: Accept payments on Solana and leading Ethereum Layer 2 networks (Base, Polygon, Arbitrum).
 - **Instant Setup**: Enter your wallet address(es) and business name—get a payment page ready in minutes.
 - **Non-Custodial**: Payments go directly from the payer's wallet to your specified wallet address. Merkle Pay never holds your funds.
-- **Native Payment Standards**: Uses Solana Pay for Solana and EIP-681 URI schemes for EVM chains (Polygon, Arbitrum, zkSync).
+- **Native Payment Standards**: Uses Solana Pay for Solana and EIP-681 URI schemes for EVM chains (Base, Polygon, Arbitrum).
 - **Smart Display**: Generates QR codes and clickable payment links compatible with popular wallets on each supported chain (e.g., Phantom, MetaMask).
 - **Reliable Tracking**: Uses unique on-chain identifiers (`reference` key on Solana, potentially event emission via contracts on EVM) for robust backend verification. Includes optional `orderId` mapping.
 - **Real-time Status**: Payment status page with real-time updates (WebSocket recommended).
@@ -72,7 +71,8 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 - **PostgreSQL**: A running instance (local or hosted)
 - **Web3 Wallet**:
   - **Solana:** Phantom, Solflare, etc.
-  - **EVM (Polygon/Arbitrum/zkSync):** coming soon
+  - **EVM (Base/Polygon/Arbitrum):** coming soon
+  - **Sui:** coming soon
 
 ### Why PostgreSQL?
 

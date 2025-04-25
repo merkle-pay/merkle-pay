@@ -70,20 +70,26 @@ export const POLLING_INTERVAL_MS = 2000; // Check every 2 seconds
 export const MONITORING_TIMEOUT_MS = 90 * 1000; // 90 seconds timeout per payment
 export const REQUIRED_CONFIRMATION_LEVEL = "confirmed"; // Or 'finalized'
 
-export const getPhantomSolana = () => {
+export const getPhantomProviders = () => {
   if (typeof window === "undefined") {
-    return null;
+    return {
+      phantomSolanaProvider: null,
+    };
   }
 
   if ("phantom" in window) {
-    const solana = window.phantom?.solana;
+    const phantomSolanaProvider = window.phantom?.solana;
 
-    if (solana?.isPhantom) {
-      return solana;
+    if (phantomSolanaProvider?.isPhantom) {
+      return {
+        phantomSolanaProvider,
+      };
     }
   }
 
-  return null;
+  return {
+    phantomSolanaProvider: null,
+  };
 };
 
 export const MEMO_PROGRAM_ID = new PublicKey(
@@ -94,13 +100,13 @@ export const SOLANA_RPC_ENDPOINT =
   process.env.NEXT_PUBLIC_SOLANA_RPC_ENDPOINT || clusterApiUrl("mainnet-beta"); // Or "devnet", "testnet"
 
 export const validatePhantomExtensionPayment = ({
-  phantomSolana,
+  phantomSolanaProvider,
   payment,
 }: {
-  phantomSolana: PhantomSolanaProvider | null;
+  phantomSolanaProvider: PhantomSolanaProvider | null;
   payment: Payment;
 }) => {
-  if (!phantomSolana) {
+  if (!phantomSolanaProvider) {
     return {
       isValid: false,
       error: "Phantom wallet not detected.",
@@ -146,10 +152,10 @@ export const validatePhantomExtensionPayment = ({
 };
 
 export const sendSolanaPaymentWithPhantom = async ({
-  phantomSolana,
+  phantomSolanaProvider,
   payment,
 }: {
-  phantomSolana: PhantomSolanaProvider | null;
+  phantomSolanaProvider: PhantomSolanaProvider | null;
   payment: Payment;
 }) => {
   const result: {
@@ -166,7 +172,7 @@ export const sendSolanaPaymentWithPhantom = async ({
 
   // 1. --- Pre-checks ---
   const { isValid, error } = validatePhantomExtensionPayment({
-    phantomSolana,
+    phantomSolanaProvider,
     payment,
   });
   if (!isValid || error) {
@@ -177,7 +183,7 @@ export const sendSolanaPaymentWithPhantom = async ({
   try {
     const { recipient_address, amount, orderId, token } = payment;
     // 2. --- Connect & Get Public Key ---
-    const { publicKey } = await phantomSolana!.connect({
+    const { publicKey } = await phantomSolanaProvider!.connect({
       onlyIfTrusted: false,
     }); // Ensure connection prompt if needed
     if (!publicKey) {
@@ -268,7 +274,7 @@ export const sendSolanaPaymentWithPhantom = async ({
     // 7. --- Sign and Send ---
     console.log("Requesting signature and sending transaction...");
     const { signature }: { signature: TransactionSignature } =
-      await phantomSolana!.signAndSendTransaction(transaction);
+      await phantomSolanaProvider!.signAndSendTransaction(transaction);
     console.log(`Transaction submitted with signature: ${signature}`);
 
     // 8. --- Confirmation (Optional but kept for immediate feedback) ---
