@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createPayment } from "src/services/payment";
-import { paymentSchema } from "src/types/payment";
+import { createPaymentTableRecord } from "src/services/payment";
+import { paymentFormDataSchema } from "src/types/payment";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const json: unknown = await request.json();
   const parsedJson = z
     .object({
-      payment: paymentSchema,
+      paymentFormData: paymentFormDataSchema,
     })
     .safeParse(json);
 
@@ -25,11 +25,13 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { payment } = parsedJson.data;
+  const { paymentFormData } = parsedJson.data;
 
   if (
-    !process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.includes(payment.blockchain) ||
-    !process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.includes(payment.token)
+    !process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.includes(
+      paymentFormData.blockchain
+    ) ||
+    !process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.includes(paymentFormData.token)
   ) {
     return NextResponse.json({
       code: 400,
@@ -44,21 +46,21 @@ export async function POST(request: NextRequest) {
     const referencePublicKeyString = referencePublicKey.toBase58();
 
     const url = encodeURL({
-      recipient: new PublicKey(payment.recipient_address),
-      amount: new BigNumber(payment.amount),
+      recipient: new PublicKey(paymentFormData.recipient_address),
+      amount: new BigNumber(paymentFormData.amount),
       // Convert the reference string back to a PublicKey object for encodeURL
       reference: new PublicKey(referencePublicKey),
-      label: payment.businessName,
-      memo: payment.orderId,
-      message: payment.message,
+      label: paymentFormData.businessName,
+      memo: paymentFormData.orderId,
+      message: paymentFormData.message,
       splToken: new PublicKey(
-        SplTokens[parsedJson.data.payment.token as keyof typeof SplTokens].mint
+        SplTokens[paymentFormData.token as keyof typeof SplTokens].mint
       ),
     });
 
-    const createdPayment = await createPayment({
+    const createdPaymentTableRecord = await createPaymentTableRecord({
       referencePublicKey: referencePublicKeyString,
-      payment: parsedJson.data.payment,
+      paymentFormData: paymentFormData,
       mpid: nanoid(),
     });
 
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
       data: {
         urlForQrCode: url,
         referencePublicKeyString: referencePublicKeyString,
-        paymentTableRecord: createdPayment,
+        paymentTableRecord: createdPaymentTableRecord,
       },
       message: null,
     });

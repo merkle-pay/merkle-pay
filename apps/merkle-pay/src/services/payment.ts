@@ -1,31 +1,31 @@
-import { Payment } from "src/types/payment";
+import { PaymentFormData } from "src/types/payment";
 import { PaymentStatus, prisma } from "../utils/prisma";
 import { PrismaClientKnownRequestError } from "../../prisma/client/runtime/library";
 
-export const createPayment = async ({
-  payment,
+export const createPaymentTableRecord = async ({
+  paymentFormData,
   referencePublicKey,
   mpid,
 }: {
-  payment: Payment;
+  paymentFormData: PaymentFormData;
   referencePublicKey: string;
   mpid: string;
 }) => {
-  const p = await prisma.payment.create({
+  const paymentTableRecord = await prisma.payment.create({
     data: {
-      amount: payment.amount,
-      token: payment.token,
-      blockchain: payment.blockchain,
-      orderId: payment.orderId,
+      amount: paymentFormData.amount,
+      token: paymentFormData.token,
+      blockchain: paymentFormData.blockchain,
+      orderId: paymentFormData.orderId,
       status: PaymentStatus.PENDING,
       referencePublicKey: referencePublicKey,
-      recipient_address: payment.recipient_address,
+      recipient_address: paymentFormData.recipient_address,
       mpid,
-      raw: payment,
-      business_name: payment.businessName,
+      raw: paymentFormData,
+      business_name: paymentFormData.businessName,
     },
   });
-  return p;
+  return paymentTableRecord;
 };
 
 export const getPaymentByMpid = async (mpid: string) => {

@@ -3,39 +3,25 @@ import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 import { LS_KEYS } from "src/utils/ls";
 import { generateAndSaveNaclKeys } from "src/queries/solana";
 import { ls } from "src/utils/ls";
-import { PaymentTableRecord } from "src/utils/prisma";
+
 import { PhantomConnectCallbackData } from "src/utils/phantom";
 import { createPhantomPaymentUniversalLink } from "src/utils/solana";
-
+import { paymentTableRecordSchema } from "src/types/payment";
+import { z } from "zod";
 export const WithPhantomApp = ({
-  isLoadingQR,
-  isPaying,
+  isPayingWithPhantomExtension,
   mobilePhantomStep,
   setAlertMessage,
-  paymentRecord,
+  paymentTableRecord,
   APP_URL,
 }: {
-  isLoadingQR: boolean;
-  isPaying: boolean;
+  isPayingWithPhantomExtension: boolean;
   mobilePhantomStep: "connect" | "sst";
   setAlertMessage: (error: {
     type: "error" | "success" | null;
     value: string | null;
   }) => void;
-  paymentRecord: Pick<
-    PaymentTableRecord,
-    | "id"
-    | "mpid"
-    | "orderId"
-    | "referencePublicKey"
-    | "recipient_address"
-    | "amount"
-    | "token"
-    | "blockchain"
-  > & {
-    urlForQrCode: string | null;
-    returnUrl: string;
-  };
+  paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   APP_URL: string;
 }) => {
   const { isMobileDevice } = useIsMobileDevice();
@@ -61,16 +47,18 @@ export const WithPhantomApp = ({
 
   // step1: connect phantom app
   const handleConnectPhantomApp = async () => {
-    // ! TODO: verify payment record
-    // const { error } = await verifyPaymentRecord(paymentRecord);
-    // if (error) {
-    //   Message.error(error);
-    //   return;
-    // }
+    if (!paymentTableRecord) {
+      setAlertMessage({
+        type: "error",
+        value: "Payment table record not found.",
+      });
+      return;
+    }
+
     const { dAppPublicKey, error } = await generateAndSaveNaclKeys({
-      mpid: paymentRecord.mpid,
-      orderId: paymentRecord.orderId,
-      paymentId: paymentRecord.id,
+      mpid: paymentTableRecord.mpid,
+      orderId: paymentTableRecord.orderId,
+      paymentId: paymentTableRecord.id,
     });
 
     if (error || !dAppPublicKey) {
@@ -87,7 +75,7 @@ export const WithPhantomApp = ({
       LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS,
       JSON.stringify({
         dAppPublicKey,
-        paymentRecord,
+        paymentTableRecord,
         expiry: Date.now() + 60 * 60 * 1000, // 1 hour
       })
     );
@@ -110,32 +98,19 @@ export const WithPhantomApp = ({
     try {
       const {
         dAppPublicKey,
-        paymentRecord,
+        paymentTableRecord,
         expiry,
         decryptedConnectCallbackData,
       } = JSON.parse(ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS) ?? "{}") as {
         dAppPublicKey: string;
-        paymentRecord: Pick<
-          PaymentTableRecord,
-          | "id"
-          | "mpid"
-          | "orderId"
-          | "referencePublicKey"
-          | "recipient_address"
-          | "amount"
-          | "token"
-          | "blockchain"
-        > & {
-          urlForQrCode: string | null;
-          returnUrl: string;
-        };
+        paymentTableRecord: z.infer<typeof paymentTableRecordSchema>;
         expiry: number;
         decryptedConnectCallbackData: PhantomConnectCallbackData;
       };
 
       if (
         !dAppPublicKey ||
-        !paymentRecord ||
+        !paymentTableRecord ||
         !expiry ||
         !decryptedConnectCallbackData ||
         Date.now() >= expiry
@@ -149,12 +124,12 @@ export const WithPhantomApp = ({
 
       const universalLink = await createPhantomPaymentUniversalLink(
         {
-          recipient_address: paymentRecord.recipient_address,
-          amount: paymentRecord.amount,
-          token: paymentRecord.token,
-          blockchain: paymentRecord.blockchain,
-          orderId: paymentRecord.orderId,
-          mpid: paymentRecord.mpid,
+          recipient_address: paymentTableRecord.recipient_address,
+          amount: paymentTableRecord.amount,
+          token: paymentTableRecord.token,
+          blockchain: paymentTableRecord.blockchain,
+          orderId: paymentTableRecord.orderId,
+          mpid: paymentTableRecord.mpid,
         },
         {
           dappEncryptionPublicKey: dAppPublicKey,
@@ -180,7 +155,7 @@ export const WithPhantomApp = ({
       onClick={async () => {
         await handlePhantomApp();
       }}
-      disabled={isLoadingQR || isPaying}
+      disabled={isPayingWithPhantomExtension}
     >
       Pay with Phantom <br />
       {isMobileDevice ? "Mobile App" : "Wallet Extension"}

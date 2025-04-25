@@ -7,15 +7,16 @@ import {
 } from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
-import { paymentSchema } from "../../../types/payment";
+import { paymentFormDataSchema } from "../../../types/payment";
 import { fromZodError } from "zod-validation-error";
 import styles from "./index.module.scss";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { useMediaQuery } from "@react-hookz/web";
 import { CfTurnstile } from "src/components/cf-turnstile";
 import { createPaymentQuery } from "src/queries/payment";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AntibotToken } from "src/types/antibot";
+import { TurnstileInstance } from "@marsidev/react-turnstile";
 
 export default function PaymentPreviewPage({
   TURNSTILE_SITE_KEY,
@@ -23,12 +24,18 @@ export default function PaymentPreviewPage({
   TURNSTILE_SITE_KEY: string;
 }) {
   const {
-    payment: paymentValueFromStore,
+    paymentFormData: paymentFormDataValueFromStore,
     paymentFormUrl,
     setPaymentTableRecord,
     setUrlForQrCode,
     setReferencePublicKeyString,
   } = usePaymentStore();
+
+  const turnstileRef = useRef<TurnstileInstance>(null);
+  const handleResetAntibotToken = () => {
+    turnstileRef.current?.reset();
+  };
+
   const router = useRouter();
 
   const isMobileLayout = useMediaQuery("(max-width: 768px)");
@@ -61,7 +68,7 @@ export default function PaymentPreviewPage({
     success,
     error,
     data: payment,
-  } = paymentSchema.safeParse(paymentValueFromStore);
+  } = paymentFormDataSchema.safeParse(paymentFormDataValueFromStore);
 
   // If there's no payment data, redirect back to the payment page
   if (!success) {
@@ -86,6 +93,7 @@ export default function PaymentPreviewPage({
 
   const createPaymentTableRecord = async () => {
     if (!turnstileToken.isInitialized) {
+      handleResetAntibotToken();
       setAlertMessage({
         type: "error",
         value: "Turnstile token not initialized yet, please try again",
@@ -94,6 +102,7 @@ export default function PaymentPreviewPage({
     }
 
     if (turnstileToken.error) {
+      handleResetAntibotToken();
       setAlertMessage({
         type: "error",
         value: turnstileToken.error,
@@ -102,6 +111,7 @@ export default function PaymentPreviewPage({
     }
 
     if (turnstileToken.isExpired) {
+      handleResetAntibotToken();
       setAlertMessage({
         type: "error",
         value: "Turnstile token expired",
@@ -110,6 +120,7 @@ export default function PaymentPreviewPage({
     }
 
     if (!turnstileToken.token) {
+      handleResetAntibotToken();
       setAlertMessage({
         type: "error",
         value: "Turnstile token missing",

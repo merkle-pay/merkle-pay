@@ -1,17 +1,11 @@
 import { Button, Space, Typography, Alert } from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
-
 import styles from "./index.module.scss";
-
 import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
-import { CfTurnstile } from "../../../components/cf-turnstile";
 import { useRef, useState } from "react";
-import { AntibotToken } from "src/types/antibot";
 import { getPhantomProviders } from "src/utils/solana";
-
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
-
 import { WithQRCode } from "src/components/pay-solana/with-qrcode";
 import { WithPhantomExtension } from "src/components/pay-solana/with-phantom-extenstion";
 import { WithPhantomApp } from "src/components/pay-solana/with-phantom-app";
@@ -20,13 +14,12 @@ import { logoSvg } from "src/utils/logo";
 import { createQROptions } from "@solana/pay";
 
 export default function PaymentConfirmPage({
-  TURNSTILE_SITE_KEY,
   APP_URL,
 }: {
   TURNSTILE_SITE_KEY: string;
   APP_URL: string;
 }) {
-  const { payment, paymentFormUrl, urlForQrCode, paymentTableRecord } =
+  const { paymentFormData, paymentFormUrl, urlForQrCode, paymentTableRecord } =
     usePaymentStore();
   const router = useRouter();
   const goToUrl = (url: string) => {
@@ -41,7 +34,8 @@ export default function PaymentConfirmPage({
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
 
-  const [isPaying, setIsPaying] = useState(false);
+  const [isPayingWithPhantomExtension, setIsPayingWithPhantomExtension] =
+    useState(false);
 
   const [alertMessage, setAlertMessage] = useState<{
     type: "error" | "success" | "info" | null;
@@ -50,22 +44,6 @@ export default function PaymentConfirmPage({
     type: null,
     value: null,
   });
-
-  const [turnstileToken, setTurnstileToken] = useState<AntibotToken>({
-    token: "",
-    error: "",
-    isExpired: true,
-    isInitialized: false,
-  });
-
-  const handleTurnstileEvents = (params: AntibotToken) => {
-    setTurnstileToken((tt) => {
-      return {
-        ...tt,
-        ...params,
-      };
-    });
-  };
 
   const generateQrCode = async () => {
     if (!urlForQrCode || !paymentTableRecord?.mpid) {
@@ -125,31 +103,27 @@ export default function PaymentConfirmPage({
         <WithQRCode qrCodeRef={qrCodeRef} generateQrCode={generateQrCode} />
         {phantomSolanaProvider && (
           <WithPhantomExtension
-            isPaying={isPaying}
-            setIsPaying={setIsPaying}
+            isPaying={isPayingWithPhantomExtension}
+            setIsPaying={setIsPayingWithPhantomExtension}
             setAlertMessage={setAlertMessage}
             phantomSolanaProvider={phantomSolanaProvider}
             paymentTableRecord={paymentTableRecord}
             goToUrl={goToUrl}
-            payment={payment}
+            paymentFormData={paymentFormData}
           />
         )}
 
-        {/* {isMobileDevice && (
+        {isMobileDevice && (
           <WithPhantomApp
-            isLoadingQR={isLoadingQrCode}
-            isPaying={isPaying}
+            isPayingWithPhantomExtension={isPayingWithPhantomExtension}
             mobilePhantomStep={mobilePhantomStep}
             setAlertMessage={setAlertMessage}
-            paymentRecord={paymentRecord}
+            paymentTableRecord={paymentTableRecord}
             APP_URL={APP_URL}
           />
-        )} */}
+        )}
       </Space>
-      <CfTurnstile
-        siteKey={TURNSTILE_SITE_KEY}
-        handleTurnstileEvents={handleTurnstileEvents}
-      />
+
       <Space size={8} className={styles.buttons}>
         <Button
           type="outline"
@@ -169,8 +143,8 @@ export default function PaymentConfirmPage({
               router.push(`/pay/status?mpid=${paymentTableRecord.mpid}`);
             }
           }}
-          loading={isPaying}
-          disabled={!paymentTableRecord?.mpid || isPaying}
+          loading={isPayingWithPhantomExtension}
+          disabled={!paymentTableRecord?.mpid || isPayingWithPhantomExtension}
           icon={<IconArrowRight />}
         >
           I have paid. Check status
@@ -181,9 +155,8 @@ export default function PaymentConfirmPage({
 }
 
 export const getServerSideProps = async () => {
-  const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
   const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
   return {
-    props: { TURNSTILE_SITE_KEY, APP_URL },
+    props: { APP_URL },
   };
 };

@@ -1,55 +1,49 @@
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
-import { useRef, useEffect } from "react";
+import { useRef, forwardRef, useImperativeHandle } from "react";
 import { AntibotToken } from "src/types/antibot";
 
-export function CfTurnstile({
-  siteKey,
-  handleTurnstileEvents,
-  hasBeenUsed,
-  setHasBeenUsed,
-}: {
+type CfTurnstileProps = {
   siteKey: string;
   handleTurnstileEvents: (params: AntibotToken) => void;
-  hasBeenUsed?: boolean;
-  setHasBeenUsed?: (params: boolean) => void;
-}) {
-  const ref = useRef<TurnstileInstance | null>(null);
+};
 
-  useEffect(() => {
-    if (hasBeenUsed === true) {
-      ref.current?.reset();
-      setHasBeenUsed?.(false);
-    }
-  }, [hasBeenUsed, setHasBeenUsed]);
+export const CfTurnstile = forwardRef<TurnstileInstance, CfTurnstileProps>(
+  ({ siteKey, handleTurnstileEvents }, ref) => {
+    const turnstileRef = useRef<TurnstileInstance>(null);
 
-  return (
-    <Turnstile
-      ref={ref}
-      siteKey={siteKey}
-      onSuccess={(token) => {
-        handleTurnstileEvents({
-          token,
-          error: "",
-          isExpired: false,
-          isInitialized: true,
-        });
-      }}
-      onError={(error) => {
-        handleTurnstileEvents({
-          token: "",
-          error,
-          isExpired: false,
-          isInitialized: true,
-        });
-      }}
-      onExpire={() => {
-        handleTurnstileEvents({
-          token: "",
-          error: "",
-          isExpired: true,
-          isInitialized: true,
-        });
-      }}
-    />
-  );
-}
+    useImperativeHandle(ref, () => turnstileRef.current as TurnstileInstance);
+
+    return (
+      <Turnstile
+        ref={ref}
+        siteKey={siteKey}
+        onSuccess={(token) => {
+          handleTurnstileEvents({
+            token,
+            error: "",
+            isExpired: false,
+            isInitialized: true,
+          });
+        }}
+        onError={(error) => {
+          handleTurnstileEvents({
+            token: "",
+            error,
+            isExpired: false,
+            isInitialized: true,
+          });
+        }}
+        onExpire={() => {
+          handleTurnstileEvents({
+            token: "",
+            error: "",
+            isExpired: true,
+            isInitialized: true,
+          });
+        }}
+      />
+    );
+  }
+);
+
+CfTurnstile.displayName = "CfTurnstile";

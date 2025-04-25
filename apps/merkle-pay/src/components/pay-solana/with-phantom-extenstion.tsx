@@ -4,7 +4,7 @@ import { Button } from "@arco-design/web-react";
 import { sendSolanaPaymentWithPhantom } from "src/utils/solana";
 import { PhantomSolanaProvider } from "src/types/global";
 import { z } from "zod";
-import { Payment, paymentTableRecordSchema } from "src/types/payment";
+import { PaymentFormData, paymentTableRecordSchema } from "src/types/payment";
 
 export const WithPhantomExtension = ({
   isPaying,
@@ -13,7 +13,7 @@ export const WithPhantomExtension = ({
   phantomSolanaProvider,
   paymentTableRecord,
   goToUrl,
-  payment,
+  paymentFormData,
 }: {
   isPaying: boolean;
   setIsPaying: (isPaying: boolean) => void;
@@ -24,13 +24,13 @@ export const WithPhantomExtension = ({
   phantomSolanaProvider: PhantomSolanaProvider | null;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   goToUrl: (url: string) => void;
-  payment: Payment;
+  paymentFormData: PaymentFormData;
 }) => {
   const handlePayWithPhantomExtension = async () => {
     setIsPaying(true);
     const result = await sendSolanaPaymentWithPhantom({
       phantomSolanaProvider,
-      payment,
+      paymentFormData,
     }).finally(() => {
       setIsPaying(false);
     });

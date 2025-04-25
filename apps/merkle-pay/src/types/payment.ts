@@ -74,7 +74,7 @@ export type OrderStep =
 //       &message=<message>
 //       &memo=<memo></memo>
 
-export const paymentSchema = z.object({
+export const paymentFormDataSchema = z.object({
   recipient_address: z.string(),
   amount: z.number().positive(),
   token: z.string(),
@@ -86,10 +86,10 @@ export const paymentSchema = z.object({
   message: z.string().optional(),
 });
 
-export type Payment = z.infer<typeof paymentSchema>;
+export type PaymentFormData = z.infer<typeof paymentFormDataSchema>;
 
 export type PaymentState = {
-  payment: Payment;
+  paymentFormData: PaymentFormData;
   solanaWallets: RecipientWallet[];
   businessName: string | undefined;
   tokenOptions: string[];
@@ -102,7 +102,7 @@ export type PaymentState = {
 };
 
 export type PaymentActions = {
-  setPayment: (payment: Payment) => void;
+  setPaymentFormData: (paymentFormData: PaymentFormData) => void;
   setPaymentFormUrl: (url: string) => void;
   setSolanaWallets: (wallets: RecipientWallet[]) => void;
   setBusinessName: (name: string) => void;

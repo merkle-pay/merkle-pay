@@ -1,5 +1,5 @@
 import {
-  Payment,
+  PaymentFormData,
   PaymentState,
   PaymentStore,
   paymentTableRecordSchema,
@@ -12,7 +12,7 @@ import { z } from "zod";
 
 const initialState: PaymentState = {
   // payment will be saved into the database
-  payment: {
+  paymentFormData: {
     recipient_address: "",
     amount: 0,
     token: "",
@@ -22,7 +22,7 @@ const initialState: PaymentState = {
     businessName: "",
     payer: "",
     message: "",
-  } satisfies Payment,
+  } satisfies PaymentFormData,
   solanaWallets: [], // configurable
   businessName: "", // configurable
   tokenOptions: [], // configurable
@@ -37,7 +37,8 @@ const initialState: PaymentState = {
 // Custom hook to use the context
 export const usePaymentStore = create<PaymentStore>((set) => ({
   ...initialState,
-  setPayment: (payment: Payment) => set({ payment }),
+  setPaymentFormData: (paymentFormData: PaymentFormData) =>
+    set({ paymentFormData }),
   setPaymentFormUrl: (url: string) => set({ paymentFormUrl: url }),
   setSolanaWallets: (wallets: RecipientWallet[]) =>
     set({ solanaWallets: wallets }),

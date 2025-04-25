@@ -20,7 +20,7 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 
 import { PaymentStatus, PaymentTableRecord } from "./prisma";
-import { Payment } from "src/types/payment";
+import { PaymentFormData } from "src/types/payment";
 import { PhantomSolanaProvider } from "src/types/global";
 
 import { z } from "zod";
@@ -101,10 +101,10 @@ export const SOLANA_RPC_ENDPOINT =
 
 export const validatePhantomExtensionPayment = ({
   phantomSolanaProvider,
-  payment,
+  paymentFormData,
 }: {
   phantomSolanaProvider: PhantomSolanaProvider | null;
-  payment: Payment;
+  paymentFormData: PaymentFormData;
 }) => {
   if (!phantomSolanaProvider) {
     return {
@@ -112,14 +112,14 @@ export const validatePhantomExtensionPayment = ({
       error: "Phantom wallet not detected.",
     };
   }
-  if (!payment) {
+  if (!paymentFormData) {
     return {
       isValid: false,
       error: "Payment details not found.",
     };
   }
 
-  const { recipient_address, amount, orderId, token } = payment;
+  const { recipient_address, amount, orderId, token } = paymentFormData;
 
   if (!recipient_address || !amount || !orderId || !token) {
     return {
@@ -153,10 +153,10 @@ export const validatePhantomExtensionPayment = ({
 
 export const sendSolanaPaymentWithPhantom = async ({
   phantomSolanaProvider,
-  payment,
+  paymentFormData,
 }: {
   phantomSolanaProvider: PhantomSolanaProvider | null;
-  payment: Payment;
+  paymentFormData: PaymentFormData;
 }) => {
   const result: {
     alertMessage: string | null;
@@ -171,7 +171,7 @@ export const sendSolanaPaymentWithPhantom = async ({
   // 1. --- Pre-checks ---
   const { isValid, error } = validatePhantomExtensionPayment({
     phantomSolanaProvider,
-    payment,
+    paymentFormData,
   });
   if (!isValid || error) {
     result.alertMessage = error || "Invalid payment details.";
@@ -179,7 +179,7 @@ export const sendSolanaPaymentWithPhantom = async ({
   }
 
   try {
-    const { recipient_address, amount, orderId, token } = payment;
+    const { recipient_address, amount, orderId, token } = paymentFormData;
     // 2. --- Connect & Get Public Key ---
     const { publicKey } = await phantomSolanaProvider!.connect({
       onlyIfTrusted: false,

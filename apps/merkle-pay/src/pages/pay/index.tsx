@@ -10,7 +10,7 @@ import {
 } from "@arco-design/web-react";
 import { IconArrowRight } from "@arco-design/web-react/icon";
 import { useRouter } from "next/router";
-import { paymentSchema } from "../../types/payment";
+import { paymentFormDataSchema } from "../../types/payment";
 import { fromZodError } from "zod-validation-error";
 
 import { usePaymentStore } from "../../store/payment-store";
@@ -39,7 +39,7 @@ export default function PayPage({
 
   const {
     solanaWallets,
-    setPayment,
+    setPaymentFormData,
     businessName: businessNameFromStore,
     tokenOptions,
     blockchainOptions,
@@ -89,7 +89,7 @@ export default function PayPage({
 
   const goToPreview = () => {
     // Save all payment data to context
-    const parsedPayment = paymentSchema.safeParse({
+    const parsedPaymentFormData = paymentFormDataSchema.safeParse({
       ...router.query,
       amount:
         typeof router.query.amount === "string"
@@ -99,12 +99,12 @@ export default function PayPage({
       businessName: businessNameFromStore,
     });
 
-    if (!parsedPayment.success) {
-      Message.error(fromZodError(parsedPayment.error).message);
+    if (!parsedPaymentFormData.success) {
+      Message.error(fromZodError(parsedPaymentFormData.error).message);
       return;
     }
 
-    setPayment(parsedPayment.data);
+    setPaymentFormData(parsedPaymentFormData.data);
     setPaymentFormUrl(router.asPath);
 
     // Navigate to preview
