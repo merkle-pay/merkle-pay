@@ -220,7 +220,7 @@ export default function PaymentPreviewPage({
         </Button>
         <Button
           type="primary"
-          disabled={isLoading}
+          disabled={isLoading || !antibotToken}
           loading={isLoading}
           onClick={handleConfirmPayment}
         >

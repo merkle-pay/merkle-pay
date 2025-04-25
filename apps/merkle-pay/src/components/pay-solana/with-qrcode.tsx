@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import styles from "./with-qrcode.module.scss";
 import clsx from "clsx";
-import { Button, Space, Typography } from "@arco-design/web-react";
+import { Button } from "@arco-design/web-react";
 
 export const WithQRCode = ({
   qrCodeRef,
@@ -14,7 +14,7 @@ export const WithQRCode = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <Space direction="vertical" size={8}>
+    <>
       <Button
         type="primary"
         long
@@ -23,21 +23,16 @@ export const WithQRCode = ({
           setIsExpanded(!isExpanded);
         }}
       >
-        <Typography.Title heading={5}>Scan QR Code</Typography.Title>
+        Scan QR Code with Phantom or Solflare wallet
       </Button>
 
-      <Space direction="vertical" size={4}>
-        <div
-          className={clsx(styles.qrCodeContainer, {
-            [styles.expanded]: isExpanded,
-          })}
-        >
-          <div id="qr-code-container" ref={qrCodeRef} />
-          <Typography.Text type="secondary">
-            Open your banking app and scan this QR code to complete the payment
-          </Typography.Text>
-        </div>
-      </Space>
-    </Space>
+      <div
+        className={clsx(styles.qrCodeContainer, {
+          [styles.expanded]: isExpanded,
+        })}
+        id="qr-code-container"
+        ref={qrCodeRef}
+      />
+    </>
   );
 };

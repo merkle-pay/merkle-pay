@@ -6,6 +6,7 @@
   min-width: 0;
 
   margin-top: 5%;
+  margin-bottom: 5%;
 
   .title,
   .subtitle {
@@ -29,8 +30,6 @@
   }
 
   @media screen and (min-width: 640px) {
-    margin-top: 10%;
-
     .title {
       font-size: 2rem;
     }
@@ -43,8 +42,7 @@
   }
 }
 
-.loading,
-.error {
+.loading {
   display: flex;
   justify-content: center;
   align-items: center;
