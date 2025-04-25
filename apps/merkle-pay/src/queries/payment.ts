@@ -1,18 +1,19 @@
 import {
-  Payment,
+  PaymentFormData,
   PaymentStatusApiResponse,
   paymentTableRecordSchema,
 } from "src/types/payment";
 import { z, ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
-export const createPaymentQuery = async (
-  payment: Payment,
+
+export const createPaymentTableRecordQuery = async (
+  paymentFormData: PaymentFormData,
   turnstileToken: string
 ) => {
   try {
     const res = await fetch("/api/payment/init", {
       method: "POST",
-      body: JSON.stringify({ payment }),
+      body: JSON.stringify({ paymentFormData }),
       headers: {
         "Content-Type": "application/json",
         "mp-antibot-token": turnstileToken,

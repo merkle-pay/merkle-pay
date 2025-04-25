@@ -13,7 +13,7 @@ import styles from "./index.module.scss";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { useMediaQuery } from "@react-hookz/web";
 import { CfTurnstile } from "src/components/cf-turnstile";
-import { createPaymentQuery } from "src/queries/payment";
+import { createPaymentTableRecordQuery } from "src/queries/payment";
 import { useRef, useState } from "react";
 import { AntibotToken } from "src/types/antibot";
 import { TurnstileInstance } from "@marsidev/react-turnstile";
@@ -30,6 +30,8 @@ export default function PaymentPreviewPage({
     setUrlForQrCode,
     setReferencePublicKeyString,
   } = usePaymentStore();
+
+  console.log("paymentFormDataValueFromStore", paymentFormDataValueFromStore);
 
   const turnstileRef = useRef<TurnstileInstance>(null);
   const handleResetAntibotToken = () => {
@@ -67,7 +69,7 @@ export default function PaymentPreviewPage({
   const {
     success,
     error,
-    data: payment,
+    data: validatedPaymentFormData,
   } = paymentFormDataSchema.safeParse(paymentFormDataValueFromStore);
 
   // If there's no payment data, redirect back to the payment page
@@ -129,14 +131,14 @@ export default function PaymentPreviewPage({
     }
 
     if (
-      payment.amount <= 0 ||
-      !payment.blockchain ||
-      !payment.token ||
-      !payment.businessName ||
-      !payment.recipient_address ||
-      !payment.payer ||
-      !payment.orderId ||
-      !payment.returnUrl
+      validatedPaymentFormData.amount <= 0 ||
+      !validatedPaymentFormData.blockchain ||
+      !validatedPaymentFormData.token ||
+      !validatedPaymentFormData.businessName ||
+      !validatedPaymentFormData.recipient_address ||
+      !validatedPaymentFormData.payer ||
+      !validatedPaymentFormData.orderId ||
+      !validatedPaymentFormData.returnUrl
     ) {
       setAlertMessage({
         type: "error",
@@ -153,8 +155,8 @@ export default function PaymentPreviewPage({
 
     try {
       // Replace with your actual API call
-      const { data, error } = await createPaymentQuery(
-        payment,
+      const { data, error } = await createPaymentTableRecordQuery(
+        validatedPaymentFormData,
         turnstileToken.token
       );
       if (error || !data) {
@@ -212,35 +214,35 @@ export default function PaymentPreviewPage({
         data={[
           {
             label: "Payer",
-            value: payment.payer,
+            value: validatedPaymentFormData.payer,
           },
           {
             label: "Business Name",
-            value: payment.businessName,
+            value: validatedPaymentFormData.businessName,
           },
           {
             label: "Order ID",
-            value: payment.orderId,
+            value: validatedPaymentFormData.orderId,
           },
           {
             label: "Blockchain",
-            value: payment.blockchain,
+            value: validatedPaymentFormData.blockchain,
           },
           {
             label: "Amount",
-            value: `${payment.amount} ${payment.token}`,
+            value: `${validatedPaymentFormData.amount} ${validatedPaymentFormData.token}`,
           },
           {
             label: "Recipient",
-            value: payment.recipient_address,
+            value: validatedPaymentFormData.recipient_address,
           },
           {
             label: "Message",
-            value: payment.message,
+            value: validatedPaymentFormData.message,
           },
           {
             label: "Return URL",
-            value: payment.returnUrl,
+            value: validatedPaymentFormData.returnUrl,
           },
         ]}
         size={"medium"}

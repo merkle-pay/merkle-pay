@@ -129,7 +129,7 @@ export default function PaymentConfirmPage({
           type="outline"
           icon={<IconArrowLeft />}
           onClick={() => {
-            router.push(paymentFormUrl || "/pay");
+            goToUrl(paymentFormUrl || "/pay");
           }}
         >
           Back to Payment Form
@@ -140,7 +140,7 @@ export default function PaymentConfirmPage({
           type="primary"
           onClick={() => {
             if (paymentTableRecord?.mpid) {
-              router.push(`/pay/status?mpid=${paymentTableRecord.mpid}`);
+              goToUrl(`/pay/status?mpid=${paymentTableRecord.mpid}`);
             }
           }}
           loading={isPayingWithPhantomExtension}
