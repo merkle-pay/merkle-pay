@@ -9,20 +9,13 @@ import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
 import { CfTurnstile } from "../../../components/cf-turnstile";
 import { useState } from "react";
 import { AntibotToken } from "src/types/antibot";
-import {
-  createPhantomPaymentUniversalLink,
-  getPhantomProviders,
-} from "src/utils/solana";
+import { getPhantomProviders } from "src/utils/solana";
 
-import { Message } from "@arco-design/web-react";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
-import { useMediaQuery } from "@react-hookz/web";
-import { generateAndSaveNaclKeys } from "src/queries/solana";
-import { ls, LS_KEYS } from "src/utils/ls";
-import { PhantomConnectCallbackData } from "src/utils/phantom";
-import { PaymentTableRecord } from "src/utils/prisma";
+
 import { WithQRCode } from "src/components/pay-solana/with-qrcode";
 import { WithPhantomExtension } from "src/components/pay-solana/with-phantom-extenstion";
+import { WithPhantomApp } from "src/components/pay-solana/with-phantom-app";
 
 export default function PaymentConfirmPage({
   TURNSTILE_SITE_KEY,
@@ -33,10 +26,12 @@ export default function PaymentConfirmPage({
 }) {
   const { payment, paymentFormUrl } = usePaymentStore();
   const router = useRouter();
+  const { mobilePhantomStep = "connect" } = router.query as {
+    mobilePhantomStep: "connect" | "sst";
+  };
 
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
-  const isMobileLayout = useMediaQuery("(max-width: 768px)");
 
   const [isPaying, setIsPaying] = useState(false);
   const [phantomExtensionError, setPhantomExtensionError] = useState<
@@ -70,143 +65,6 @@ export default function PaymentConfirmPage({
     antibotToken: turnstileToken,
   });
 
-  const handlePhantomApp = async () => {
-    const phantomUniversalLinkParams = ls.get(
-      LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS
-    );
-
-    try {
-      const {
-        dAppPublicKey,
-        paymentRecord,
-        expiry,
-        decryptedConnectCallbackParams,
-      } = JSON.parse(phantomUniversalLinkParams ?? "{}");
-
-      if (
-        dAppPublicKey &&
-        paymentRecord &&
-        expiry &&
-        decryptedConnectCallbackParams &&
-        Date.now() < expiry
-      ) {
-        await handlePaySolanaWithPhantomApp();
-        return;
-      }
-    } catch (error) {
-      console.error(
-        error instanceof Error ? error.message : "Unexpected error"
-      );
-    }
-
-    await handleConnectPhantomApp();
-  };
-
-  // step1: connect phantom app
-  const handleConnectPhantomApp = async () => {
-    // ! TODO: verify payment record
-    // const { error } = await verifyPaymentRecord(paymentRecord);
-    // if (error) {
-    //   Message.error(error);
-    //   return;
-    // }
-    const { dAppPublicKey, error } = await generateAndSaveNaclKeys({
-      mpid: paymentRecord.mpid,
-      orderId: paymentRecord.orderId,
-      paymentId: paymentRecord.id,
-    });
-
-    if (error || !dAppPublicKey) {
-      Message.error(error || "Failed to generate DApp Encryption Public Key.");
-      return;
-    }
-
-    // store dAppPublicKey and paymentRecord in local storage
-    // and set expiry to 1 hour
-    ls.set(
-      LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS,
-      JSON.stringify({
-        dAppPublicKey,
-        paymentRecord,
-        expiry: Date.now() + 60 * 60 * 1000, // 1 hour
-      })
-    );
-
-    const phantomConnectBaseUrl = "https://phantom.app/ul/v1/connect";
-
-    const params = new URLSearchParams({
-      app_url: APP_URL,
-      dapp_encryption_public_key: dAppPublicKey,
-      redirect_link: `${APP_URL}/phantom/connect-callback`,
-    });
-
-    const phantomConnectUrl = `${phantomConnectBaseUrl}?${params.toString()}`;
-
-    window.open(phantomConnectUrl, "_blank");
-  };
-
-  // step2: pay with phantom app
-  const handlePaySolanaWithPhantomApp = async () => {
-    try {
-      const {
-        dAppPublicKey,
-        paymentRecord,
-        expiry,
-        decryptedConnectCallbackData,
-      } = JSON.parse(ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS) ?? "{}") as {
-        dAppPublicKey: string;
-        paymentRecord: Pick<
-          PaymentTableRecord,
-          | "id"
-          | "mpid"
-          | "orderId"
-          | "referencePublicKey"
-          | "recipient_address"
-          | "amount"
-          | "token"
-          | "blockchain"
-        > & {
-          urlForQrCode: string | null;
-          returnUrl: string;
-        };
-        expiry: number;
-        decryptedConnectCallbackData: PhantomConnectCallbackData;
-      };
-
-      if (
-        !dAppPublicKey ||
-        !paymentRecord ||
-        !expiry ||
-        !decryptedConnectCallbackData ||
-        Date.now() >= expiry
-      ) {
-        Message.error("Invalid Phantom Universal Link Params.");
-        return;
-      }
-
-      const universalLink = await createPhantomPaymentUniversalLink(
-        {
-          recipient_address: paymentRecord.recipient_address,
-          amount: paymentRecord.amount,
-          token: paymentRecord.token,
-          blockchain: paymentRecord.blockchain,
-          orderId: paymentRecord.orderId,
-          mpid: paymentRecord.mpid,
-        },
-        {
-          dappEncryptionPublicKey: dAppPublicKey,
-          appUrl: APP_URL,
-          decryptedConnectCallbackData,
-        }
-      );
-      if (universalLink) {
-        window.open(universalLink, "_blank");
-      }
-    } catch (error) {
-      setPhantomExtensionError((error as Error).message);
-    }
-  };
-
   return (
     <Space direction="vertical" size={8} className={styles.container}>
       <Typography.Title className={styles.title}>
@@ -227,36 +85,31 @@ export default function PaymentConfirmPage({
           />
         </div>
       )}
-      <Space size={8} direction={isMobileLayout ? "vertical" : "horizontal"}>
+      <Space size={8} direction={"vertical"}>
         <WithQRCode qrCodeRef={qrCodeRef} />
-        <WithPhantomExtension
-          isPaying={isPaying}
-          setIsPaying={setIsPaying}
-          setPhantomExtensionError={setPhantomExtensionError}
-          setRegularError={setRegularError}
-          phantomSolanaProvider={phantomSolanaProvider}
-          paymentRecord={paymentRecord}
-          isLoadingQR={isLoadingQR}
-          router={router}
-          payment={payment}
-        />
+        {phantomSolanaProvider && (
+          <WithPhantomExtension
+            isPaying={isPaying}
+            setIsPaying={setIsPaying}
+            setPhantomExtensionError={setPhantomExtensionError}
+            setRegularError={setRegularError}
+            phantomSolanaProvider={phantomSolanaProvider}
+            paymentRecord={paymentRecord}
+            isLoadingQR={isLoadingQR}
+            router={router}
+            payment={payment}
+          />
+        )}
 
-        {(isMobileDevice || phantomSolanaProvider) && (
-          <div className={styles.phantomButton}>
-            <Button
-              type="primary"
-              size="large"
-              onClick={async () => {
-                if (isMobileDevice) {
-                  await handlePhantomApp();
-                }
-              }}
-              disabled={isLoadingQR || isPaying}
-            >
-              Pay with Phantom <br />
-              {isMobileDevice ? "Mobile App" : "Wallet Extension"}
-            </Button>
-          </div>
+        {isMobileDevice && (
+          <WithPhantomApp
+            isLoadingQR={isLoadingQR}
+            isPaying={isPaying}
+            mobilePhantomStep={mobilePhantomStep}
+            setRegularError={setRegularError}
+            paymentRecord={paymentRecord}
+            APP_URL={APP_URL}
+          />
         )}
       </Space>
       <CfTurnstile
