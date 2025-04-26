@@ -150,7 +150,8 @@ export default function PaymentConfirmPage({
 
         <Button
           className={styles.checkStatusButton}
-          type="primary"
+          type="outline"
+          status="success"
           onClick={() => {
             if (paymentTableRecord?.mpid) {
               goToUrl(`/pay/status?mpid=${paymentTableRecord.mpid}`);
