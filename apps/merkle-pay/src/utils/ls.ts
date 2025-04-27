@@ -14,5 +14,6 @@ export const ls = {
 };
 
 export const LS_KEYS = {
+  PHANTOM_CONNECT_CALLBACK_PARAMS: "MerklePay.PhantomConnectCallbackParams",
   PHANTOM_UNIVERSAL_LINK_PARAMS: "MerklePay.PhantomUniversalLinkParams",
 };

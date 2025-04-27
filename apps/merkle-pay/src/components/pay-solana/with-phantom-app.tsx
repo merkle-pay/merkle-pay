@@ -8,6 +8,7 @@ import { PhantomConnectCallbackData } from "src/utils/phantom";
 import { createPhantomPaymentUniversalLink } from "src/utils/solana";
 import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
+
 export const WithPhantomApp = ({
   isPayingWithPhantomExtension,
   mobilePhantomStep,
@@ -30,10 +31,12 @@ export const WithPhantomApp = ({
     try {
       if (mobilePhantomStep === "connect") {
         await handleConnectPhantomApp();
+        return;
       }
 
       if (mobilePhantomStep === "sst") {
         await handlePaySolanaWithPhantomApp();
+        return;
       }
 
       throw new Error("Invalid Phantom Step");
@@ -55,7 +58,7 @@ export const WithPhantomApp = ({
       return;
     }
 
-    const { dAppPublicKey, error } = await generateAndSaveNaclKeys({
+    const { dAppPublicKey, error, requestId } = await generateAndSaveNaclKeys({
       mpid: paymentTableRecord.mpid,
       orderId: paymentTableRecord.orderId,
       paymentId: paymentTableRecord.id,
@@ -72,7 +75,7 @@ export const WithPhantomApp = ({
     // store dAppPublicKey and paymentRecord in local storage
     // and set expiry to 1 hour
     ls.set(
-      LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS,
+      LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS,
       JSON.stringify({
         dAppPublicKey,
         paymentTableRecord,
@@ -85,28 +88,33 @@ export const WithPhantomApp = ({
     const params = new URLSearchParams({
       app_url: APP_URL,
       dapp_encryption_public_key: dAppPublicKey,
-      redirect_link: `${APP_URL}/phantom/connect-callback`,
+      redirect_link: `${APP_URL}/phantom/connect-callback?requestId=${requestId}`,
     });
 
     const phantomConnectUrl = `${phantomConnectBaseUrl}?${params.toString()}`;
 
-    window.open(phantomConnectUrl, "_blank");
+    window.location.href = phantomConnectUrl;
   };
 
   // step2: pay with phantom app
   const handlePaySolanaWithPhantomApp = async () => {
     try {
-      const {
-        dAppPublicKey,
-        paymentTableRecord,
-        expiry,
-        decryptedConnectCallbackData,
-      } = JSON.parse(ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS) ?? "{}") as {
+      const ls_data = JSON.parse(
+        ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS) ?? "{}"
+      ) as {
         dAppPublicKey: string;
         paymentTableRecord: z.infer<typeof paymentTableRecordSchema>;
         expiry: number;
         decryptedConnectCallbackData: PhantomConnectCallbackData;
       };
+
+      console.log("ls_data", ls_data);
+      const {
+        dAppPublicKey,
+        paymentTableRecord,
+        expiry,
+        decryptedConnectCallbackData,
+      } = ls_data;
 
       if (
         !dAppPublicKey ||

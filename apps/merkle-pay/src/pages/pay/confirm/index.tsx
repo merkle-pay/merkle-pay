@@ -34,6 +34,7 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
   const { mobilePhantomStep = "connect" } = router.query as {
     mobilePhantomStep: "connect" | "sst";
   };
+
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();

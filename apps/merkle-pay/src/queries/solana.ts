@@ -23,6 +23,7 @@ export const generateAndSaveNaclKeys = async ({
     return data as {
       dAppPublicKey?: string;
       error?: string;
+      requestId?: string;
     };
   } catch (error) {
     console.error((error as Error).message);
@@ -30,5 +31,6 @@ export const generateAndSaveNaclKeys = async ({
   return {} as {
     dAppPublicKey?: string;
     error?: string;
+    requestId?: string;
   };
 };

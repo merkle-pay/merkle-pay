@@ -10,6 +10,7 @@ import { ls } from "src/utils/ls";
 import { PhantomConnectCallbackData } from "src/utils/phantom";
 
 export default function PhantomConnectCallbackPage({
+  DAPP_PUBLIC_KEY_BASE58,
   DAPP_PRIVATE_KEY_BASE58,
   NONCE,
   DATA,
@@ -18,6 +19,7 @@ export default function PhantomConnectCallbackPage({
   errorCode,
   errorMessage,
 }: {
+  DAPP_PUBLIC_KEY_BASE58?: string;
   DAPP_PRIVATE_KEY_BASE58?: string;
   NONCE?: string;
   DATA?: string;
@@ -37,6 +39,7 @@ export default function PhantomConnectCallbackPage({
       !router.isReady ||
       isError ||
       !DAPP_PRIVATE_KEY_BASE58 ||
+      !DAPP_PUBLIC_KEY_BASE58 ||
       !PHANTOM_ENCRYPTION_PUBLIC_KEY ||
       !NONCE ||
       !DATA
@@ -67,14 +70,19 @@ export default function PhantomConnectCallbackPage({
       ) as PhantomConnectCallbackData;
 
       const phantomUniversalLinkParams = JSON.parse(
-        ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS) ?? "{}"
+        ls.get(LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS) ?? "{}"
       );
 
-      const { dAppPublicKey, paymentRecord, expiry } =
+      const { dAppPublicKey, paymentTableRecord, expiry } =
         phantomUniversalLinkParams;
 
-      if (!dAppPublicKey || !paymentRecord || !expiry || Date.now() > expiry) {
-        setError("Invalid Phantom Universal Link Params.");
+      if (
+        !dAppPublicKey ||
+        !paymentTableRecord ||
+        !expiry ||
+        Date.now() > expiry
+      ) {
+        setError(`Invalid Phantom Connect Callback Params`);
         return;
       }
 
@@ -86,9 +94,11 @@ export default function PhantomConnectCallbackPage({
         })
       );
 
-      router.push("/pay/confirm");
+      router.push("/pay/confirm?mobilePhantomStep=sst");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Unexpected error");
+    } finally {
+      ls.remove(LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS);
     }
   }, [isError, router.isReady, router.push]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -104,9 +114,9 @@ export default function PhantomConnectCallbackPage({
 }
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const { phantom_encryption_public_key, nonce, data } = ctx.query;
+  const { requestId, phantom_encryption_public_key, nonce, data } = ctx.query;
 
-  if (!phantom_encryption_public_key) {
+  if (!phantom_encryption_public_key || !requestId) {
     return {
       props: {
         isError: true,
@@ -116,21 +126,26 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
   }
 
-  const phantomDeepLink = await prisma.phantomDeepLink.findFirstOrThrow({
+  const phantomDeepLink = await prisma.phantomDeepLink.findFirst({
     where: {
-      publicKey: phantom_encryption_public_key as string,
+      requestId: requestId as string,
     },
   });
 
   if (!phantomDeepLink) {
     return {
-      props: {},
+      props: {
+        isError: true,
+        errorCode: requestId,
+        errorMessage: "Phantom Deep Link not found.",
+      },
     };
   }
 
   return {
     props: {
       DAPP_PRIVATE_KEY_BASE58: phantomDeepLink.privateKey,
+      DAPP_PUBLIC_KEY_BASE58: phantomDeepLink.publicKey,
       NONCE: nonce,
       DATA: data,
       PHANTOM_ENCRYPTION_PUBLIC_KEY: phantom_encryption_public_key,
