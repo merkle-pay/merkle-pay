@@ -74,14 +74,11 @@ export const WithPhantomApp = ({
 
     // store dAppPublicKey and paymentRecord in local storage
     // and set expiry to 1 hour
-    ls.set(
-      LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS,
-      JSON.stringify({
-        dAppPublicKey,
-        paymentTableRecord,
-        expiry: Date.now() + 60 * 60 * 1000, // 1 hour
-      })
-    );
+    ls.setPhantomConnectCallbackParams({
+      dAppPublicKey,
+      paymentTableRecord,
+      expiry: Date.now() + 60 * 60 * 1000, // 1 hour
+    });
 
     const phantomConnectBaseUrl = "https://phantom.app/ul/v1/connect";
 

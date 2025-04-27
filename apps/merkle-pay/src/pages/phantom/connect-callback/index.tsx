@@ -69,9 +69,12 @@ export default function PhantomConnectCallbackPage({
         decryptedConnectCallbackDataString
       ) as PhantomConnectCallbackData;
 
-      const phantomUniversalLinkParams = JSON.parse(
-        ls.get(LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS) ?? "{}"
-      );
+      const phantomUniversalLinkParams = ls.getPhantomConnectCallbackParams();
+
+      if (!phantomUniversalLinkParams) {
+        setError(`Phantom Connect Callback Params not found`);
+        return;
+      }
 
       const { dAppPublicKey, paymentTableRecord, expiry } =
         phantomUniversalLinkParams;
@@ -82,7 +85,7 @@ export default function PhantomConnectCallbackPage({
         !expiry ||
         Date.now() > expiry
       ) {
-        setError(`Invalid Phantom Connect Callback Params`);
+        setError(`Invalid Phantom Connect Callback Params or expired.`);
         return;
       }
 
@@ -110,7 +113,7 @@ export default function PhantomConnectCallbackPage({
     );
   }
 
-  return <div>PhantomConnectCallbackPage</div>;
+  return <div>Phantom Connect Callback Page</div>;
 }
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
