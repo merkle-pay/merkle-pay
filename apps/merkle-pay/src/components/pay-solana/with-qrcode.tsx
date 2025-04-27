@@ -17,6 +17,7 @@ export const WithQRCode = ({
     <>
       <Button
         type="primary"
+        size="large"
         long
         onClick={() => {
           generateQrCode();

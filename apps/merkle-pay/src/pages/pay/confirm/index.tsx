@@ -19,13 +19,9 @@ import QRCodeStyling from "@solana/qr-code-styling";
 import { logoSvg } from "src/utils/logo";
 import { createQROptions } from "@solana/pay";
 import { useMediaQuery } from "@react-hookz/web";
+import { CONFIRMATION_DATA_KEY_LABEL_MAP } from "src/utils/payment";
 
-export default function PaymentConfirmPage({
-  APP_URL,
-}: {
-  TURNSTILE_SITE_KEY: string;
-  APP_URL: string;
-}) {
+export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
   const { paymentFormData, paymentFormUrl, urlForQrCode, paymentTableRecord } =
     usePaymentStore();
   const isMobileLayout = useMediaQuery("(max-width: 768px)");
@@ -82,61 +78,71 @@ export default function PaymentConfirmPage({
   };
 
   const descriptionData = Object.entries(paymentTableRecord ?? {})
-    .filter(([key]) => key !== "raw")
+    .filter(
+      ([key]) =>
+        !!CONFIRMATION_DATA_KEY_LABEL_MAP[
+          key as keyof typeof CONFIRMATION_DATA_KEY_LABEL_MAP
+        ]
+    )
     .map(([key, value]) => ({
       key: key,
-      label: key,
-      value: value ?? "",
+      label:
+        CONFIRMATION_DATA_KEY_LABEL_MAP[
+          key as keyof typeof CONFIRMATION_DATA_KEY_LABEL_MAP
+        ],
+      value,
     }));
 
   return (
-    <Space direction="vertical" size={8} className={styles.container}>
-      {alertMessage.value && alertMessage.type && (
-        <Alert
-          closable
-          type={alertMessage.type}
-          title={alertMessage.type.toUpperCase()}
-          content={alertMessage.value}
-          onClose={() => {
-            setAlertMessage({
-              type: null,
-              value: null,
-            });
-          }}
+    <Space direction="vertical" size={48} className={styles.container}>
+      <Space direction="vertical" size={8}>
+        {alertMessage.value && alertMessage.type && (
+          <Alert
+            closable
+            type={alertMessage.type}
+            title={alertMessage.type.toUpperCase()}
+            content={alertMessage.value}
+            onClose={() => {
+              setAlertMessage({
+                type: null,
+                value: null,
+              });
+            }}
+          />
+        )}
+        <Typography.Title className={styles.title}>
+          Payment Confirmation
+        </Typography.Title>
+        <Descriptions
+          size="large"
+          column={isMobileLayout ? 1 : 2}
+          colon=" : "
+          layout="inline-vertical"
+          data={descriptionData}
+          labelStyle={{ fontWeight: 600, color: "#000" }}
         />
-      )}
-      <Typography.Title className={styles.title}>
-        Payment Confirmation
-      </Typography.Title>
-      <Descriptions
-        size="large"
-        column={isMobileLayout ? 1 : 2}
-        colon=" : "
-        layout="horizontal"
-        data={descriptionData}
-        labelStyle={{ fontWeight: 600, color: "#000" }}
-      />
-      <WithQRCode qrCodeRef={qrCodeRef} generateQrCode={generateQrCode} />
-      {phantomSolanaProvider && (
-        <WithPhantomExtension
-          isPaying={isPayingWithPhantomExtension}
-          setIsPaying={setIsPayingWithPhantomExtension}
-          setAlertMessage={setAlertMessage}
-          phantomSolanaProvider={phantomSolanaProvider}
-          paymentTableRecord={paymentTableRecord}
-          goToUrl={goToUrl}
-          paymentFormData={paymentFormData}
-        />
-      )}
-      {isMobileDevice && (
-        <WithPhantomApp
-          isPayingWithPhantomExtension={isPayingWithPhantomExtension}
-          mobilePhantomStep={mobilePhantomStep}
-          setAlertMessage={setAlertMessage}
-          paymentTableRecord={paymentTableRecord}
-          APP_URL={APP_URL}
-        />
-      )}
+        <WithQRCode qrCodeRef={qrCodeRef} generateQrCode={generateQrCode} />
+        {phantomSolanaProvider && (
+          <WithPhantomExtension
+            isPaying={isPayingWithPhantomExtension}
+            setIsPaying={setIsPayingWithPhantomExtension}
+            setAlertMessage={setAlertMessage}
+            phantomSolanaProvider={phantomSolanaProvider}
+            paymentTableRecord={paymentTableRecord}
+            goToUrl={goToUrl}
+            paymentFormData={paymentFormData}
+          />
+        )}
+        {isMobileDevice && (
+          <WithPhantomApp
+            isPayingWithPhantomExtension={isPayingWithPhantomExtension}
+            mobilePhantomStep={mobilePhantomStep}
+            setAlertMessage={setAlertMessage}
+            paymentTableRecord={paymentTableRecord}
+            APP_URL={APP_URL}
+          />
+        )}
+      </Space>
       <Space size={8} className={styles.buttons}>
         <Button
           type="outline"

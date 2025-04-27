@@ -152,13 +152,13 @@ export const WithPhantomApp = ({
     <Button
       type="primary"
       size="large"
+      long
       onClick={async () => {
         await handlePhantomApp();
       }}
       disabled={isPayingWithPhantomExtension}
     >
-      Pay with Phantom <br />
-      {isMobileDevice ? "Mobile App" : "Wallet Extension"}
+      Pay with Phantom {isMobileDevice ? "Mobile App" : "Wallet Extension"}
     </Button>
   );
 };

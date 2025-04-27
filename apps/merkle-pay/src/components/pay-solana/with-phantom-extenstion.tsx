@@ -59,6 +59,7 @@ export const WithPhantomExtension = ({
     <Button
       type="primary"
       long
+      size="large"
       onClick={handlePayWithPhantomExtension}
       disabled={isPaying}
     >

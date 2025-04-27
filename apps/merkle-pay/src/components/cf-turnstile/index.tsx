@@ -14,7 +14,7 @@ export type CfTurnstileProps = {
   siteKey: string;
   setToken?: (token: string) => void;
   options?: TurnstileProps["options"];
-  ref: Ref<CfTurnstileHandle>;
+  ref?: Ref<CfTurnstileHandle>;
 };
 
 export const CfTurnstile = (props: CfTurnstileProps) => {

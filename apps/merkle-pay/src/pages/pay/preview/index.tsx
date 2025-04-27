@@ -12,11 +12,9 @@ import { fromZodError } from "zod-validation-error";
 import styles from "./index.module.scss";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { useMediaQuery } from "@react-hookz/web";
-import { CfTurnstile } from "src/components/cf-turnstile";
+import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
 import { createPaymentTableRecordQuery } from "src/queries/payment";
 import { useRef, useState } from "react";
-
-import { TurnstileInstance } from "@marsidev/react-turnstile";
 
 export default function PaymentPreviewPage({
   TURNSTILE_SITE_KEY,
@@ -31,12 +29,7 @@ export default function PaymentPreviewPage({
     setReferencePublicKeyString,
   } = usePaymentStore();
 
-  console.log("paymentFormDataValueFromStore", paymentFormDataValueFromStore);
-
-  const turnstileRef = useRef<TurnstileInstance>(null);
-  const handleResetAntibotToken = () => {
-    turnstileRef.current?.reset();
-  };
+  const turnstileRef = useRef<CfTurnstileHandle>(null);
 
   const router = useRouter();
 
@@ -76,12 +69,17 @@ export default function PaymentPreviewPage({
     const success = await createPaymentTableRecord();
     if (success) {
       router.push("/pay/confirm");
+    } else {
+      turnstileRef.current?.reset();
+      setAlertMessage({
+        type: "error",
+        value: "Failed to create payment table record, please try again",
+      });
     }
   };
 
   const createPaymentTableRecord = async () => {
     if (!antibotToken) {
-      handleResetAntibotToken();
       setAlertMessage({
         type: "error",
         value: "Turnstile token not initialized yet, please try again",
@@ -149,7 +147,6 @@ export default function PaymentPreviewPage({
         <div className={styles.error}>
           <Alert
             closable
-            style={{ marginBottom: 20 }}
             type="error"
             title="Error"
             content={alertMessage.value}
