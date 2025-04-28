@@ -10,6 +10,7 @@ type PhantomConnectCallbackParams = {
 
 type PhantomUniversalLinkParams = PhantomConnectCallbackParams & {
   decryptedConnectCallbackData: PhantomConnectCallbackData;
+  DAPP_PRIVATE_KEY_BASE58: string;
 };
 
 export const ls = {

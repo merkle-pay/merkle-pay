@@ -92,6 +92,7 @@ export default function ConnectCallback({
       ls.setPhantomUniversalLinkParams({
         ...phantomUniversalLinkParams,
         decryptedConnectCallbackData,
+        DAPP_PRIVATE_KEY_BASE58,
       });
 
       router.push("/pay/confirm?mobilePhantomStep=sst");

@@ -1,4 +1,3 @@
-import type { Cluster } from "@solana/web3.js";
 import {
   LAMPORTS_PER_SOL,
   PublicKey,
@@ -11,7 +10,6 @@ import {
 } from "@solana/web3.js";
 import {
   createTransferInstruction,
-  createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
@@ -28,8 +26,8 @@ import { z } from "zod";
 /**
  * Establish a connection to the cluster
  */
-export function establishConnection(cluster: Cluster = "devnet"): Connection {
-  const endpoint = clusterApiUrl(cluster);
+export function establishConnection(): Connection {
+  const endpoint = SOLANA_RPC_ENDPOINT;
   const connection = new Connection(endpoint, "confirmed");
   return connection;
 }
@@ -43,12 +41,13 @@ export const SplTokens = {
     mint: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
     decimals: 6,
   },
+  SOL: {
+    mint: "So11111111111111111111111111111111111111112",
+    decimals: 9,
+  },
 };
 
-export const NativeSolanaToken = {
-  mint: "So11111111111111111111111111111111111111112",
-  decimals: 9,
-};
+export type SplTokenName = keyof typeof SplTokens;
 
 // !TODO: all kinds of solana error codes should be added later
 export const SOLANA_ERROR_CODES = new Set([]);
@@ -135,10 +134,7 @@ export const validatePhantomExtensionPayment = ({
     };
   }
 
-  if (
-    SplTokens[token as keyof typeof SplTokens] === undefined &&
-    token !== "SOL"
-  ) {
+  if (SplTokens[token as SplTokenName] === undefined) {
     return {
       isValid: false,
       error: "Invalid token.",
@@ -189,7 +185,7 @@ export const sendSolanaPaymentWithPhantomExtension = async ({
     }
 
     // 3. --- Initialize Connection ---
-    const connection = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
+    const connection = establishConnection();
 
     // 4. --- Create Instructions ---
     const instructions: TransactionInstruction[] = [];
@@ -316,6 +312,7 @@ export async function createPhantomPaymentUniversalLink(
   >,
   options: {
     dappEncryptionPublicKey: string;
+    dappPrivateKeyBase58: string;
     appUrl: string;
     session: string;
     public_key: string;
@@ -334,63 +331,104 @@ export async function createPhantomPaymentUniversalLink(
     schema.parse(paymentRecord);
 
   // 2) Build Solana TX
-  const conn = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
-  const recipientPK = new PublicKey(recipient_address);
-  const payerPK = new PublicKey(options.public_key);
-  const tx = new Transaction();
-  const { mint, decimals } = SplTokens[token as keyof typeof SplTokens];
+  const connection = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
 
-  // ensure ATA exists
-  const ata = await getAssociatedTokenAddress(new PublicKey(mint), recipientPK);
-  if (!(await conn.getAccountInfo(ata))) {
-    tx.add(
-      createAssociatedTokenAccountInstruction(
-        payerPK,
-        ata,
-        recipientPK,
-        new PublicKey(mint)
+  const instructions: TransactionInstruction[] = [];
+
+  const memoInstruction = new TransactionInstruction({
+    keys: [
+      {
+        pubkey: new PublicKey(options.public_key),
+        isSigner: true,
+        isWritable: true,
+      },
+    ],
+    programId: MEMO_PROGRAM_ID,
+    data: Buffer.from(orderId, "utf8"),
+  });
+  instructions.push(memoInstruction);
+
+  const recipientPubKey = new PublicKey(recipient_address);
+
+  if (token === "SOL") {
+    // SOL Transfer
+    const lamports = Math.round(amount * LAMPORTS_PER_SOL); // Ensure integer lamports
+
+    instructions.push(
+      SystemProgram.transfer({
+        fromPubkey: new PublicKey(options.public_key),
+        toPubkey: recipientPubKey,
+        lamports: lamports,
+      })
+    );
+  } else {
+    // SPL Token Transfer
+    const { mint, decimals } = SplTokens[token as keyof typeof SplTokens];
+    const mintPubKey = new PublicKey(mint);
+
+    // Calculate token amount based on decimals
+    const tokenAmount = new BigNumber(amount)
+      .multipliedBy(Math.pow(10, decimals))
+      .integerValue()
+      .toNumber();
+
+    // Get Associated Token Accounts
+    const senderTokenAccount = await getAssociatedTokenAddress(
+      mintPubKey,
+      new PublicKey(options.public_key)
+    );
+    const recipientTokenAccount = await getAssociatedTokenAddress(
+      mintPubKey,
+      recipientPubKey
+    );
+
+    instructions.push(
+      createTransferInstruction(
+        senderTokenAccount, // from
+        recipientTokenAccount, // to
+        new PublicKey(options.public_key), // owner/signer (sender's wallet)
+        tokenAmount, // amount (in smallest unit)
+        [], // multiSigners
+        TOKEN_PROGRAM_ID // Token program ID
       )
     );
   }
 
-  // transfer
-  const amountRaw = new BigNumber(amount)
-    .multipliedBy(10 ** decimals)
-    .integerValue()
-    .toNumber();
-
-  const payerAta = await getAssociatedTokenAddress(
-    new PublicKey(mint),
-    payerPK
-  );
-  tx.add(createTransferInstruction(payerAta, ata, payerPK, amountRaw));
-
-  // memo
-  tx.add({
-    programId: MEMO_PROGRAM_ID,
-    keys: [],
-    data: Buffer.from(orderId),
-  });
+  // 5. --- Create Transaction ---
+  const tx = new Transaction().add(...instructions);
+  tx.feePayer = new PublicKey(options.public_key);
 
   // recent blockhash + feePayer
-  const { blockhash } = await conn.getLatestBlockhash();
+  const { blockhash } = await connection.getLatestBlockhash();
   tx.recentBlockhash = blockhash;
-  tx.feePayer = payerPK;
+  tx.feePayer = new PublicKey(options.public_key);
 
-  // 3) Serialize
   const serializedTx = tx.serialize({ requireAllSignatures: false });
   const serializedTxBase58 = bs58.encode(serializedTx);
 
-  // 4) Build Universal Link
+  const payloadObject = {
+    session: options.session,
+    transaction: serializedTxBase58,
+  };
+
+  const sharedSecret = nacl.box.before(
+    bs58.decode(options.dappEncryptionPublicKey),
+    bs58.decode(options.dappPrivateKeyBase58)
+  );
+
   const nonceBytes = nacl.randomBytes(24);
+
+  const encryptedPayload = nacl.box.after(
+    Buffer.from(JSON.stringify(payloadObject)),
+    nonceBytes,
+    sharedSecret
+  );
+
   const ulParams = new URLSearchParams({
     dapp_encryption_public_key: options.dappEncryptionPublicKey,
     nonce: bs58.encode(nonceBytes),
     redirect_link: `${options.appUrl}/phantom/deeplink-callback?mpid=${paymentRecord.mpid}`,
-    payload: JSON.stringify({
-      session: options.session,
-      transaction: serializedTxBase58,
-    }),
+    payload: bs58.encode(encryptedPayload),
     // cluster: "mainnet-beta" // optional; defaults to mainnet-beta
   });
 

@@ -113,10 +113,12 @@ export const WithPhantomApp = ({
         paymentTableRecord,
         expiry,
         decryptedConnectCallbackData,
+        DAPP_PRIVATE_KEY_BASE58,
       } = ls.getPhantomUniversalLinkParams() ?? {};
 
       if (
         !dAppPublicKey ||
+        !DAPP_PRIVATE_KEY_BASE58 ||
         !paymentTableRecord ||
         !expiry ||
         !decryptedConnectCallbackData ||
@@ -140,6 +142,7 @@ export const WithPhantomApp = ({
         },
         {
           dappEncryptionPublicKey: dAppPublicKey,
+          dappPrivateKeyBase58: DAPP_PRIVATE_KEY_BASE58,
           appUrl: APP_URL,
           ...decryptedConnectCallbackData,
         }
