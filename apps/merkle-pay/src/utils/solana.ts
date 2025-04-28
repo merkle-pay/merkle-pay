@@ -24,7 +24,7 @@ import { PaymentFormData } from "src/types/payment";
 import { PhantomSolanaProvider } from "src/types/global";
 
 import { z } from "zod";
-import { PhantomConnectCallbackData } from "./phantom";
+
 /**
  * Establish a connection to the cluster
  */
@@ -317,7 +317,8 @@ export async function createPhantomPaymentUniversalLink(
   options: {
     dappEncryptionPublicKey: string;
     appUrl: string;
-    decryptedConnectCallbackData: PhantomConnectCallbackData;
+    session: string;
+    public_key: string;
   }
 ): Promise<string> {
   // 1) Validate
@@ -335,9 +336,7 @@ export async function createPhantomPaymentUniversalLink(
   // 2) Build Solana TX
   const conn = new Connection(SOLANA_RPC_ENDPOINT, "confirmed");
   const recipientPK = new PublicKey(recipient_address);
-  const payerPK = new PublicKey(
-    options.decryptedConnectCallbackData.public_key
-  );
+  const payerPK = new PublicKey(options.public_key);
   const tx = new Transaction();
   const { mint, decimals } = SplTokens[token as keyof typeof SplTokens];
 
@@ -379,17 +378,19 @@ export async function createPhantomPaymentUniversalLink(
   tx.feePayer = payerPK;
 
   // 3) Serialize
-  const serialized = tx
-    .serialize({ requireAllSignatures: false })
-    .toString("base64");
+  const serializedTx = tx.serialize({ requireAllSignatures: false });
+  const serializedTxBase58 = bs58.encode(serializedTx);
 
   // 4) Build Universal Link
   const nonceBytes = nacl.randomBytes(24);
   const ulParams = new URLSearchParams({
     dapp_encryption_public_key: options.dappEncryptionPublicKey,
     nonce: bs58.encode(nonceBytes),
-    redirect_link: `${options.appUrl}/phantom/deeplink-callback`,
-    transaction: serialized,
+    redirect_link: `${options.appUrl}/phantom/deeplink-callback?mpid=${paymentRecord.mpid}`,
+    payload: JSON.stringify({
+      session: options.session,
+      transaction: serializedTxBase58,
+    }),
     // cluster: "mainnet-beta" // optional; defaults to mainnet-beta
   });
 

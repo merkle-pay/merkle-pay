@@ -1,4 +1,4 @@
-import { Alert, Space } from "@arco-design/web-react";
+import { Alert, Space, Spin, Typography } from "@arco-design/web-react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import nacl from "tweetnacl";
@@ -110,7 +110,21 @@ export default function ConnectCallback({
     );
   }
 
-  return <div>Phantom Connect Callback Page</div>;
+  return (
+    <Space direction="vertical" size={48}>
+      <Typography.Title heading={3}>Processing Connection...</Typography.Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <Spin dot />
+      </div>
+    </Space>
+  );
 }
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {

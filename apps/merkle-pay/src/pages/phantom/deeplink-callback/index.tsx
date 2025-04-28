@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { Message } from "@arco-design/web-react";
+import { Message, Space, Spin, Typography } from "@arco-design/web-react";
 import nacl from "tweetnacl";
 import { prisma } from "src/utils/prisma";
 
@@ -67,7 +67,21 @@ export default function DeepLinkCallback() {
     router,
   ]);
 
-  return <div>Processing...</div>;
+  return (
+    <Space direction="vertical" size={48}>
+      <Typography.Title heading={3}>Processing Payment...</Typography.Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
+        <Spin dot />
+      </div>
+    </Space>
+  );
 }
 
 function decryptPayload(

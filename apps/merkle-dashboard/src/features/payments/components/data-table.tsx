@@ -32,7 +32,7 @@ interface DataTableProps {
 }
 
 export function DataTable({ columns }: DataTableProps) {
-  const { payments, isLoading } = usePaymentsContext()
+  const { payments, isLoading, total, pageSize } = usePaymentsContext()
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
@@ -50,6 +50,7 @@ export function DataTable({ columns }: DataTableProps) {
       rowSelection,
       columnFilters,
     },
+    pageCount: Math.ceil(total / pageSize),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,

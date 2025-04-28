@@ -141,7 +141,7 @@ export const WithPhantomApp = ({
         {
           dappEncryptionPublicKey: dAppPublicKey,
           appUrl: APP_URL,
-          decryptedConnectCallbackData,
+          ...decryptedConnectCallbackData,
         }
       );
       if (universalLink) {
