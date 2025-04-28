@@ -11,10 +11,14 @@ import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
 
 export const WithQRCode = ({
+  isPaying,
+  setIsPaying,
   urlForQrCode,
   paymentTableRecord,
   setAlertMessage,
 }: {
+  isPaying: boolean;
+  setIsPaying: (isPaying: boolean) => void;
   urlForQrCode: string | null;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   setAlertMessage: (message: {
@@ -62,6 +66,7 @@ export const WithQRCode = ({
         onClick={() => {
           generateQrCode();
           setIsExpanded(!isExpanded);
+          setIsPaying(!isPaying);
         }}
       >
         Scan QR Code with Phantom or Solflare wallet

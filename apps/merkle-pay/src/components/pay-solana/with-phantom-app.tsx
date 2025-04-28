@@ -10,13 +10,15 @@ import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
 
 export const WithPhantomApp = ({
-  isPayingWithPhantomExtension,
+  isPaying,
+  setIsPaying,
   mobilePhantomStep,
   setAlertMessage,
   paymentTableRecord,
   APP_URL,
 }: {
-  isPayingWithPhantomExtension: boolean;
+  isPaying: boolean;
+  setIsPaying: (isPaying: boolean) => void;
   mobilePhantomStep: "connect" | "sst";
   setAlertMessage: (error: {
     type: "error" | "success" | null;
@@ -57,40 +59,51 @@ export const WithPhantomApp = ({
       });
       return;
     }
+    try {
+      setIsPaying(true);
+      const { dAppPublicKey, error, requestId } = await generateAndSaveNaclKeys(
+        {
+          mpid: paymentTableRecord.mpid,
+          orderId: paymentTableRecord.orderId,
+          paymentId: paymentTableRecord.id,
+        }
+      );
 
-    const { dAppPublicKey, error, requestId } = await generateAndSaveNaclKeys({
-      mpid: paymentTableRecord.mpid,
-      orderId: paymentTableRecord.orderId,
-      paymentId: paymentTableRecord.id,
-    });
+      if (error || !dAppPublicKey) {
+        setAlertMessage({
+          type: "error",
+          value: error || "Failed to generate DApp Encryption Public Key.",
+        });
+        return;
+      }
 
-    if (error || !dAppPublicKey) {
+      // store dAppPublicKey and paymentRecord in local storage
+      // and set expiry to 1 hour
+      ls.setPhantomConnectCallbackParams({
+        dAppPublicKey,
+        paymentTableRecord,
+        expiry: Date.now() + 60 * 60 * 1000, // 1 hour
+      });
+
+      const phantomConnectBaseUrl = "https://phantom.app/ul/v1/connect";
+
+      const params = new URLSearchParams({
+        app_url: APP_URL,
+        dapp_encryption_public_key: dAppPublicKey,
+        redirect_link: `${APP_URL}/phantom/connect-callback?requestId=${requestId}`,
+      });
+
+      const phantomConnectUrl = `${phantomConnectBaseUrl}?${params.toString()}`;
+
+      window.location.href = phantomConnectUrl;
+    } catch (error) {
       setAlertMessage({
         type: "error",
-        value: error || "Failed to generate DApp Encryption Public Key.",
+        value: `Failed to connect Phantom App: ${(error as Error).message}`,
       });
-      return;
+    } finally {
+      setIsPaying(false);
     }
-
-    // store dAppPublicKey and paymentRecord in local storage
-    // and set expiry to 1 hour
-    ls.setPhantomConnectCallbackParams({
-      dAppPublicKey,
-      paymentTableRecord,
-      expiry: Date.now() + 60 * 60 * 1000, // 1 hour
-    });
-
-    const phantomConnectBaseUrl = "https://phantom.app/ul/v1/connect";
-
-    const params = new URLSearchParams({
-      app_url: APP_URL,
-      dapp_encryption_public_key: dAppPublicKey,
-      redirect_link: `${APP_URL}/phantom/connect-callback?requestId=${requestId}`,
-    });
-
-    const phantomConnectUrl = `${phantomConnectBaseUrl}?${params.toString()}`;
-
-    window.location.href = phantomConnectUrl;
   };
 
   // step2: pay with phantom app
@@ -161,7 +174,7 @@ export const WithPhantomApp = ({
       onClick={async () => {
         await handlePhantomApp();
       }}
-      disabled={isPayingWithPhantomExtension}
+      disabled={isPaying}
     >
       Pay with Phantom {isMobileDevice ? "Mobile App" : "Wallet Extension"}
     </Button>

@@ -35,10 +35,7 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
 
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
-
-  const [isPayingWithPhantomExtension, setIsPayingWithPhantomExtension] =
-    useState(false);
-
+  const [isPaying, setIsPaying] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{
     type: "error" | "success" | "info" | null;
     value: string | null;
@@ -92,14 +89,16 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
           labelStyle={{ fontWeight: 600, color: "#000" }}
         />
         <WithQRCode
+          isPaying={isPaying}
+          setIsPaying={setIsPaying}
           urlForQrCode={urlForQrCode}
           paymentTableRecord={paymentTableRecord}
           setAlertMessage={setAlertMessage}
         />
         {phantomSolanaProvider && (
           <WithPhantomExtension
-            isPaying={isPayingWithPhantomExtension}
-            setIsPaying={setIsPayingWithPhantomExtension}
+            isPaying={isPaying}
+            setIsPaying={setIsPaying}
             setAlertMessage={setAlertMessage}
             phantomSolanaProvider={phantomSolanaProvider}
             paymentTableRecord={paymentTableRecord}
@@ -109,7 +108,8 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
         )}
         {isMobileDevice && (
           <WithPhantomApp
-            isPayingWithPhantomExtension={isPayingWithPhantomExtension}
+            isPaying={isPaying}
+            setIsPaying={setIsPaying}
             mobilePhantomStep={mobilePhantomStep}
             setAlertMessage={setAlertMessage}
             paymentTableRecord={paymentTableRecord}
@@ -137,8 +137,7 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
               goToUrl(`/pay/status?mpid=${paymentTableRecord.mpid}`);
             }
           }}
-          loading={isPayingWithPhantomExtension}
-          disabled={!paymentTableRecord?.mpid || isPayingWithPhantomExtension}
+          disabled={!paymentTableRecord?.mpid}
           icon={<IconArrowRight />}
         >
           I have paid. Check status
