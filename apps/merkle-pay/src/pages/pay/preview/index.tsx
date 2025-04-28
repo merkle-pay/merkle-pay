@@ -15,6 +15,7 @@ import { useMediaQuery } from "@react-hookz/web";
 import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
 import { createPaymentTableRecordQuery } from "src/queries/payment";
 import { useRef, useState } from "react";
+import { getPaymentFormDataDescriptionData } from "src/utils/payment";
 
 export default function PaymentPreviewPage({
   TURNSTILE_SITE_KEY,
@@ -165,43 +166,17 @@ export default function PaymentPreviewPage({
       )}
       <h1>Payment Preview</h1>
       <Descriptions
-        column={1}
-        layout={isMobileLayout ? "vertical" : "horizontal"}
-        data={[
-          {
-            label: "Payer",
-            value: validatedPaymentFormData.payer,
-          },
-          {
-            label: "Business Name",
-            value: validatedPaymentFormData.businessName,
-          },
-          {
-            label: "Order ID",
-            value: validatedPaymentFormData.orderId,
-          },
-          {
-            label: "Blockchain",
-            value: validatedPaymentFormData.blockchain,
-          },
-          {
-            label: "Amount",
-            value: `${validatedPaymentFormData.amount} ${validatedPaymentFormData.token}`,
-          },
-          {
-            label: "Recipient",
-            value: validatedPaymentFormData.recipient_address,
-          },
-          {
-            label: "Message",
-            value: validatedPaymentFormData.message,
-          },
-          {
-            label: "Return URL",
-            value: validatedPaymentFormData.returnUrl,
-          },
-        ]}
+        column={isMobileLayout ? 1 : 2}
+        border
+        layout={"horizontal"}
+        data={getPaymentFormDataDescriptionData(validatedPaymentFormData)}
         size={"medium"}
+        labelStyle={{ fontWeight: 600, color: "#000" }}
+        valueStyle={{
+          overflowWrap: "break-word",
+          wordBreak: "break-all",
+          minWidth: "140px",
+        }}
       />
 
       <CfTurnstile siteKey={TURNSTILE_SITE_KEY} setToken={setAntibotToken} />

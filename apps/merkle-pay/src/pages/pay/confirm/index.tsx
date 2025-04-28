@@ -17,7 +17,7 @@ import { WithPhantomExtension } from "src/components/pay-solana/with-phantom-ext
 import { WithPhantomApp } from "src/components/pay-solana/with-phantom-app";
 
 import { useMediaQuery } from "@react-hookz/web";
-import { CONFIRMATION_DATA_KEY_LABEL_MAP } from "src/utils/payment";
+import { getPaymentRecordDescriptionData } from "src/utils/payment";
 
 export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
   const { paymentFormData, paymentFormUrl, urlForQrCode, paymentTableRecord } =
@@ -44,22 +44,6 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
     value: null,
   });
 
-  const descriptionData = Object.entries(paymentTableRecord ?? {})
-    .filter(
-      ([key]) =>
-        !!CONFIRMATION_DATA_KEY_LABEL_MAP[
-          key as keyof typeof CONFIRMATION_DATA_KEY_LABEL_MAP
-        ]
-    )
-    .map(([key, value]) => ({
-      key: key,
-      label:
-        CONFIRMATION_DATA_KEY_LABEL_MAP[
-          key as keyof typeof CONFIRMATION_DATA_KEY_LABEL_MAP
-        ],
-      value,
-    }));
-
   return (
     <Space direction="vertical" size={48} className={styles.container}>
       <Space direction="vertical" size={8}>
@@ -81,11 +65,12 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
           Payment Confirmation
         </Typography.Title>
         <Descriptions
+          border
           size="large"
           column={isMobileLayout ? 1 : 2}
           colon=" : "
-          layout="inline-vertical"
-          data={descriptionData}
+          layout="horizontal"
+          data={getPaymentRecordDescriptionData(paymentTableRecord)}
           labelStyle={{ fontWeight: 600, color: "#000" }}
         />
         <WithQRCode

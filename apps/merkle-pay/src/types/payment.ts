@@ -139,4 +139,5 @@ export const paymentTableRecordSchema = z.object({
   raw: z.any(),
   txId: z.string().or(z.null()).optional(),
   status: z.nativeEnum(PaymentStatus),
+  createdAt: z.string(),
 });
