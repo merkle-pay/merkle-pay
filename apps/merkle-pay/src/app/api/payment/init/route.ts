@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       // Convert the reference string back to a PublicKey object for encodeURL
       reference: new PublicKey(referencePublicKey),
       label: paymentFormData.businessName,
-      memo: paymentFormData.orderId,
+      memo: `${paymentFormData.businessName} -- ${paymentFormData.orderId}`,
       message: paymentFormData.message,
       splToken: new PublicKey(
         SplTokens[paymentFormData.token as keyof typeof SplTokens].mint

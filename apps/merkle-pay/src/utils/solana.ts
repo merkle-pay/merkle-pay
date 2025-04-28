@@ -175,7 +175,8 @@ export const sendSolanaPaymentWithPhantomExtension = async ({
   }
 
   try {
-    const { recipient_address, amount, orderId, token } = paymentFormData;
+    const { recipient_address, amount, orderId, token, businessName } =
+      paymentFormData;
     // 2. --- Connect & Get Public Key ---
     const { publicKey } = await phantomSolanaProvider!.connect({
       onlyIfTrusted: false,
@@ -195,7 +196,7 @@ export const sendSolanaPaymentWithPhantomExtension = async ({
     const memoInstruction = new TransactionInstruction({
       keys: [{ pubkey: publicKey, isSigner: true, isWritable: true }],
       programId: MEMO_PROGRAM_ID,
-      data: Buffer.from(orderId, "utf8"),
+      data: Buffer.from(`${businessName} -- ${orderId}`, "utf8"),
     });
     instructions.push(memoInstruction);
 
@@ -308,7 +309,13 @@ export const sendSolanaPaymentWithPhantomExtension = async ({
 export async function createPhantomPaymentUniversalLink(
   paymentRecord: Pick<
     PaymentTableRecord,
-    "mpid" | "recipient_address" | "amount" | "token" | "blockchain" | "orderId"
+    | "mpid"
+    | "recipient_address"
+    | "amount"
+    | "token"
+    | "blockchain"
+    | "orderId"
+    | "business_name"
   >,
   options: {
     dappEncryptionPublicKey: string;
@@ -326,8 +333,9 @@ export async function createPhantomPaymentUniversalLink(
     token: z.string(),
     blockchain: z.literal("solana"),
     orderId: z.string(),
+    business_name: z.string(),
   });
-  const { recipient_address, amount, token, orderId } =
+  const { recipient_address, amount, token, orderId, business_name } =
     schema.parse(paymentRecord);
 
   // 2) Build Solana TX
@@ -344,7 +352,7 @@ export async function createPhantomPaymentUniversalLink(
       },
     ],
     programId: MEMO_PROGRAM_ID,
-    data: Buffer.from(orderId, "utf8"),
+    data: Buffer.from(`${business_name} -- ${orderId}`, "utf8"),
   });
   instructions.push(memoInstruction);
 
