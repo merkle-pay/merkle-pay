@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Button } from "@arco-design/web-react";
-import { sendSolanaPaymentWithPhantom } from "src/utils/solana";
+import { sendSolanaPaymentWithPhantomExtension } from "src/utils/solana";
 import { PhantomSolanaProvider } from "src/types/global";
 import { z } from "zod";
 import { PaymentFormData, paymentTableRecordSchema } from "src/types/payment";
@@ -28,7 +28,7 @@ export const WithPhantomExtension = ({
 }) => {
   const handlePayWithPhantomExtension = async () => {
     setIsPaying(true);
-    const result = await sendSolanaPaymentWithPhantom({
+    const result = await sendSolanaPaymentWithPhantomExtension({
       phantomSolanaProvider,
       paymentFormData,
     }).finally(() => {

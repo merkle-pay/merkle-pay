@@ -9,7 +9,7 @@ import { LS_KEYS } from "src/utils/ls";
 import { ls } from "src/utils/ls";
 import { PhantomConnectCallbackData } from "src/utils/phantom";
 
-export default function PhantomConnectCallbackPage({
+export default function ConnectCallback({
   DAPP_PUBLIC_KEY_BASE58,
   DAPP_PRIVATE_KEY_BASE58,
   NONCE,
@@ -89,13 +89,10 @@ export default function PhantomConnectCallbackPage({
         return;
       }
 
-      ls.set(
-        LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS,
-        JSON.stringify({
-          ...phantomUniversalLinkParams,
-          decryptedConnectCallbackData,
-        })
-      );
+      ls.setPhantomUniversalLinkParams({
+        ...phantomUniversalLinkParams,
+        decryptedConnectCallbackData,
+      });
 
       router.push("/pay/confirm?mobilePhantomStep=sst");
     } catch (error: unknown) {

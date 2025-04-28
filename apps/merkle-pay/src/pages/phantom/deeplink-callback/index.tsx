@@ -4,7 +4,7 @@ import { Message } from "@arco-design/web-react";
 import nacl from "tweetnacl";
 import { prisma } from "src/utils/prisma";
 
-export default function PhantomCallback() {
+export default function DeepLinkCallback() {
   const router = useRouter();
   const {
     data,

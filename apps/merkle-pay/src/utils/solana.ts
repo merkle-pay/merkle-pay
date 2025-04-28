@@ -151,7 +151,7 @@ export const validatePhantomExtensionPayment = ({
   };
 };
 
-export const sendSolanaPaymentWithPhantom = async ({
+export const sendSolanaPaymentWithPhantomExtension = async ({
   phantomSolanaProvider,
   paymentFormData,
 }: {
@@ -388,7 +388,7 @@ export async function createPhantomPaymentUniversalLink(
   const ulParams = new URLSearchParams({
     dapp_encryption_public_key: options.dappEncryptionPublicKey,
     nonce: bs58.encode(nonceBytes),
-    redirect_link: `${options.appUrl}/phantom/callback`,
+    redirect_link: `${options.appUrl}/phantom/deeplink-callback`,
     transaction: serialized,
     // cluster: "mainnet-beta" // optional; defaults to mainnet-beta
   });

@@ -1,10 +1,9 @@
 import { Button } from "@arco-design/web-react";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
-import { LS_KEYS } from "src/utils/ls";
+
 import { generateAndSaveNaclKeys } from "src/queries/solana";
 import { ls } from "src/utils/ls";
 
-import { PhantomConnectCallbackData } from "src/utils/phantom";
 import { createPhantomPaymentUniversalLink } from "src/utils/solana";
 import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
@@ -21,7 +20,7 @@ export const WithPhantomApp = ({
   setIsPaying: (isPaying: boolean) => void;
   mobilePhantomStep: "connect" | "sst";
   setAlertMessage: (error: {
-    type: "error" | "success" | null;
+    type: "error" | "success" | "info" | null;
     value: string | null;
   }) => void;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
@@ -109,22 +108,12 @@ export const WithPhantomApp = ({
   // step2: pay with phantom app
   const handlePaySolanaWithPhantomApp = async () => {
     try {
-      const ls_data = JSON.parse(
-        ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS) ?? "{}"
-      ) as {
-        dAppPublicKey: string;
-        paymentTableRecord: z.infer<typeof paymentTableRecordSchema>;
-        expiry: number;
-        decryptedConnectCallbackData: PhantomConnectCallbackData;
-      };
-
-      console.log("ls_data", ls_data);
       const {
         dAppPublicKey,
         paymentTableRecord,
         expiry,
         decryptedConnectCallbackData,
-      } = ls_data;
+      } = ls.getPhantomUniversalLinkParams() ?? {};
 
       if (
         !dAppPublicKey ||
@@ -156,7 +145,7 @@ export const WithPhantomApp = ({
         }
       );
       if (universalLink) {
-        window.open(universalLink, "_blank");
+        window.location.href = universalLink;
       }
     } catch (error) {
       setAlertMessage({

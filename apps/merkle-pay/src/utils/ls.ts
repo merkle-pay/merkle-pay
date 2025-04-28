@@ -1,10 +1,15 @@
 import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
+import { PhantomConnectCallbackData } from "./phantom";
 
 type PhantomConnectCallbackParams = {
   dAppPublicKey: string;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema>;
   expiry: number;
+};
+
+type PhantomUniversalLinkParams = PhantomConnectCallbackParams & {
+  decryptedConnectCallbackData: PhantomConnectCallbackData;
 };
 
 export const ls = {
@@ -25,6 +30,13 @@ export const ls = {
   },
   getPhantomConnectCallbackParams: (): PhantomConnectCallbackParams | null => {
     const params = ls.get(LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS);
+    return params ? JSON.parse(params) : null;
+  },
+  setPhantomUniversalLinkParams: (params: PhantomUniversalLinkParams) => {
+    ls.set(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS, JSON.stringify(params));
+  },
+  getPhantomUniversalLinkParams: (): PhantomUniversalLinkParams | null => {
+    const params = ls.get(LS_KEYS.PHANTOM_UNIVERSAL_LINK_PARAMS);
     return params ? JSON.parse(params) : null;
   },
 };
