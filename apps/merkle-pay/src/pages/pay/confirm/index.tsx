@@ -9,15 +9,13 @@ import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import styles from "./index.module.scss";
 import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { getPhantomProviders } from "src/utils/solana";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 import { WithQRCode } from "src/components/pay-solana/with-qrcode";
 import { WithPhantomExtension } from "src/components/pay-solana/with-phantom-extenstion";
 import { WithPhantomApp } from "src/components/pay-solana/with-phantom-app";
-import QRCodeStyling from "@solana/qr-code-styling";
-import { logoSvg } from "src/utils/logo";
-import { createQROptions } from "@solana/pay";
+
 import { useMediaQuery } from "@react-hookz/web";
 import { CONFIRMATION_DATA_KEY_LABEL_MAP } from "src/utils/payment";
 
@@ -35,7 +33,6 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
     mobilePhantomStep: "connect" | "sst";
   };
 
-  const qrCodeRef = useRef<HTMLDivElement>(null);
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
 
@@ -49,34 +46,6 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
     type: null,
     value: null,
   });
-
-  const generateQrCode = async () => {
-    if (!urlForQrCode || !paymentTableRecord?.mpid) {
-      setAlertMessage({
-        type: "error",
-        value: urlForQrCode
-          ? "QR code not generated properly"
-          : "Invalid payment record",
-      });
-      return;
-    }
-
-    const logoDataUri = `data:image/svg+xml;base64,${btoa(logoSvg)}`;
-    const options = createQROptions(urlForQrCode, 300);
-    options.image = logoDataUri;
-
-    const qrCode = new QRCodeStyling(options);
-    const currentRef = qrCodeRef.current;
-    if (qrCode && currentRef) {
-      currentRef.innerHTML = "";
-      qrCode.append(currentRef);
-    } else {
-      setAlertMessage({
-        type: "info",
-        value: "QR code not appended properly",
-      });
-    }
-  };
 
   const descriptionData = Object.entries(paymentTableRecord ?? {})
     .filter(
@@ -122,7 +91,11 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
           data={descriptionData}
           labelStyle={{ fontWeight: 600, color: "#000" }}
         />
-        <WithQRCode qrCodeRef={qrCodeRef} generateQrCode={generateQrCode} />
+        <WithQRCode
+          urlForQrCode={urlForQrCode}
+          paymentTableRecord={paymentTableRecord}
+          setAlertMessage={setAlertMessage}
+        />
         {phantomSolanaProvider && (
           <WithPhantomExtension
             isPaying={isPayingWithPhantomExtension}
