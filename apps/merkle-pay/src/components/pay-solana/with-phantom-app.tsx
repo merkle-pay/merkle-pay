@@ -2,7 +2,6 @@ import { Button } from "@arco-design/web-react";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 
 import { generateAndSaveNaclKeys } from "src/queries/solana";
-import { ls } from "src/utils/ls";
 
 import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
@@ -67,14 +66,6 @@ export const WithPhantomApp = ({
         });
         return;
       }
-
-      // store dAppPublicKey and paymentRecord in local storage
-      // and set expiry to 1 hour
-      ls.setPhantomConnectCallbackParams({
-        dAppPublicKey,
-        paymentTableRecord,
-        expiry: Date.now() + 60 * 60 * 1000, // 1 hour
-      });
 
       const phantomConnectBaseUrl = "https://phantom.app/ul/v1/connect";
 
