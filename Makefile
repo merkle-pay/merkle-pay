@@ -11,7 +11,7 @@
 .PHONY: lint lint-pay lint-dashboard
 
 # Docker Targets
-.PHONY: d-up d-stop d-restart d-down d-clean
+.PHONY: d-up d-stop d-restart d-down d-clean d-logs
 
 # Variables
 PAY_DIR := apps/merkle-pay
@@ -31,6 +31,7 @@ help:
 	@echo "  d-restart       - Restart Docker Compose containers"
 	@echo "  d-down          - Stop and remove Docker compose containers"
 	@echo "  d-clean         - Clean all Docker resources, including images, containers, volumes, and networks"
+	@echo "  d-logs          - Tail the logs of the Docker Compose containers"
 	@echo "  tag TAG=<name>  - Create a Git tag or list all local tags if no TAG is provided"
 	@echo "  tags            - Push all Git tags to the remote repository"
 	@echo "  tree            - Generate directory tree of the project"
@@ -110,6 +111,9 @@ d-down:
 d-clean:
 	docker compose $(DOCKER_COMPOSE_ENV_FILE) down -v --rmi all --remove-orphans
 	rm -rf caddy/data/caddy caddy/config/caddy
+
+d-logs:
+	docker compose $(DOCKER_COMPOSE_ENV_FILE) logs -f
 
 # merkle-pay standalone image
 .PHONY: so-build so-run so-push

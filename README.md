@@ -12,53 +12,71 @@
 
 ---
 
-**Accept stablecoin payments on Solana, Base, Sui, TRON, Polygon, Arbitrum, and more with ease—built for creators, indie hackers, and small businesses.**
+**Accept stablecoin payments on Solana, Base, SUI, TRON, Polygon, Arbitrum, Optimism and more with ease—built for creators, indie hackers, and small businesses.**
 
 Merkle Pay is a non-custodial web platform enabling users to quickly set up payment pages for receiving stablecoins like USDT and USDC directly to their own wallets on **multiple blockchains**.
 
-Leveraging native blockchain payment standards (like Solana Pay and EIP-681), it offers fast transactions, extremely low network fees, and a smooth user experience across all supported chains.
+Leveraging native blockchain payment standards (like Solana Pay and EIP-681), it offers fast transactions, extremely low network fees (on supported chains), and a smooth user experience.
 
 Merkle Pay is fully open-source under the [MIT license](LICENSE).
 
 ---
 
-## Supported Blockchains (v1)
+## Supported Blockchains & Status
 
 Merkle Pay aims to provide a seamless payment experience across high-throughput, low-fee networks:
 
-- ✅ **Solana**
-  - Phantom
-  - Solflare
-- ✅ **Base** _(Coming Soon)_
-- ✅ **Sui** _(Coming Soon)_
-- ✅ **TRON** _(Coming Soon)_
-- ✅ **Polygon PoS** _(Coming Soon)_
-- ✅ **Arbitrum One** _(Coming Soon)_
+- ✅ **Solana** (Live & Fully Supported)
+  - Native SOL, USDC, USDT payments confirmed.
+- ⏳ **Base** (Next Focus - In Progress)
+  - EVM integration using EIP-681 is actively being developed.
+- ⏳ **Polygon PoS** (Planned)
+- ⏳ **Arbitrum One** (Planned)
+- ⏳ **Optimism** (Planned)
+- ◻️ **Sui** (Future Consideration)
+- ◻️ **TRON** (Future Consideration)
 
-_(Support for additional chains may be added in the future.)_
+_(Support for additional chains may be added based on development progress and community demand.)_
 
 ---
 
-## Supported Wallets (v1 - Solana Focus)
+## Supported Wallets & Interaction Methods
 
 Wallet compatibility ensures a smooth payment experience for your customers.
 
-- ✅ **Phantom**: Recommended for both desktop (via QR code) and mobile (via deeplinking). Excellent Solana Pay support.
-- ✅ **Solflare**: Recommended for both desktop and mobile. Strong Solana Pay support.
-- **Other Solana Wallets**: Wallets implementing the Solana Pay standard _should_ be compatible, but Phantom and Solflare are the primary tested wallets for v1.
-- **EVM Wallets (MetaMask, etc.)**: Support for EVM wallets will be detailed as Base, Polygon, Arbitrum, and more integration is completed.
+**Solana:**
 
-## Features (v1)
+- ✅ **Phantom**: Supports all interaction methods:
+  - QR Code Scanning (via Solana Pay)
+  - Desktop Browser Extension Invocation
+  - Mobile Deeplinking / Universal Links
+- ✅ **Solflare**: Supports all interaction methods:
+  - QR Code Scanning (via Solana Pay)
+  - Desktop Browser Extension Invocation
+  - Mobile Deeplinking / Universal Links
+- **Other Solana Wallets**: Wallets implementing the Solana Pay standard _should_ be compatible with QR code scanning. Deeplinking and extension support may vary.
 
-- **Multi-Chain Support**: Accept payments on Solana and leading Ethereum Layer 2 networks (Base, Polygon, Arbitrum).
+**EVM (Base, Polygon, Arbitrum, Optimism - _Coming Soon_):**
+
+- Target wallets include **MetaMask**, **Rabby**, **Phantom (EVM)**, **Coinbase Wallet**, and others supporting the **EIP-681** payment request standard via QR code scanning or link handling.
+
+---
+
+## Features
+
+- **Multi-Chain Ready**: Fully functional on Solana; EVM support (Base first, then others) in active development.
 - **Instant Setup**: Enter your wallet address(es) and business name—get a payment page ready in minutes.
 - **Non-Custodial**: Payments go directly from the payer's wallet to your specified wallet address. Merkle Pay never holds your funds.
-- **Native Payment Standards**: Uses Solana Pay for Solana and EIP-681 URI schemes for EVM chains (Base, Polygon, Arbitrum).
-- **Smart Display**: Generates QR codes and clickable payment links compatible with popular wallets on each supported chain (e.g., Phantom, MetaMask).
-- **Reliable Tracking**: Uses unique on-chain identifiers (`reference` key on Solana, potentially event emission via contracts on EVM) for robust backend verification. Includes optional `orderId` mapping.
-- **Real-time Status**: Payment status page with real-time updates (WebSocket recommended).
-- **Stablecoin Focus**: Designed primarily for USDT, USDC, and other major stablecoins native to or bridged across the supported chains.
+- **Comprehensive Solana Payments**:
+  - Scan QR Code (Solana Pay Protocol) via Phantom and Solflare
+  - Phantom wallet chrome extension connect and send transaction
+  - Phantom app deeplink connect and send transaction
+- **EIP-681 Standard for EVM**: Generates standard `ethereum:` payment URIs/QR codes for EVM chains (Base, Polygon, etc.) compatible with major wallets.
+- **Robust Off-Chain Tracking**: Links merchant `orderId`s to confirmed blockchain transactions (`txHash`) via backend monitoring and stores the relationship securely in your PostgreSQL database.
+- **Unique Payment Disambiguation**: Uses amount randomization (the "cents trick") for EVM payments and leverages Solana Pay's reference mechanism to reliably distinguish between potentially simultaneous payments, ensuring accurate mapping in the database.
+- **Stablecoin Focus**: Designed primarily for USDT, USDC, and native chain assets (like SOL) on supported chains.
 - **Open-Source & Self-Hostable**: Deploy using Docker or manually deploy to platforms like Vercel.
+- **Basic UI**: Utilizes Arco Design for a clean, functional interface. (Focus is currently on functionality, UI contributions welcome!)
 
 ---
 
@@ -70,9 +88,9 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 - **PNPM**: v10.6.4
 - **PostgreSQL**: A running instance (local or hosted)
 - **Web3 Wallet**:
-  - **Solana:** Phantom, Solflare, etc.
-  - **EVM (Base/Polygon/Arbitrum):** coming soon
-  - **Sui:** coming soon
+  - **Solana:** Phantom, Solflare, etc. (ensure you have devnet SOL/tokens for testing)
+  - **EVM (Base/Polygon/etc.):** MetaMask or similar (once EVM support is added)
+  - **Sui:** (once Sui support is added)
 
 ### Why PostgreSQL?
 
@@ -105,24 +123,28 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     ```bash
     # you need two .env files for local development
 
-    # step 1
+    # step 1: backend config
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # step 2
+    # -> EDIT apps/merkle-pay/.env with your PostgreSQL connection string etc.
+
+    # step 2: frontend dev flag
     touch apps/merkle-dashboard/.env.development
     echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
     ```
 
-4.  **Database Migration**
+4.  **Database Setup & Migration**
 
     ```bash
     cd apps/merkle-pay
+    # Generate Prisma client
     make prisma-gen
-    make prisma-migrate NAME=MY_MIGRATION_NAME
-    make prisma-deploy # password is yesyesyes
+    # Apply migration to database (password is 'yesyesyes')
+    make prisma-deploy
     ```
 
 5.  **Run Locally**
     ```bash
+    # In root directory
     make dev
     ```
 
@@ -147,13 +169,17 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 2.  **Configure Environment Variables**
 
     ```bash
-    # edit .env file and add your env vars
+    # edit .env file and add your production env vars (DB connection, secrets, etc.)
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    # -> EDIT apps/merkle-pay/.env CAREFULLY for production settings
     ```
 
-3.  **Run Locally**
+3.  **Build & Run with Docker Compose**
     ```bash
+    # Build images and start containers in detached mode
     make d-up
+    # To stop: make d-down
+    # To view logs: make d-logs
     ```
 
 ---
@@ -161,6 +187,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 ## Contributing
 
 - PRs and Issues are warmly welcomed!
+- Focus areas include EVM chain integrations, UI improvements, and additional wallet support.
 
 ---
 

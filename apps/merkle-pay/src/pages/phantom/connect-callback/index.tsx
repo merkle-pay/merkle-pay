@@ -1,120 +1,34 @@
-import { Alert, Space, Spin, Typography } from "@arco-design/web-react";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { Alert, Space, Button, Typography } from "@arco-design/web-react";
+
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { GetServerSidePropsContext } from "next";
 import { prisma } from "src/utils/prisma";
-import { LS_KEYS } from "src/utils/ls";
-import { ls } from "src/utils/ls";
+
 import { PhantomConnectCallbackData } from "src/utils/phantom";
 
+import { createPhantomPaymentUniversalLink } from "src/utils/solana";
+
 export default function ConnectCallback({
-  DAPP_PUBLIC_KEY_BASE58,
-  DAPP_PRIVATE_KEY_BASE58,
-  NONCE,
-  DATA,
-  PHANTOM_ENCRYPTION_PUBLIC_KEY,
   isError,
   errorCode,
   errorMessage,
+  universalLink,
 }: {
-  DAPP_PUBLIC_KEY_BASE58?: string;
-  DAPP_PRIVATE_KEY_BASE58?: string;
-  NONCE?: string;
-  DATA?: string;
-  PHANTOM_ENCRYPTION_PUBLIC_KEY?: string;
+  universalLink?: string;
   isError?: boolean;
   errorCode?: string;
   errorMessage?: string;
 }) {
-  const router = useRouter();
-
-  const [error, setError] = useState<string | null>(
-    isError ? `Error: ${errorCode} - ${errorMessage}` : null
-  );
-
-  useEffect(() => {
-    if (
-      !router.isReady ||
-      isError ||
-      !DAPP_PRIVATE_KEY_BASE58 ||
-      !DAPP_PUBLIC_KEY_BASE58 ||
-      !PHANTOM_ENCRYPTION_PUBLIC_KEY ||
-      !NONCE ||
-      !DATA
-    ) {
-      return;
-    }
-
-    try {
-      const decryptedConnectCallbackDataBytes = nacl.box.open(
-        bs58.decode(DATA),
-        bs58.decode(NONCE),
-        bs58.decode(PHANTOM_ENCRYPTION_PUBLIC_KEY),
-        bs58.decode(DAPP_PRIVATE_KEY_BASE58)
-      );
-
-      if (!decryptedConnectCallbackDataBytes) {
-        setError("Failed to decrypt Phantom Connect Callback Params.");
-        return;
-      }
-
-      const decryptedConnectCallbackDataString = new TextDecoder().decode(
-        decryptedConnectCallbackDataBytes
-      );
-
-      // ! what is the type ??
-      const decryptedConnectCallbackData = JSON.parse(
-        decryptedConnectCallbackDataString
-      ) as PhantomConnectCallbackData;
-
-      const phantomUniversalLinkParams = ls.getPhantomConnectCallbackParams();
-
-      if (!phantomUniversalLinkParams) {
-        setError(`Phantom Connect Callback Params not found`);
-        return;
-      }
-
-      const { dAppPublicKey, paymentTableRecord, expiry } =
-        phantomUniversalLinkParams;
-
-      if (
-        !dAppPublicKey ||
-        !paymentTableRecord ||
-        !expiry ||
-        Date.now() > expiry
-      ) {
-        setError(`Invalid Phantom Connect Callback Params or expired.`);
-        return;
-      }
-
-      ls.setPhantomUniversalLinkParams({
-        ...phantomUniversalLinkParams,
-        decryptedConnectCallbackData,
-        DAPP_PRIVATE_KEY_BASE58,
-        PHANTOM_ENCRYPTION_PUBLIC_KEY,
-      });
-
-      router.push("/pay/confirm?mobilePhantomStep=sst");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Unexpected error");
-    } finally {
-      ls.remove(LS_KEYS.PHANTOM_CONNECT_CALLBACK_PARAMS);
-    }
-  }, [isError, router.isReady, router.push]); // eslint-disable-line react-hooks/exhaustive-deps
+  const error = isError ? `Error: ${errorCode} - ${errorMessage}` : null;
 
   if (isError || error) {
-    return (
-      <Space direction="vertical">
-        <Alert content={error} />
-      </Space>
-    );
+    return <Alert type="error" content={error} />;
   }
 
   return (
     <Space direction="vertical" size={48}>
-      <Typography.Title heading={3}>Processing Connection...</Typography.Title>
+      <Typography.Title heading={3}>Ready to Pay</Typography.Title>
       <div
         style={{
           display: "flex",
@@ -123,7 +37,17 @@ export default function ConnectCallback({
           height: "50vh",
         }}
       >
-        <Spin dot />
+        <Button
+          type="primary"
+          size="large"
+          onClick={() => {
+            if (universalLink) {
+              window.location.href = universalLink;
+            }
+          }}
+        >
+          <Typography.Title heading={3}>Let&apos;s GO!</Typography.Title>
+        </Button>
       </div>
     </Space>
   );
@@ -158,13 +82,83 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
   }
 
+  const DAPP_PRIVATE_KEY_BASE58 = phantomDeepLink.privateKey;
+  const DAPP_PUBLIC_KEY_BASE58 = phantomDeepLink.publicKey;
+  const NONCE = nonce as string;
+  const DATA = data as string;
+  const PHANTOM_ENCRYPTION_PUBLIC_KEY = phantom_encryption_public_key as string;
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
+
+  if (
+    !DAPP_PRIVATE_KEY_BASE58 ||
+    !DAPP_PUBLIC_KEY_BASE58 ||
+    !PHANTOM_ENCRYPTION_PUBLIC_KEY ||
+    !NONCE ||
+    !DATA ||
+    !APP_URL
+  ) {
+    return {
+      props: {
+        isError: true,
+        errorCode: requestId,
+        errorMessage: "Some parameters are missing.",
+      },
+    };
+  }
+
+  const decryptedConnectCallbackDataBytes = nacl.box.open(
+    bs58.decode(DATA),
+    bs58.decode(NONCE),
+    bs58.decode(PHANTOM_ENCRYPTION_PUBLIC_KEY),
+    bs58.decode(DAPP_PRIVATE_KEY_BASE58)
+  );
+
+  const decryptedConnectCallbackDataString = new TextDecoder().decode(
+    decryptedConnectCallbackDataBytes!
+  );
+
+  const decryptedConnectCallbackData = JSON.parse(
+    decryptedConnectCallbackDataString
+  ) as PhantomConnectCallbackData;
+
+  const paymentTableRecord = await prisma.payment.findFirst({
+    where: {
+      mpid: phantomDeepLink.mpid,
+    },
+  });
+
+  if (!paymentTableRecord) {
+    return {
+      props: {
+        isError: true,
+        errorCode: requestId,
+        errorMessage: "Payment not found.",
+      },
+    };
+  }
+
+  const universalLink = await createPhantomPaymentUniversalLink(
+    {
+      recipient_address: paymentTableRecord.recipient_address,
+      amount: paymentTableRecord.amount,
+      token: paymentTableRecord.token,
+      blockchain: paymentTableRecord.blockchain,
+      orderId: paymentTableRecord.orderId,
+      mpid: paymentTableRecord.mpid,
+      business_name: paymentTableRecord.business_name,
+    },
+    {
+      dappEncryptionPublicKey: DAPP_PUBLIC_KEY_BASE58,
+      dappPrivateKeyBase58: DAPP_PRIVATE_KEY_BASE58,
+      appUrl: APP_URL,
+      ...decryptedConnectCallbackData,
+      PHANTOM_ENCRYPTION_PUBLIC_KEY: PHANTOM_ENCRYPTION_PUBLIC_KEY,
+    }
+  );
+
   return {
     props: {
-      DAPP_PRIVATE_KEY_BASE58: phantomDeepLink.privateKey,
-      DAPP_PUBLIC_KEY_BASE58: phantomDeepLink.publicKey,
-      NONCE: nonce,
-      DATA: data,
-      PHANTOM_ENCRYPTION_PUBLIC_KEY: phantom_encryption_public_key,
+      universalLink,
     },
   };
 };

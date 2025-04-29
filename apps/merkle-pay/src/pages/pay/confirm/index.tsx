@@ -36,9 +36,6 @@ export default function PaymentConfirmPage({
       router.push(url);
     }
   };
-  const { mobilePhantomStep = "connect" } = router.query as {
-    mobilePhantomStep: "connect" | "sst";
-  };
 
   const cfTurnstileRef = useRef<CfTurnstileHandle>(null);
 
@@ -104,7 +101,6 @@ export default function PaymentConfirmPage({
           <WithPhantomApp
             isPaying={isPaying}
             setIsPaying={setIsPaying}
-            mobilePhantomStep={mobilePhantomStep}
             setAlertMessage={setAlertMessage}
             paymentTableRecord={paymentTableRecord}
             APP_URL={APP_URL}

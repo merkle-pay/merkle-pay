@@ -11,7 +11,6 @@ import { CfTurnstileHandle } from "../cf-turnstile";
 export const WithPhantomApp = ({
   isPaying,
   setIsPaying,
-  mobilePhantomStep,
   setAlertMessage,
   paymentTableRecord,
   APP_URL,
@@ -19,7 +18,6 @@ export const WithPhantomApp = ({
 }: {
   isPaying: boolean;
   setIsPaying: (isPaying: boolean) => void;
-  mobilePhantomStep: "connect" | "sst";
   setAlertMessage: (error: {
     type: "error" | "success" | "info" | null;
     value: string | null;
@@ -32,17 +30,7 @@ export const WithPhantomApp = ({
 
   const handlePhantomApp = async () => {
     try {
-      if (mobilePhantomStep === "connect") {
-        await handleConnectPhantomApp();
-        return;
-      }
-
-      if (mobilePhantomStep === "sst") {
-        await handlePaySolanaWithPhantomApp();
-        return;
-      }
-
-      throw new Error("Invalid Phantom Step");
+      await handleConnectPhantomApp();
     } catch (error) {
       setAlertMessage({
         type: "error",
@@ -106,79 +94,6 @@ export const WithPhantomApp = ({
       });
     } finally {
       setIsPaying(false);
-    }
-  };
-
-  // step2: pay with phantom app
-  const handlePaySolanaWithPhantomApp = async () => {
-    try {
-      const {
-        dAppPublicKey,
-        paymentTableRecord,
-        expiry,
-        decryptedConnectCallbackData,
-        DAPP_PRIVATE_KEY_BASE58,
-        PHANTOM_ENCRYPTION_PUBLIC_KEY,
-      } = ls.getPhantomUniversalLinkParams() ?? {};
-
-      if (
-        !dAppPublicKey ||
-        !DAPP_PRIVATE_KEY_BASE58 ||
-        !paymentTableRecord ||
-        !expiry ||
-        !decryptedConnectCallbackData ||
-        Date.now() >= expiry
-      ) {
-        setAlertMessage({
-          type: "error",
-          value: "Invalid Phantom Universal Link Params.",
-        });
-        return;
-      }
-
-      const partialPaymentRecord = {
-        recipient_address: paymentTableRecord.recipient_address,
-        amount: paymentTableRecord.amount,
-        token: paymentTableRecord.token,
-        blockchain: paymentTableRecord.blockchain,
-        orderId: paymentTableRecord.orderId,
-        mpid: paymentTableRecord.mpid,
-        business_name: paymentTableRecord.business_name,
-      };
-
-      const options = {
-        dappEncryptionPublicKey: dAppPublicKey,
-        dappPrivateKeyBase58: DAPP_PRIVATE_KEY_BASE58,
-        appUrl: APP_URL,
-        ...decryptedConnectCallbackData,
-        PHANTOM_ENCRYPTION_PUBLIC_KEY,
-      };
-
-      const antibotToken = await cfTurnstileRef.current?.getResponseAsync();
-
-      const response = await fetch("/api/payment/phantom/deeplink", {
-        method: "POST",
-        body: JSON.stringify({ partialPaymentRecord, options }),
-        headers: {
-          "Content-Type": "application/json",
-          "mp-antibot-token": antibotToken ?? "",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create Phantom Payment Universal Link.");
-      }
-
-      const { universalLink } = await response.json();
-
-      if (universalLink) {
-        window.location.href = universalLink;
-      }
-    } catch (error) {
-      setAlertMessage({
-        type: "error",
-        value: (error as Error).message,
-      });
     }
   };
 
