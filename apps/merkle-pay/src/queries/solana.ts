@@ -2,16 +2,22 @@ export const generateAndSaveNaclKeys = async ({
   mpid,
   orderId,
   paymentId,
+  antibotToken,
 }: {
   mpid: string;
   orderId: string;
   paymentId: number;
+  antibotToken?: string;
 }) => {
   try {
     const response = await fetch(
       "/api/payment/phantom/dapp-encryption-public-key",
       {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "mp-antibot-token": antibotToken ?? "",
+        },
         body: JSON.stringify({
           orderId,
           paymentId,

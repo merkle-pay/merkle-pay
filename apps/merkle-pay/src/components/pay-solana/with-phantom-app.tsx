@@ -4,9 +4,9 @@ import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 import { generateAndSaveNaclKeys } from "src/queries/solana";
 import { ls } from "src/utils/ls";
 
-import { createPhantomPaymentUniversalLink } from "src/utils/solana";
 import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
+import { CfTurnstileHandle } from "../cf-turnstile";
 
 export const WithPhantomApp = ({
   isPaying,
@@ -15,6 +15,7 @@ export const WithPhantomApp = ({
   setAlertMessage,
   paymentTableRecord,
   APP_URL,
+  cfTurnstileRef,
 }: {
   isPaying: boolean;
   setIsPaying: (isPaying: boolean) => void;
@@ -25,6 +26,7 @@ export const WithPhantomApp = ({
   }) => void;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   APP_URL: string;
+  cfTurnstileRef: React.RefObject<CfTurnstileHandle | null>;
 }) => {
   const { isMobileDevice } = useIsMobileDevice();
 
@@ -60,11 +62,13 @@ export const WithPhantomApp = ({
     }
     try {
       setIsPaying(true);
+      const antibotToken = await cfTurnstileRef.current?.getResponseAsync();
       const { dAppPublicKey, error, requestId } = await generateAndSaveNaclKeys(
         {
           mpid: paymentTableRecord.mpid,
           orderId: paymentTableRecord.orderId,
           paymentId: paymentTableRecord.id,
+          antibotToken: antibotToken ?? "",
         }
       );
 
@@ -114,6 +118,7 @@ export const WithPhantomApp = ({
         expiry,
         decryptedConnectCallbackData,
         DAPP_PRIVATE_KEY_BASE58,
+        PHANTOM_ENCRYPTION_PUBLIC_KEY,
       } = ls.getPhantomUniversalLinkParams() ?? {};
 
       if (
@@ -131,22 +136,41 @@ export const WithPhantomApp = ({
         return;
       }
 
-      const universalLink = await createPhantomPaymentUniversalLink(
-        {
-          recipient_address: paymentTableRecord.recipient_address,
-          amount: paymentTableRecord.amount,
-          token: paymentTableRecord.token,
-          blockchain: paymentTableRecord.blockchain,
-          orderId: paymentTableRecord.orderId,
-          mpid: paymentTableRecord.mpid,
+      const partialPaymentRecord = {
+        recipient_address: paymentTableRecord.recipient_address,
+        amount: paymentTableRecord.amount,
+        token: paymentTableRecord.token,
+        blockchain: paymentTableRecord.blockchain,
+        orderId: paymentTableRecord.orderId,
+        mpid: paymentTableRecord.mpid,
+        business_name: paymentTableRecord.business_name,
+      };
+
+      const options = {
+        dappEncryptionPublicKey: dAppPublicKey,
+        dappPrivateKeyBase58: DAPP_PRIVATE_KEY_BASE58,
+        appUrl: APP_URL,
+        ...decryptedConnectCallbackData,
+        PHANTOM_ENCRYPTION_PUBLIC_KEY,
+      };
+
+      const antibotToken = await cfTurnstileRef.current?.getResponseAsync();
+
+      const response = await fetch("/api/payment/phantom/deeplink", {
+        method: "POST",
+        body: JSON.stringify({ partialPaymentRecord, options }),
+        headers: {
+          "Content-Type": "application/json",
+          "mp-antibot-token": antibotToken ?? "",
         },
-        {
-          dappEncryptionPublicKey: dAppPublicKey,
-          dappPrivateKeyBase58: DAPP_PRIVATE_KEY_BASE58,
-          appUrl: APP_URL,
-          ...decryptedConnectCallbackData,
-        }
-      );
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create Phantom Payment Universal Link.");
+      }
+
+      const { universalLink } = await response.json();
+
       if (universalLink) {
         window.location.href = universalLink;
       }

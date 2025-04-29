@@ -9,7 +9,7 @@ import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import styles from "./index.module.scss";
 import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { getPhantomProviders } from "src/utils/solana";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 import { WithQRCode } from "src/components/pay-solana/with-qrcode";
@@ -18,8 +18,15 @@ import { WithPhantomApp } from "src/components/pay-solana/with-phantom-app";
 
 import { useMediaQuery } from "@react-hookz/web";
 import { getPaymentRecordDescriptionData } from "src/utils/payment";
+import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
 
-export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
+export default function PaymentConfirmPage({
+  APP_URL,
+  CF_TURNSTILE_SITE_KEY,
+}: {
+  APP_URL: string;
+  CF_TURNSTILE_SITE_KEY: string;
+}) {
   const { paymentFormData, paymentFormUrl, urlForQrCode, paymentTableRecord } =
     usePaymentStore();
   const isMobileLayout = useMediaQuery("(max-width: 768px)");
@@ -32,6 +39,8 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
   const { mobilePhantomStep = "connect" } = router.query as {
     mobilePhantomStep: "connect" | "sst";
   };
+
+  const cfTurnstileRef = useRef<CfTurnstileHandle>(null);
 
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
@@ -99,9 +108,11 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
             setAlertMessage={setAlertMessage}
             paymentTableRecord={paymentTableRecord}
             APP_URL={APP_URL}
+            cfTurnstileRef={cfTurnstileRef}
           />
         )}
       </Space>
+      <CfTurnstile ref={cfTurnstileRef} siteKey={CF_TURNSTILE_SITE_KEY} />
       <Space size={8} className={styles.buttons}>
         <Button
           type="outline"
@@ -134,7 +145,9 @@ export default function PaymentConfirmPage({ APP_URL }: { APP_URL: string }) {
 
 export const getServerSideProps = async () => {
   const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const CF_TURNSTILE_SITE_KEY =
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
   return {
-    props: { APP_URL },
+    props: { APP_URL, CF_TURNSTILE_SITE_KEY },
   };
 };

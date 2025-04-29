@@ -323,6 +323,7 @@ export async function createPhantomPaymentUniversalLink(
     appUrl: string;
     session: string;
     public_key: string;
+    PHANTOM_ENCRYPTION_PUBLIC_KEY: string;
   }
 ): Promise<string> {
   // 1) Validate
@@ -420,7 +421,7 @@ export async function createPhantomPaymentUniversalLink(
   };
 
   const sharedSecret = nacl.box.before(
-    bs58.decode(options.dappEncryptionPublicKey),
+    bs58.decode(options.PHANTOM_ENCRYPTION_PUBLIC_KEY),
     bs58.decode(options.dappPrivateKeyBase58)
   );
 
