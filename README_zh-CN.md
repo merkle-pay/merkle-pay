@@ -12,7 +12,7 @@
 
 ---
 
-**轻松在 Solana、Base、Sui、TRON、Polygon、Arbitrum 上接受稳定币支付——专为创作者、独立开发者和小企业打造。**
+**轻松在 Solana、Base、SUI、TRON、Polygon、Arbitrum、Optimism 等稳定币支付——专为创作者、独立开发者和小企业打造。**
 
 Merkle Pay 是一个非托管的网络平台，用户可以快速设置支付页面，以便在**多个区块链**上直接接收 USDT 和 USDC 等稳定币到自己的钱包。
 
@@ -22,41 +22,61 @@ Merkle Pay 根据 [MIT 许可证](LICENSE) 完全开源。
 
 ---
 
-## 支持的区块链 (v1)
+## 支持的区块链 & 状态
 
 Merkle Pay 旨在在高吞吐量、低费用的网络上提供无缝的支付体验：
 
-- ✅ **Solana**
-- ✅ **Base** _(即将推出)_
-- ✅ **Sui** _(即将推出)_
-- ✅ **TRON** _(即将推出)_
-- ✅ **Polygon PoS** _(即将推出)_
-- ✅ **Arbitrum One** _(即将推出)_
+- ✅ **Solana** (已上线 & 完全支持)
+  - 原生 SOL, USDC, USDT 支付已确认。
+- ⏳ **Base** (下一个重点 - 进行中)
+  - 使用 EIP-681 的 EVM 集成正在积极开发中。
+- ⏳ **Polygon PoS** (计划中)
+- ⏳ **Arbitrum One** (计划中)
+- ⏳ **Optimism** (计划中)
+- ◻️ **Sui** (未来考虑)
+- ◻️ **TRON** (未来考虑)
 
-_（未来可能会增加对其他链的支持。）_
+_（根据开发进度和社区需求，可能会增加对其他链的支持。）_
 
 ---
 
-## 支持的钱包 (v1 - 重点关注 Solana)
+## 支持的钱包 & 交互方法
 
 钱包兼容性确保为您的客户提供流畅的支付体验。
 
-- ✅ **Phantom**：推荐用于桌面（通过二维码）和移动设备（通过深度链接）。出色的 Solana Pay 支持。
-- ✅ **Solflare**：推荐用于桌面和移动设备。强大的 Solana Pay 支持。
-- **其他 Solana 钱包**：实现 Solana Pay 标准的钱包*应该*兼容，但 Phantom 和 Solflare 是 v1 版本主要测试的钱包。
-- **EVM 钱包 (MetaMask 等)**：随着 Base、Polygon、Arbitrum 集成的完成，将详细说明对 EVM 钱包的支持。
+**Solana:**
 
-## 特性 (v1)
+- ✅ **Phantom**: 支持所有交互方法：
+  - QR Code 扫描 (通过 Solana Pay)
+  - 桌面浏览器扩展调用
+  - 移动 Deeplinking / Universal Links
+- ✅ **Solflare**: 支持所有交互方法：
+  - QR Code 扫描 (通过 Solana Pay)
+  - 桌面浏览器扩展调用
+  - 移动 Deeplinking / Universal Links
+- **其他 Solana 钱包**：实现 Solana Pay 标准的钱包*应该*与 QR Code 扫描兼容。Deeplinking 和扩展支持可能有所不同。
 
-- **多链支持**：在 Solana 和领先的以太坊 Layer 2 网络（Base、Polygon、Arbitrum）上接受付款。
+**EVM (Base, Polygon, Arbitrum, Optimism - _即将推出_):**
+
+- 目标钱包包括 **MetaMask**, **Rabby**, **Phantom (EVM)**, **Coinbase Wallet**, 以及其他通过 QR Code 扫描或链接处理支持 **EIP-681** 支付请求标准的钱包。
+
+---
+
+## 特性
+
+- **多链支持**：在 Solana 上完全可用；EVM 支持（首先是 Base，然后是其他链）正在积极开发中。
 - **即时设置**：输入您的钱包地址和企业名称——几分钟内即可准备好支付页面。
 - **非托管**：付款直接从付款人的钱包转到您指定的钱包地址。Merkle Pay 绝不持有您的资金。
-- **原生支付标准**：Solana 使用 Solana Pay，EVM 链（Base、Polygon、Arbitrum）使用 EIP-681 URI 方案。
-- **智能显示**：生成与每个支持链上的流行钱包（例如 Phantom、MetaMask）兼容的二维码和可点击支付链接。
-- **可靠跟踪**：使用唯一的链上标识符（Solana 上的 `reference` 键，EVM 上可能通过合约的事件发射）进行可靠的后端验证。包括可选的 `orderId` 映射。
-- **实时状态**：具有实时更新的支付状态页面（推荐使用 WebSocket）。
-- **专注于稳定币**：主要为 USDT、USDC 以及在支持的链上原生或桥接的主要稳定币设计。
+- **全面的 Solana 支付**：
+  - 通过 Phantom 和 Solflare 扫描 QR Code (Solana Pay Protocol)
+  - Phantom 钱包 Chrome 扩展程序连接并发送交易
+  - Phantom 应用 Deeplink 连接并发送交易
+- **EVM 的 EIP-681 标准**：为 EVM 链（Base, Polygon 等）生成与主流钱包兼容的标准 `ethereum:` 支付 URI/QR Code。
+- **可靠的链下跟踪**：通过后端监控将商家的 `orderId` 与已确认的区块链交易 (`txHash`) 关联，并将关系安全地存储在您的 PostgreSQL 数据库中。
+- **独特的支付区分**：对 EVM 支付使用金额随机化（"分钱技巧"）并利用 Solana Pay 的引用机制来可靠地区分可能同时发生的支付，确保在数据库中准确映射。
+- **专注于稳定币**：主要为 USDT、USDC 以及在支持的链上原生链资产（如 SOL）设计。
 - **开源和可自托管**：使用 Docker 部署或手动部署到 Vercel 等平台。
+- **基本 UI**：利用 Arco Design 实现干净、实用的界面。（目前重点是功能性，欢迎对 UI 的贡献！)
 
 ---
 
@@ -68,10 +88,9 @@ _（未来可能会增加对其他链的支持。）_
 - **PNPM**：v10.6.4
 - **PostgreSQL**：运行中的实例（本地或托管）
 - **Web3 钱包**：
-  - **Solana:** Phantom, Solflare 等
-  - **EVM (Base/Polygon/Arbitrum):** 即将推出
-  - **Sui:** 即将推出
-  - **TRON:** 即将推出
+  - **Solana:** Phantom, Solflare 等 (确保您有 devnet SOL/代币用于测试)
+  - **EVM (Base/Polygon/等):** MetaMask 或类似钱包 (一旦添加 EVM 支持)
+  - **Sui:** (一旦添加 Sui 支持)
 
 ### 为什么选择 PostgreSQL？
 
@@ -104,24 +123,28 @@ _（未来可能会增加对其他链的支持。）_
     ```bash
     # 本地开发需要两个 .env 文件
 
-    # 步骤 1
+    # 步骤 1: 后端配置
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # 步骤 2
+    # -> 编辑 apps/merkle-pay/.env，填入您的 PostgreSQL 连接字符串等。
+
+    # 步骤 2: 前端开发标志
     touch apps/merkle-dashboard/.env.development
     echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
     ```
 
-4.  **数据库迁移**
+4.  **数据库设置 & 迁移**
 
     ```bash
     cd apps/merkle-pay
+    # 生成 Prisma 客户端
     make prisma-gen
-    make prisma-migrate NAME=你的_迁移名称
-    make prisma-deploy # 密码是 yesyesyes
+    # 将迁移应用到数据库 (密码是 'yesyesyes')
+    make prisma-deploy
     ```
 
 5.  **本地运行**
     ```bash
+    # 在根目录中
     make dev
     ```
 
@@ -146,13 +169,17 @@ _（未来可能会增加对其他链的支持。）_
 2.  **配置环境变量**
 
     ```bash
-    # 编辑 .env 文件并添加您的环境变量
+    # 编辑 .env 文件并添加您的生产环境变量 (DB 连接、密钥等)
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    # -> 仔细编辑 apps/merkle-pay/.env 以进行生产设置
     ```
 
-3.  **运行**
+3.  **使用 Docker Compose 构建并运行**
     ```bash
+    # 构建镜像并在分离模式下启动容器
     make d-up
+    # 停止: make d-down
+    # 查看日志: make d-logs
     ```
 
 ---
@@ -160,6 +187,8 @@ _（未来可能会增加对其他链的支持。）_
 ## 贡献
 
 - 热烈欢迎 PR 和 Issues！
+- 重点领域包括 EVM 链集成、UI 改进和额外的钱包支持。
+- 这份简体中文 README 由 AI 翻译。如果您发现任何错误，请提交 Pull Request。
 
 ---
 

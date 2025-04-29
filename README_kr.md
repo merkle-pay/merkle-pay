@@ -12,7 +12,7 @@
 
 ---
 
-**Solana, Base, Sui, TRON, Polygon, Arbitrum에서 스테이블코인 결제를 쉽게 수락하세요—크리에이터, 인디 해커, 소상공인을 위해 제작되었습니다.**
+**Solana, Base, SUI, TRON, Polygon, Arbitrum, Optimism 등에서 스테이블코인 결제를 쉽게 수락하세요—크리에이터, 인디 해커, 소상공인을 위해 제작되었습니다.**
 
 Merkle Pay는 사용자가 결제 페이지를 빠르게 설정하여 **여러 블록체인**에서 USDT 및 USDC와 같은 스테이블코인을 자신의 지갑으로 직접 받을 수 있도록 지원하는 비수탁형 웹 플랫폼입니다.
 
@@ -22,41 +22,61 @@ Merkle Pay는 [MIT 라이선스](LICENSE)에 따라 완전히 오픈 소스입�
 
 ---
 
-## 지원 블록체인 (v1)
+## 지원 블록체인 & 상태
 
 Merkle Pay는 처리량이 높고 수수료가 낮은 네트워크 전반에 걸쳐 원활한 결제 경험을 제공하는 것을 목표로 합니다:
 
-- ✅ **Solana**
-- ✅ **Base** _(출시 예정)_
-- ✅ **Sui** _(출시 예정)_
-- ✅ **TRON** _(출시 예정)_
-- ✅ **Polygon PoS** _(출시 예정)_
-- ✅ **Arbitrum One** _(출시 예정)_
+- ✅ **Solana** (라이브 & 완전 지원)
+  - 네이티브 SOL, USDC, USDT 결제 확인됨.
+- ⏳ **Base** (다음 초점 - 진행 중)
+  - EIP-681을 사용한 EVM 통합 적극 개발 중.
+- ⏳ **Polygon PoS** (계획됨)
+- ⏳ **Arbitrum One** (계획됨)
+- ⏳ **Optimism** (계획됨)
+- ◻️ **Sui** (향후 고려)
+- ◻️ **TRON** (향후 고려)
 
-_(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
+_(개발 진행 상황 및 커뮤니티 요구에 따라 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 
 ---
 
-## 지원 지갑 (v1 - Solana 중심)
+## 지원 지갑 & 상호작용 방법
 
 지갑 호환성은 고객에게 원활한 결제 경험을 보장합니다.
 
-- ✅ **Phantom**: 데스크톱(QR 코드 사용) 및 모바일(딥링킹 사용) 모두 권장됩니다. 뛰어난 Solana Pay 지원.
-- ✅ **Solflare**: 데스크톱 및 모바일 모두 권장됩니다. 강력한 Solana Pay 지원.
-- **기타 Solana 지갑**: Solana Pay 표준을 구현하는 지갑은 호환되어야 하지만, v1에서는 Phantom과 Solflare가 주로 테스트된 지갑입니다.
-- **EVM 지갑 (MetaMask 등)**: Base, Polygon, Arbitrum 통합이 완료되면 EVM 지갑 지원에 대해 자세히 설명할 예정입니다.
+**Solana:**
 
-## 기능 (v1)
+- ✅ **Phantom**: 모든 상호작용 방법 지원:
+  - QR 코드 스캔 (Solana Pay 통해)
+  - 데스크톱 브라우저 확장 프로그램 호출
+  - 모바일 딥링킹 / 유니버설 링크
+- ✅ **Solflare**: 모든 상호작용 방법 지원:
+  - QR 코드 스캔 (Solana Pay 통해)
+  - 데스크톱 브라우저 확장 프로그램 호출
+  - 모바일 딥링킹 / 유니버설 링크
+- **기타 Solana 지갑**: Solana Pay 표준을 구현하는 지갑은 QR 코드 스캔과 호환*되어야* 합니다. 딥링킹 및 확장 프로그램 지원은 다를 수 있습니다.
 
-- **멀티체인 지원**: Solana 및 주요 이더리움 레이어 2 네트워크(Base, Polygon, Arbitrum)에서 결제를 수락합니다.
-- **즉시 설정**: 지갑 주소와 비즈니스 이름을 입력하면 몇 분 안에 결제 페이지가 준비됩니다.
+**EVM (Base, Polygon, Arbitrum, Optimism - _출시 예정_):**
+
+- 대상 지갑에는 **MetaMask**, **Rabby**, **Phantom (EVM)**, **Coinbase Wallet** 및 QR 코드 스캔 또는 링크 처리를 통해 **EIP-681** 결제 요청 표준을 지원하는 기타 지갑이 포함됩니다.
+
+---
+
+## 기능
+
+- **멀티체인 지원**: Solana에서 완전히 작동; EVM 지원(Base 우선, 그 다음 다른 체인) 적극 개발 중.
+- **즉시 설정**: 지갑 주소(들)와 비즈니스 이름을 입력하면 몇 분 안에 결제 페이지가 준비됩니다.
 - **비수탁형**: 결제는 지불인의 지갑에서 지정된 지갑 주소로 직접 전송됩니다. Merkle Pay는 귀하의 자금을 절대 보유하지 않습니다.
-- **네이티브 결제 표준**: Solana의 경우 Solana Pay를 사용하고 EVM 체인(Base, Polygon, Arbitrum)의 경우 EIP-681 URI 스킴을 사용합니다.
-- **스마트 디스플레이**: 각 지원 체인의 인기 있는 지갑(예: Phantom, MetaMask)과 호환되는 QR 코드 및 클릭 가능한 결제 링크를 생성합니다.
-- **신뢰할 수 있는 추적**: 고유한 온체인 식별자(Solana의 `reference` 키, EVM의 경우 컨트랙트를 통한 이벤트 발생 가능성)를 사용하여 강력한 백엔드 검증을 수행합니다. 선택적 `orderId` 매핑을 포함합니다.
-- **실시간 상태**: 실시간 업데이트가 포함된 결제 상태 페이지 (WebSocket 권장).
-- **스테이블코인 중심**: 주로 USDT, USDC 및 지원되는 체인에서 네이티브이거나 브릿지된 기타 주요 스테이블코인을 위해 설계되었습니다.
+- **포괄적인 Solana 결제**:
+  - Phantom 및 Solflare를 통한 QR 코드 스캔 (Solana Pay 프로토콜)
+  - Phantom 지갑 크롬 확장 프로그램 연결 및 거래 전송
+  - Phantom 앱 딥링크 연결 및 거래 전송
+- **EVM용 EIP-681 표준**: 주요 지갑과 호환되는 EVM 체인(Base, Polygon 등)용 표준 `ethereum:` 결제 URI/QR 코드 생성.
+- **견고한 오프체인 추적**: 백엔드 모니터링을 통해 판매자 `orderId`를 확인된 블록체인 거래(`txHash`)에 연결하고 PostgreSQL 데이터베이스에 관계를 안전하게 저장합니다.
+- **고유한 결제 명확화**: EVM 결제에 금액 무작위화("센트 트릭")를 사용하고 Solana Pay의 참조 메커니즘을 활용하여 잠재적으로 동시적인 결제를 안정적으로 구별하여 데이터베이스에 정확한 매핑을 보장합니다.
+- **스테이블코인 중심**: 주로 USDT, USDC 및 지원되는 체인의 네이티브 체인 자산(예: SOL)을 위해 설계되었습니다.
 - **오픈 소스 및 자체 호스팅 가능**: Docker를 사용하여 배포하거나 Vercel과 같은 플랫폼에 수동으로 배포합니다.
+- **기본 UI**: 깨끗하고 기능적인 인터페이스를 위해 Arco Design을 활용합니다. (현재는 기능성에 중점을 두고 있으며 UI 기여를 환영합니다!)
 
 ---
 
@@ -68,10 +88,9 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 - **PNPM**: v10.6.4
 - **PostgreSQL**: 실행 중인 인스턴스 (로컬 또는 호스팅)
 - **Web3 지갑**:
-  - **Solana:** Phantom, Solflare 등
-  - **EVM (Base/Polygon/Arbitrum):** 출시 예정
-  - **Sui:** 출시 예정
-  - **TRON:** 출시 예정
+  - **Solana:** Phantom, Solflare 등 (테스트용 devnet SOL/토큰이 있는지 확인)
+  - **EVM (Base/Polygon/등):** MetaMask 또는 유사 지갑 (EVM 지원 추가 시)
+  - **Sui:** (Sui 지원 추가 시)
 
 ### 왜 PostgreSQL인가?
 
@@ -104,24 +123,28 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
     ```bash
     # 로컬 개발에는 두 개의 .env 파일이 필요합니다
 
-    # 단계 1
+    # 단계 1: 백엔드 구성
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # 단계 2
+    # -> PostgreSQL 연결 문자열 등으로 apps/merkle-pay/.env 수정
+
+    # 단계 2: 프론트엔드 개발 플래그
     touch apps/merkle-dashboard/.env.development
     echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
     ```
 
-4.  **데이터베이스 마이그레이션**
+4.  **데이터베이스 설정 및 마이그레이션**
 
     ```bash
     cd apps/merkle-pay
+    # Prisma 클라이언트 생성
     make prisma-gen
-    make prisma-migrate NAME=MY_MIGRATION_NAME
-    make prisma-deploy # 비밀번호는 yesyesyes 입니다
+    # 데이터베이스에 마이그레이션 적용 (비밀번호는 'yesyesyes' 입니다)
+    make prisma-deploy
     ```
 
 5.  **로컬에서 실행**
     ```bash
+    # 루트 디렉토리에서
     make dev
     ```
 
@@ -146,13 +169,17 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 2.  **환경 변수 구성**
 
     ```bash
-    # .env 파일을 편집하고 환경 변수를 추가하세요
+    # .env 파일을 편집하고 프로덕션 환경 변수를 추가하세요 (DB 연결, 비밀키 등)
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    # -> 프로덕션 설정을 위해 apps/merkle-pay/.env를 신중하게 수정하세요
     ```
 
-3.  **실행**
+3.  **Docker Compose로 빌드 및 실행**
     ```bash
+    # 이미지를 빌드하고 분리 모드에서 컨테이너 시작
     make d-up
+    # 중지하려면: make d-down
+    # 로그를 보려면: make d-logs
     ```
 
 ---
@@ -160,6 +187,8 @@ _(향후 추가 체인에 대한 지원이 추가될 수 있습니다.)_
 ## 기여
 
 - PR과 이슈는 언제나 환영입니다!
+- 주요 초점 분야에는 EVM 체인 통합, UI 개선 및 추가 지갑 지원이 포함됩니다.
+- 이 한국어 README는 AI에 의해 번역되었습니다. 오류를 발견하시면 Pull Request를 열어주세요.
 
 ---
 
