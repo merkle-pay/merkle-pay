@@ -99,12 +99,12 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 - **Structured Querying**: SQL provides powerful and standard ways to query and analyze payment data as the platform grows.
 - **Mature Ecosystem**: Excellent tooling and ORM support (e.g., Prisma) in the Node.js/TypeScript ecosystem.
 
-### Installation & Setup for LOCAL DEVELOPMENT
+### Installation & Setup for <u>LOCAL DEVELOPMENT</u>
 
 1.  **Clone the Repository**
 
     ```bash
-    git clone https://github.com/yourusername/merkle-pay.git
+    git clone https://github.com/merkle-pay/merkle-pay.git
     cd merkle-pay
     ```
 
@@ -125,7 +125,6 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 
     # step 1: backend config
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # -> EDIT apps/merkle-pay/.env with your PostgreSQL connection string etc.
 
     # step 2: frontend dev flag
     touch apps/merkle-dashboard/.env.development
@@ -150,7 +149,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 
 ---
 
-### Deployment for PRODUCTION
+### Deployment for <u>PRODUCTION</u>
 
 0.  **Install docker**
 
