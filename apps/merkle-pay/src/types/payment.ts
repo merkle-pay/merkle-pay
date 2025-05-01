@@ -30,7 +30,7 @@ export const payPageQuerySchema = z.object({
     z.number()
   ),
   orderId: z.string(),
-  payer: z.string().optional(),
+  payer: z.string().optional(), // optional in the url, but required in the form
   returnUrl: z.string(),
   businessName: z.string(),
 });
@@ -82,7 +82,7 @@ export const paymentFormDataSchema = z.object({
   orderId: z.string(),
   returnUrl: z.string(),
   businessName: z.string(),
-  payer: z.string().optional(),
+  payer: z.string(), // optional in the url, but required in the form
   message: z.string().optional(),
 });
 
