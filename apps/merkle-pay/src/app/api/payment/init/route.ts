@@ -31,7 +31,9 @@ export async function POST(request: NextRequest) {
     !process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.includes(
       paymentFormData.blockchain
     ) ||
-    !process.env.NEXT_PUBLIC_TOKEN_OPTIONS?.includes(paymentFormData.token)
+    !process.env.NEXT_PUBLIC_SOLANA_TOKEN_OPTIONS?.includes(
+      paymentFormData.token
+    )
   ) {
     return NextResponse.json({
       code: 400,

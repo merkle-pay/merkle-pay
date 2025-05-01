@@ -18,6 +18,7 @@ import { RecipientWallet } from "../../types/recipient";
 import styles from "./index.module.scss";
 import { useEffect } from "react";
 import clsx from "clsx";
+import { Blockchain } from "src/types/currency";
 
 // solana:
 //        <recipient>?amount=<amount>
@@ -204,14 +205,27 @@ export default function PayPage({
           field="token"
           required
           className={styles.formItem}
+          shouldUpdate
+          noStyle
         >
-          <Select placeholder="Select token symbol">
-            {tokenOptions.map((option) => (
-              <Select.Option key={option} value={option}>
-                {option}
-              </Select.Option>
-            ))}
-          </Select>
+          {(values) => {
+            const _tokenOptions =
+              tokenOptions[
+                (values.blockchain ?? router.query.blockchain) as Blockchain
+              ];
+            if (!_tokenOptions) {
+              throw new Error("No blockchain is supported");
+            }
+            return (
+              <Select placeholder="Select token symbol">
+                {_tokenOptions.map((option) => (
+                  <Select.Option key={option} value={option}>
+                    {option}
+                  </Select.Option>
+                ))}
+              </Select>
+            );
+          }}
         </Form.Item>
 
         <Form.Item

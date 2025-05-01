@@ -92,7 +92,9 @@ export type PaymentState = {
   paymentFormData: PaymentFormData;
   solanaWallets: RecipientWallet[];
   businessName: string | undefined;
-  tokenOptions: string[];
+  tokenOptions: {
+    [key in StableCoin["blockchain"]]?: string[];
+  };
   blockchainOptions: string[];
   returnUrl: string;
   paymentFormUrl: string;
@@ -106,7 +108,9 @@ export type PaymentActions = {
   setPaymentFormUrl: (url: string) => void;
   setSolanaWallets: (wallets: RecipientWallet[]) => void;
   setBusinessName: (name: string) => void;
-  setTokenOptions: (options: string[]) => void;
+  setTokenOptions: (options: {
+    [key in StableCoin["blockchain"]]?: string[];
+  }) => void;
   setBlockchainOptions: (options: string[]) => void;
   setReturnUrl: (url: string) => void;
   setPaymentTableRecord: (

@@ -9,6 +9,7 @@ import { create } from "zustand";
 import { RecipientWallet } from "../types/recipient";
 
 import { z } from "zod";
+import { StableCoin } from "src/types/currency";
 
 const initialState: PaymentState = {
   // payment will be saved into the database
@@ -25,7 +26,10 @@ const initialState: PaymentState = {
   } satisfies PaymentFormData,
   solanaWallets: [], // configurable
   businessName: "", // configurable
-  tokenOptions: [], // configurable
+  tokenOptions: {
+    solana: [],
+    tron: [],
+  },
   blockchainOptions: [], // configurable
   returnUrl: "", // configurable
   paymentFormUrl: "",
@@ -43,7 +47,9 @@ export const usePaymentStore = create<PaymentStore>((set) => ({
   setSolanaWallets: (wallets: RecipientWallet[]) =>
     set({ solanaWallets: wallets }),
   setBusinessName: (name: string) => set({ businessName: name }),
-  setTokenOptions: (options: string[]) => set({ tokenOptions: options }),
+  setTokenOptions: (options: {
+    [key in StableCoin["blockchain"]]?: string[];
+  }) => set({ tokenOptions: options }),
   setBlockchainOptions: (options: string[]) =>
     set({ blockchainOptions: options }),
   setReturnUrl: (url: string) => set({ returnUrl: url }),

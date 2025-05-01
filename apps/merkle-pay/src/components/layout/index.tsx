@@ -23,7 +23,10 @@ export const Layout = ({
   children: React.ReactNode;
   solanaWallets: RecipientWallet[];
   businessName: string;
-  tokenOptions: string[];
+  tokenOptions: {
+    solana: string[];
+    tron: string[];
+  };
   blockchainOptions: string[];
   returnUrl: string;
 }) => {

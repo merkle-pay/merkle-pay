@@ -24,6 +24,7 @@
     "react": "catalog:pay",
     "react-dom": "catalog:pay",
     "react-icons": "catalog:pay",
+    "tronweb": "catalog:pay",
     "tweetnacl": "catalog:pay",
     "@arco-design/web-react": "catalog:pay",
     "@prisma/client": "catalog:pay",

@@ -26,6 +26,7 @@ catalogs:
     eslint-config-next: ^15.2.2
     nanoid: ^5.1.5
     sass: ^1.86.0
+    tronweb: ^6.0.3
     tweetnacl: ^1.0.3
     "@react-hookz/web": ^25.1.1
     prisma: ^6.6.0
