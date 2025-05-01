@@ -30,6 +30,20 @@ import { Blockchain } from "src/types/currency";
 
 // solana:mvines9iiHiQTysrwkJjGf2gb9Ex9jXJX8ns3qwf2kN?amount=1&label=Michael&message=Thanks%20for%20all%20the%20fish&memo=OrderId12345
 
+// Ethereum: ERC-681
+
+// request                 = schema_prefix target_address [ "@" chain_id ] [ "/" function_name ] [ "?" parameters ]
+// schema_prefix           = "ethereum" ":" [ "pay-" ]
+// target_address          = ethereum_address
+// chain_id                = 1*DIGIT
+// function_name           = STRING
+// ethereum_address        = ( "0x" 40*HEXDIG ) / ENS_NAME
+// parameters              = parameter *( "&" parameter )
+// parameter               = key "=" value
+// key                     = "value" / "gas" / "gasLimit" / "gasPrice" / TYPE
+// value                   = number / ethereum_address / STRING
+// number                  = [ "-" / "+" ] *DIGIT [ "." 1*DIGIT ] [ ( "e" / "E" ) [ 1*DIGIT ] ]
+
 export default function PayPage({
   businessNameFromEnv,
   solanaWallets, // readonly
@@ -142,7 +156,7 @@ export default function PayPage({
       )
     : true;
 
-  if (!isWalletsConfigured) {
+  if (!isWalletsConfigured || !isBlockchainSupported) {
     return (
       <Space direction="vertical" size={16}>
         <Typography.Title>Configuration Error</Typography.Title>
