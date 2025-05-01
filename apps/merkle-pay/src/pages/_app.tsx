@@ -6,7 +6,7 @@ import { Layout } from "src/components/layout";
 
 export default function App({ Component, pageProps }: AppProps) {
   const businessName = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? "";
-  const blockchainOptions =
+  const BLOCKCHAIN_OPTIONS =
     process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.split(",") ?? [];
   const tokenOptions = {
     solana: process.env.NEXT_PUBLIC_SOLANA_TOKEN_OPTIONS?.split(",") ?? [],
@@ -18,7 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <Layout
       businessName={businessName}
       tokenOptions={tokenOptions}
-      blockchainOptions={blockchainOptions}
+      BLOCKCHAIN_OPTIONS={BLOCKCHAIN_OPTIONS}
       returnUrl={returnUrl}
     >
       <Component {...pageProps} />

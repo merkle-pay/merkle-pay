@@ -45,13 +45,13 @@ import { Blockchain } from "src/types/currency";
 // number                  = [ "-" / "+" ] *DIGIT [ "." 1*DIGIT ] [ ( "e" / "E" ) [ 1*DIGIT ] ]
 
 export default function PayPage({
-  businessNameFromEnv,
-  solanaWallets, // readonly
-  tronWallets, // readonly
+  BUSINESS_NAME_FROM_ENV,
+  SOLANA_WALLETS,
+  TRON_WALLETS,
 }: {
-  businessNameFromEnv: string | null;
-  solanaWallets: RecipientWallet[];
-  tronWallets: RecipientWallet[];
+  BUSINESS_NAME_FROM_ENV: string | null;
+  SOLANA_WALLETS: RecipientWallet[];
+  TRON_WALLETS: RecipientWallet[];
 }) {
   const [form] = Form.useForm<PaymentFormData>();
   const router = useRouter();
@@ -90,7 +90,7 @@ export default function PayPage({
 
       // businessName should be removed from url if it's already set in env
       if (key === "businessName") {
-        if (businessNameFromEnv) {
+        if (BUSINESS_NAME_FROM_ENV) {
           _searchParams.delete(key);
         }
       }
@@ -147,11 +147,11 @@ export default function PayPage({
   // if it's not in the blockchainsFromContext, there will be an error
   // if it's empty, its value will be determined by the wallet selected
   const isWalletsConfigured =
-    solanaWallets?.length > 0 || tronWallets?.length > 0;
+    SOLANA_WALLETS?.length > 0 || TRON_WALLETS?.length > 0;
 
   // If blockchain is set, check if it's supported
   const isBlockchainSupported = router.query.blockchain
-    ? [...solanaWallets, ...tronWallets].find(
+    ? [...SOLANA_WALLETS, ...TRON_WALLETS].find(
         (wallet) => wallet.blockchain === router.query.blockchain
       )
     : true;
@@ -321,10 +321,10 @@ export default function PayPage({
 
         <Form.Item shouldUpdate noStyle>
           {(values) => {
-            let _recipientWallets = solanaWallets;
+            let _recipientWallets = SOLANA_WALLETS;
             switch (values.blockchain) {
               case "tron":
-                _recipientWallets = tronWallets;
+                _recipientWallets = TRON_WALLETS;
                 break;
               default:
                 break;
@@ -373,10 +373,10 @@ export default function PayPage({
 }
 
 export const getServerSideProps = async () => {
-  const businessNameFromEnv = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? null;
-  const solanaWalletsPublicEnv =
+  const BUSINESS_NAME_FROM_ENV = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? null;
+  const SOLANA_WALLETS_PUBLIC_ENV =
     process.env.NEXT_PUBLIC_SOLANA_WALLETS?.split(",") ?? [];
-  const solanaWallets: RecipientWallet[] = solanaWalletsPublicEnv.map(
+  const SOLANA_WALLETS: RecipientWallet[] = SOLANA_WALLETS_PUBLIC_ENV.map(
     (wallet) => ({
       id: `solana-${wallet}`,
       address: wallet,
@@ -384,19 +384,21 @@ export const getServerSideProps = async () => {
     })
   );
 
-  const tronWalletsPublicEnv =
+  const TRON_WALLETS_PUBLIC_ENV =
     process.env.NEXT_PUBLIC_TRON_WALLETS?.split(",") ?? [];
-  const tronWallets: RecipientWallet[] = tronWalletsPublicEnv.map((wallet) => ({
-    id: `tron-${wallet}`,
-    address: wallet,
-    blockchain: "tron",
-  }));
+  const TRON_WALLETS: RecipientWallet[] = TRON_WALLETS_PUBLIC_ENV.map(
+    (wallet) => ({
+      id: `tron-${wallet}`,
+      address: wallet,
+      blockchain: "tron",
+    })
+  );
 
   return {
     props: {
-      businessNameFromEnv,
-      solanaWallets,
-      tronWallets,
+      BUSINESS_NAME_FROM_ENV,
+      SOLANA_WALLETS,
+      TRON_WALLETS,
     },
   };
 };

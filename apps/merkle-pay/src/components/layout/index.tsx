@@ -16,7 +16,7 @@ export const Layout = ({
   children,
   businessName: businessNameFromEnv,
   tokenOptions,
-  blockchainOptions,
+  BLOCKCHAIN_OPTIONS,
   returnUrl: returnUrlFromEnv,
 }: {
   children: React.ReactNode;
@@ -26,7 +26,7 @@ export const Layout = ({
     solana: string[];
     tron: string[];
   };
-  blockchainOptions: string[];
+  BLOCKCHAIN_OPTIONS: string[];
   returnUrl: string;
 }) => {
   const router = useRouter();
@@ -44,7 +44,7 @@ export const Layout = ({
     if (!router.isReady) return;
     setBusinessName(businessNameFromEnv || businessNameFromUrl);
     setTokenOptions(tokenOptions);
-    setBlockchainOptions(blockchainOptions);
+    setBlockchainOptions(BLOCKCHAIN_OPTIONS);
     setReturnUrl(returnUrlFromUrl || returnUrlFromEnv || "/pay/status");
   }, [router.isReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
