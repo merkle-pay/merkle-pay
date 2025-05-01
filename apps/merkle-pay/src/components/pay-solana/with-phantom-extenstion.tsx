@@ -7,16 +7,12 @@ import { z } from "zod";
 import { PaymentFormData, paymentTableRecordSchema } from "src/types/payment";
 
 export const WithPhantomExtension = ({
-  isPaying,
-  setIsPaying,
   setAlertMessage,
   phantomSolanaProvider,
   paymentTableRecord,
   goToUrl,
   paymentFormData,
 }: {
-  isPaying: boolean;
-  setIsPaying: (isPaying: boolean) => void;
   setAlertMessage: (error: {
     type: "error" | "success" | null;
     value: string | null;
@@ -27,12 +23,9 @@ export const WithPhantomExtension = ({
   paymentFormData: PaymentFormData;
 }) => {
   const handlePayWithPhantomExtension = async () => {
-    setIsPaying(true);
     const result = await sendSolanaPaymentWithPhantomExtension({
       phantomSolanaProvider,
       paymentFormData,
-    }).finally(() => {
-      setIsPaying(false);
     });
 
     if (result.successMessage && result.signature && paymentTableRecord?.mpid) {
@@ -61,7 +54,6 @@ export const WithPhantomExtension = ({
       long
       size="large"
       onClick={handlePayWithPhantomExtension}
-      disabled={isPaying}
     >
       Pay with Phantom Extension
     </Button>

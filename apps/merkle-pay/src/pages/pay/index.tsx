@@ -10,7 +10,7 @@ import {
 } from "@arco-design/web-react";
 import { IconArrowRight } from "@arco-design/web-react/icon";
 import { useRouter } from "next/router";
-import { paymentFormDataSchema } from "../../types/payment";
+import { PaymentFormData, paymentFormDataSchema } from "../../types/payment";
 import { fromZodError } from "zod-validation-error";
 
 import { usePaymentStore } from "../../store/payment-store";
@@ -32,14 +32,17 @@ import { Blockchain } from "src/types/currency";
 
 export default function PayPage({
   businessNameFromEnv,
+  solanaWallets, // readonly
+  tronWallets, // readonly
 }: {
   businessNameFromEnv: string | null;
+  solanaWallets: RecipientWallet[];
+  tronWallets: RecipientWallet[];
 }) {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<PaymentFormData>();
   const router = useRouter();
 
   const {
-    solanaWallets,
     setPaymentFormData,
     businessName: businessNameFromStore,
     tokenOptions,
@@ -112,6 +115,9 @@ export default function PayPage({
     router.push("/pay/preview");
   };
 
+  const message = form.getFieldValue("message");
+  const hasMessageLessThan40 =
+    typeof message === "string" && message.length <= 40;
   const isPreviewButtonActive =
     form.getFieldValue("blockchain") &&
     form.getFieldValue("token") &&
@@ -120,23 +126,23 @@ export default function PayPage({
     form.getFieldValue("recipient_address") &&
     form.getFieldValue("returnUrl") &&
     form.getFieldValue("businessName") &&
-    (!form.getFieldValue("message") ||
-      (form.getFieldValue("message") &&
-        form.getFieldValue("message").length <= 40));
+    (!message || hasMessageLessThan40); // no message or message is less than 40 characters
 
   // allow empty values in router.query
   // blockchain here is only for confirm the blockchain type,
   // if it's not in the blockchainsFromContext, there will be an error
   // if it's empty, its value will be determined by the wallet selected
-  const isWalletsConfigured = solanaWallets?.length > 0;
-  // Protection for empty blockchain
+  const isWalletsConfigured =
+    solanaWallets?.length > 0 || tronWallets?.length > 0;
+
+  // If blockchain is set, check if it's supported
   const isBlockchainSupported = router.query.blockchain
-    ? [...solanaWallets].find(
+    ? [...solanaWallets, ...tronWallets].find(
         (wallet) => wallet.blockchain === router.query.blockchain
       )
     : true;
 
-  if (!isWalletsConfigured || !isBlockchainSupported) {
+  if (!isWalletsConfigured) {
     return (
       <Space direction="vertical" size={16}>
         <Typography.Title>Configuration Error</Typography.Title>
@@ -192,7 +198,12 @@ export default function PayPage({
           required
           className={styles.formItem}
         >
-          <Select placeholder="Select blockchain">
+          <Select
+            placeholder="Select blockchain"
+            onChange={() => {
+              form.resetFields(["recipient_address", "token"]);
+            }}
+          >
             {blockchainOptions.map((option) => (
               <Select.Option key={option} value={option}>
                 {option}
@@ -201,29 +212,33 @@ export default function PayPage({
           </Select>
         </Form.Item>
         <Form.Item
-          label="Token"
-          field="token"
-          required
-          className={styles.formItem}
-          shouldUpdate
+          shouldUpdate={(prevValues, nextValues) => {
+            return prevValues.blockchain !== nextValues.blockchain;
+          }}
           noStyle
         >
           {(values) => {
             const _tokenOptions =
               tokenOptions[
-                (values.blockchain ?? router.query.blockchain) as Blockchain
+                (values.blockchain ??
+                  router.query.blockchain ??
+                  "solana") as Blockchain
               ];
-            if (!_tokenOptions) {
-              throw new Error("No blockchain is supported");
-            }
             return (
-              <Select placeholder="Select token symbol">
-                {_tokenOptions.map((option) => (
-                  <Select.Option key={option} value={option}>
-                    {option}
-                  </Select.Option>
-                ))}
-              </Select>
+              <Form.Item
+                label="Token"
+                field="token"
+                required
+                className={styles.formItem}
+              >
+                <Select placeholder="Select token symbol">
+                  {_tokenOptions!.map((option) => (
+                    <Select.Option key={option} value={option}>
+                      {option}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
             );
           }}
         </Form.Item>
@@ -290,19 +305,33 @@ export default function PayPage({
           <Input />
         </Form.Item>
 
-        <Form.Item
-          label="Recipient"
-          field="recipient_address"
-          required
-          className={clsx(styles.formItem, styles.fullWidth)}
-        >
-          <Select placeholder="Select recipient's wallet address">
-            {solanaWallets.map((option: RecipientWallet) => (
-              <Select.Option key={option.address} value={option.address}>
-                {option.address}
-              </Select.Option>
-            ))}
-          </Select>
+        <Form.Item shouldUpdate noStyle>
+          {(values) => {
+            let _recipientWallets = solanaWallets;
+            switch (values.blockchain) {
+              case "tron":
+                _recipientWallets = tronWallets;
+                break;
+              default:
+                break;
+            }
+            return (
+              <Form.Item
+                label="Recipient"
+                field="recipient_address"
+                required
+                className={clsx(styles.formItem, styles.fullWidth)}
+              >
+                <Select placeholder="Select recipient's wallet address">
+                  {_recipientWallets.map((option: RecipientWallet) => (
+                    <Select.Option key={option.address} value={option.address}>
+                      {option.address}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            );
+          }}
         </Form.Item>
 
         <Form.Item
@@ -331,8 +360,29 @@ export default function PayPage({
 
 export const getServerSideProps = async () => {
   const businessNameFromEnv = process.env.NEXT_PUBLIC_BUSINESS_NAME ?? null;
+  const solanaWalletsPublicEnv =
+    process.env.NEXT_PUBLIC_SOLANA_WALLETS?.split(",") ?? [];
+  const solanaWallets: RecipientWallet[] = solanaWalletsPublicEnv.map(
+    (wallet) => ({
+      id: `solana-${wallet}`,
+      address: wallet,
+      blockchain: "solana",
+    })
+  );
+
+  const tronWalletsPublicEnv =
+    process.env.NEXT_PUBLIC_TRON_WALLETS?.split(",") ?? [];
+  const tronWallets: RecipientWallet[] = tronWalletsPublicEnv.map((wallet) => ({
+    id: `tron-${wallet}`,
+    address: wallet,
+    blockchain: "tron",
+  }));
 
   return {
-    props: { businessNameFromEnv },
+    props: {
+      businessNameFromEnv,
+      solanaWallets,
+      tronWallets,
+    },
   };
 };

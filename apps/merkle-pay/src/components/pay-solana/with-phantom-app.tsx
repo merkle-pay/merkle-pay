@@ -8,15 +8,11 @@ import { z } from "zod";
 import { CfTurnstileHandle } from "../cf-turnstile";
 
 export const WithPhantomApp = ({
-  isPaying,
-  setIsPaying,
   setAlertMessage,
   paymentTableRecord,
   APP_URL,
   cfTurnstileRef,
 }: {
-  isPaying: boolean;
-  setIsPaying: (isPaying: boolean) => void;
   setAlertMessage: (error: {
     type: "error" | "success" | "info" | null;
     value: string | null;
@@ -48,7 +44,6 @@ export const WithPhantomApp = ({
       return;
     }
     try {
-      setIsPaying(true);
       const antibotToken = await cfTurnstileRef.current?.getResponseAsync();
       const { dAppPublicKey, error, requestId } = await generateAndSaveNaclKeys(
         {
@@ -83,8 +78,6 @@ export const WithPhantomApp = ({
         type: "error",
         value: `Failed to connect Phantom App: ${(error as Error).message}`,
       });
-    } finally {
-      setIsPaying(false);
     }
   };
 
@@ -96,7 +89,6 @@ export const WithPhantomApp = ({
       onClick={async () => {
         await handlePhantomApp();
       }}
-      disabled={isPaying}
     >
       Pay with Phantom {isMobileDevice ? "Mobile App" : "Wallet Extension"}
     </Button>

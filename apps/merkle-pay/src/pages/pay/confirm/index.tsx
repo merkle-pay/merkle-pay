@@ -41,7 +41,7 @@ export default function PaymentConfirmPage({
 
   const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
-  const [isPaying, setIsPaying] = useState(false);
+
   const [alertMessage, setAlertMessage] = useState<{
     type: "error" | "success" | "info" | null;
     value: string | null;
@@ -80,16 +80,12 @@ export default function PaymentConfirmPage({
           labelStyle={{ fontWeight: 600, color: "#000" }}
         />
         <WithQRCode
-          isPaying={isPaying}
-          setIsPaying={setIsPaying}
           urlForQrCode={urlForQrCode}
           paymentTableRecord={paymentTableRecord}
           setAlertMessage={setAlertMessage}
         />
         {phantomSolanaProvider && (
           <WithPhantomExtension
-            isPaying={isPaying}
-            setIsPaying={setIsPaying}
             setAlertMessage={setAlertMessage}
             phantomSolanaProvider={phantomSolanaProvider}
             paymentTableRecord={paymentTableRecord}
@@ -99,8 +95,6 @@ export default function PaymentConfirmPage({
         )}
         {isMobileDevice && (
           <WithPhantomApp
-            isPaying={isPaying}
-            setIsPaying={setIsPaying}
             setAlertMessage={setAlertMessage}
             paymentTableRecord={paymentTableRecord}
             APP_URL={APP_URL}

@@ -1,6 +1,6 @@
 import { StableCoin } from "./currency";
 import { z } from "zod";
-import { RecipientWallet } from "./recipient";
+
 import { PaymentStatus } from "../utils/prisma";
 
 export const payPageQuerySchema = z.object({
@@ -82,7 +82,7 @@ export const paymentFormDataSchema = z.object({
   orderId: z.string(),
   returnUrl: z.string(),
   businessName: z.string(),
-  payer: z.string(),
+  payer: z.string().optional(),
   message: z.string().optional(),
 });
 
@@ -90,7 +90,6 @@ export type PaymentFormData = z.infer<typeof paymentFormDataSchema>;
 
 export type PaymentState = {
   paymentFormData: PaymentFormData;
-  solanaWallets: RecipientWallet[];
   businessName: string | undefined;
   tokenOptions: {
     [key in StableCoin["blockchain"]]?: string[];
@@ -106,7 +105,6 @@ export type PaymentState = {
 export type PaymentActions = {
   setPaymentFormData: (paymentFormData: PaymentFormData) => void;
   setPaymentFormUrl: (url: string) => void;
-  setSolanaWallets: (wallets: RecipientWallet[]) => void;
   setBusinessName: (name: string) => void;
   setTokenOptions: (options: {
     [key in StableCoin["blockchain"]]?: string[];

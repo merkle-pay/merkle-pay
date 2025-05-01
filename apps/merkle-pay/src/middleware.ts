@@ -33,7 +33,6 @@ export async function middleware(request: NextRequest) {
         },
       });
     } else {
-      console.log("1", 1);
       return new NextResponse(null, { status: 403, statusText: "Forbidden" });
     }
   }

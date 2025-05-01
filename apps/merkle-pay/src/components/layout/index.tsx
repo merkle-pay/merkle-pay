@@ -4,7 +4,7 @@ import {
   Typography,
   Link as ArcoLink,
 } from "@arco-design/web-react";
-import { RecipientWallet } from "../../types/recipient";
+
 import { useEffect } from "react";
 import { usePaymentStore } from "src/store/payment-store";
 import Image from "next/image";
@@ -14,14 +14,13 @@ import { useRouter } from "next/router";
 // ! All props are from env variables
 export const Layout = ({
   children,
-  solanaWallets,
   businessName: businessNameFromEnv,
   tokenOptions,
   blockchainOptions,
   returnUrl: returnUrlFromEnv,
 }: {
   children: React.ReactNode;
-  solanaWallets: RecipientWallet[];
+
   businessName: string;
   tokenOptions: {
     solana: string[];
@@ -35,7 +34,6 @@ export const Layout = ({
   const businessNameFromUrl = router.query.businessName as string;
 
   const {
-    setSolanaWallets,
     setBusinessName,
     setTokenOptions,
     setBlockchainOptions,
@@ -44,8 +42,6 @@ export const Layout = ({
 
   useEffect(() => {
     if (!router.isReady) return;
-
-    setSolanaWallets(solanaWallets);
     setBusinessName(businessNameFromEnv || businessNameFromUrl);
     setTokenOptions(tokenOptions);
     setBlockchainOptions(blockchainOptions);
