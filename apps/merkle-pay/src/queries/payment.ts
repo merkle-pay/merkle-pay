@@ -23,7 +23,7 @@ export const createPaymentTableRecordQuery = async (
     const json: unknown = await res.json();
 
     const dataSchema = z.object({
-      urlForQrCode: z.string(),
+      urlForSolanaPayQrCode: z.string(),
       referencePublicKeyString: z.string(),
       paymentTableRecord: paymentTableRecordSchema,
     });

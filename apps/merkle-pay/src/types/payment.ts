@@ -98,7 +98,7 @@ export type PaymentState = {
   returnUrl: string;
   paymentFormUrl: string;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
-  urlForQrCode: string | null;
+  urlForSolanaPayQrCode: string | null;
   referencePublicKeyString: string | null;
 };
 
@@ -114,7 +114,7 @@ export type PaymentActions = {
   setPaymentTableRecord: (
     record: z.infer<typeof paymentTableRecordSchema> | null
   ) => void;
-  setUrlForQrCode: (url: string | null) => void;
+  setUrlForSolanaPayQrCode: (url: string | null) => void;
   setReferencePublicKeyString: (str: string | null) => void;
 };
 

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { TronWeb } from "tronweb";
 import {
   PublicKey,
   Transaction,
@@ -54,6 +55,7 @@ declare global {
       solana?: PhantomSolanaProvider;
       ethereum?: PhantomEthereumProvider;
     };
+    tronWeb?: TronWeb;
   }
 }
 

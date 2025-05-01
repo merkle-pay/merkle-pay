@@ -4,21 +4,20 @@ import {
   Typography,
   Alert,
   Descriptions,
+  Result,
 } from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import styles from "./index.module.scss";
 import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
 import { useRef, useState } from "react";
-import { getPhantomProviders } from "src/utils/solana";
+
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
-import { WithQRCode } from "src/components/pay-solana/with-qrcode";
-import { WithPhantomExtension } from "src/components/pay-solana/with-phantom-extenstion";
-import { WithPhantomApp } from "src/components/pay-solana/with-phantom-app";
 
 import { useMediaQuery } from "@react-hookz/web";
 import { getPaymentRecordDescriptionData } from "src/utils/payment";
 import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
+import { SolanaPaymentMethods } from "src/components/pay-solana";
 
 export default function PaymentConfirmPage({
   APP_URL,
@@ -27,8 +26,7 @@ export default function PaymentConfirmPage({
   APP_URL: string;
   CF_TURNSTILE_SITE_KEY: string;
 }) {
-  const { paymentFormData, paymentFormUrl, urlForQrCode, paymentTableRecord } =
-    usePaymentStore();
+  const { paymentFormUrl, paymentTableRecord } = usePaymentStore();
   const isMobileLayout = useMediaQuery("(max-width: 768px)");
   const router = useRouter();
   const goToUrl = (url: string) => {
@@ -39,7 +37,6 @@ export default function PaymentConfirmPage({
 
   const cfTurnstileRef = useRef<CfTurnstileHandle>(null);
 
-  const { phantomSolanaProvider } = getPhantomProviders();
   const { isMobileDevice } = useIsMobileDevice();
 
   const [alertMessage, setAlertMessage] = useState<{
@@ -49,6 +46,21 @@ export default function PaymentConfirmPage({
     type: null,
     value: null,
   });
+
+  if (!paymentTableRecord) {
+    return (
+      <Result
+        status="error"
+        title="Payment not created or invalid"
+        subTitle="Please fill the payment form."
+        extra={[
+          <Button key="again" type="primary" onClick={() => goToUrl("/pay")}>
+            Fill the payment form
+          </Button>,
+        ]}
+      ></Result>
+    );
+  }
 
   return (
     <Space direction="vertical" size={48} className={styles.container}>
@@ -79,24 +91,11 @@ export default function PaymentConfirmPage({
           data={getPaymentRecordDescriptionData(paymentTableRecord)}
           labelStyle={{ fontWeight: 600, color: "#000" }}
         />
-        <WithQRCode
-          urlForQrCode={urlForQrCode}
-          paymentTableRecord={paymentTableRecord}
-          setAlertMessage={setAlertMessage}
-        />
-        {phantomSolanaProvider && (
-          <WithPhantomExtension
+        {paymentTableRecord?.blockchain === "solana" && (
+          <SolanaPaymentMethods
             setAlertMessage={setAlertMessage}
-            phantomSolanaProvider={phantomSolanaProvider}
-            paymentTableRecord={paymentTableRecord}
             goToUrl={goToUrl}
-            paymentFormData={paymentFormData}
-          />
-        )}
-        {isMobileDevice && (
-          <WithPhantomApp
-            setAlertMessage={setAlertMessage}
-            paymentTableRecord={paymentTableRecord}
+            isMobileDevice={isMobileDevice}
             APP_URL={APP_URL}
             cfTurnstileRef={cfTurnstileRef}
           />

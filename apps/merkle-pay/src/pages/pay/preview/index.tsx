@@ -4,6 +4,7 @@ import {
   Space,
   Typography,
   Alert,
+  Result,
 } from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
@@ -26,7 +27,7 @@ export default function PaymentPreviewPage({
     paymentFormData: paymentFormDataValueFromStore,
     paymentFormUrl,
     setPaymentTableRecord,
-    setUrlForQrCode,
+    setUrlForSolanaPayQrCode,
     setReferencePublicKeyString,
   } = usePaymentStore();
 
@@ -52,17 +53,47 @@ export default function PaymentPreviewPage({
     data: validatedPaymentFormData,
   } = paymentFormDataSchema.safeParse(paymentFormDataValueFromStore);
 
-  // If there's no payment data, redirect back to the payment page
-  if (!success) {
-    // You can either redirect or show a message
+  // If there's no payment data,
+  // either it's because the paymentFormDataValueFromStore object is not initialized yet
+  // or the paymentFormDataValueFromStore data is invalid
+  // either way, redirect back to the payment page
+  if (!success || !paymentFormDataValueFromStore.blockchain) {
     return (
-      <Space direction="vertical" size={16}>
-        <Typography.Title>Payment data is invalid</Typography.Title>
-        <Typography.Text>{fromZodError(error).message}</Typography.Text>
-        <Button type="outline" onClick={() => router.push("/pay")}>
-          Back to Payment
-        </Button>
-      </Space>
+      <Result
+        status="error"
+        title={
+          paymentFormDataValueFromStore.blockchain
+            ? "Payment form data is invalid"
+            : "Payment form not filled"
+        }
+        subTitle={
+          paymentFormDataValueFromStore.blockchain ? (
+            <Space direction="vertical" size={16}>
+              <Typography.Text>
+                Please fill the payment form again.
+              </Typography.Text>
+              {fromZodError(error!).details.map((detail, index) => {
+                return (
+                  <Typography.Text key={index}>
+                    {detail.message}
+                  </Typography.Text>
+                );
+              })}
+            </Space>
+          ) : (
+            `Please fill the payment form.`
+          )
+        }
+        extra={[
+          <Button
+            key="again"
+            type="primary"
+            onClick={() => router.push("/pay")}
+          >
+            Fill the payment form
+          </Button>,
+        ]}
+      ></Result>
     );
   }
 
@@ -125,11 +156,14 @@ export default function PaymentPreviewPage({
         return;
       }
 
-      const { urlForQrCode, referencePublicKeyString, paymentTableRecord } =
-        data;
+      const {
+        urlForSolanaPayQrCode,
+        referencePublicKeyString,
+        paymentTableRecord,
+      } = data;
 
       setPaymentTableRecord(paymentTableRecord);
-      setUrlForQrCode(urlForQrCode);
+      setUrlForSolanaPayQrCode(urlForSolanaPayQrCode);
       setReferencePublicKeyString(referencePublicKeyString);
       return true;
     } catch (err) {

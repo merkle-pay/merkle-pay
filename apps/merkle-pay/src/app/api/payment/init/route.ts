@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       code: 200,
       data: {
-        urlForQrCode: url,
+        urlForSolanaPayQrCode: url,
         referencePublicKeyString: referencePublicKeyString,
         paymentTableRecord: createdPaymentTableRecord,
       },

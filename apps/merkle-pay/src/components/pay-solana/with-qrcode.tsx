@@ -10,12 +10,12 @@ import { createQROptions } from "@solana/pay";
 import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
 
-export const WithQRCode = ({
-  urlForQrCode,
+export const WithSolanaPayQrCode = ({
+  urlForSolanaPayQrCode,
   paymentTableRecord,
   setAlertMessage,
 }: {
-  urlForQrCode: string | null;
+  urlForSolanaPayQrCode: string | null;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   setAlertMessage: (message: {
     type: "error" | "success" | "info" | null;
@@ -26,10 +26,10 @@ export const WithQRCode = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const generateQrCode = async () => {
-    if (!urlForQrCode || !paymentTableRecord?.mpid) {
+    if (!urlForSolanaPayQrCode || !paymentTableRecord?.mpid) {
       setAlertMessage({
         type: "error",
-        value: urlForQrCode
+        value: urlForSolanaPayQrCode
           ? "QR code not generated properly"
           : "Invalid payment record",
       });
@@ -37,7 +37,7 @@ export const WithQRCode = ({
     }
 
     const logoDataUri = `data:image/svg+xml;base64,${btoa(logoSvg)}`;
-    const options = createQROptions(urlForQrCode, 300);
+    const options = createQROptions(urlForSolanaPayQrCode, 300);
     options.image = logoDataUri;
 
     const qrCode = new QRCodeStyling(options);

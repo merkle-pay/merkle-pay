@@ -7,7 +7,6 @@ import {
 
 import { create } from "zustand";
 
-
 import { z } from "zod";
 import { StableCoin } from "src/types/currency";
 
@@ -33,7 +32,7 @@ const initialState: PaymentState = {
   returnUrl: "", // configurable
   paymentFormUrl: "",
   paymentTableRecord: null,
-  urlForQrCode: null,
+  urlForSolanaPayQrCode: null,
   referencePublicKeyString: null,
 };
 
@@ -53,7 +52,8 @@ export const usePaymentStore = create<PaymentStore>((set) => ({
   setPaymentTableRecord: (
     record: z.infer<typeof paymentTableRecordSchema> | null
   ) => set({ paymentTableRecord: record }),
-  setUrlForQrCode: (url: string | null) => set({ urlForQrCode: url }),
+  setUrlForSolanaPayQrCode: (url: string | null) =>
+    set({ urlForSolanaPayQrCode: url }),
   setReferencePublicKeyString: (str: string | null) =>
     set({ referencePublicKeyString: str }),
 }));
