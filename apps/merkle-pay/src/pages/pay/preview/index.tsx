@@ -41,7 +41,7 @@ export default function PaymentPreviewPage({
 
   const [alertMessage, setAlertMessage] = useState<{
     type: "error" | "success" | null;
-    value: string | null;
+    value: React.ReactNode | null;
   }>({
     type: null,
     value: null,
@@ -166,8 +166,8 @@ export default function PaymentPreviewPage({
 
       if (validatedPaymentFormData.blockchain === "solana") {
         setPaymentTableRecord(paymentTableRecord);
-        setUrlForSolanaPayQrCode(urlForSolanaPayQrCode);
-        setReferencePublicKeyString(referencePublicKeyString);
+        setUrlForSolanaPayQrCode(urlForSolanaPayQrCode ?? null);
+        setReferencePublicKeyString(referencePublicKeyString ?? null);
         console.log("1", 1);
         return true;
       }

@@ -15,7 +15,7 @@ export const WithPhantomApp = ({
 }: {
   setAlertMessage: (error: {
     type: "error" | "success" | "info" | null;
-    value: string | null;
+    value: React.ReactNode | null;
   }) => void;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   APP_URL: string;

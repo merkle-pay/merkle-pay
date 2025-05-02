@@ -42,7 +42,7 @@ export default function PaymentConfirmPage({
 
   const [alertMessage, setAlertMessage] = useState<{
     type: "error" | "success" | "info" | null;
-    value: string | null;
+    value: React.ReactNode | null;
   }>({
     type: null,
     value: null,
@@ -102,7 +102,10 @@ export default function PaymentConfirmPage({
           />
         )}
         {paymentTableRecord?.blockchain === "tron" && (
-          <TronPaymentMethods setAlertMessage={setAlertMessage} />
+          <TronPaymentMethods
+            setAlertMessage={setAlertMessage}
+            isMobileDevice={isMobileDevice}
+          />
         )}
       </Space>
       <CfTurnstile ref={cfTurnstileRef} siteKey={CF_TURNSTILE_SITE_KEY} />

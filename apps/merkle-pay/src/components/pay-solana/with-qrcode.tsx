@@ -19,7 +19,7 @@ export const WithSolanaPayQrCode = ({
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   setAlertMessage: (message: {
     type: "error" | "success" | "info" | null;
-    value: string | null;
+    value: React.ReactNode | null;
   }) => void;
 }) => {
   const qrCodeRef = useRef<HTMLDivElement>(null);

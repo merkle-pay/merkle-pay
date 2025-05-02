@@ -15,7 +15,7 @@ export const SolanaPaymentMethods = ({
 }: {
   setAlertMessage: (message: {
     type: "error" | "success" | "info" | null;
-    value: string | null;
+    value: React.ReactNode | null;
   }) => void;
   goToUrl: (url: string) => void;
   isMobileDevice: boolean;

@@ -15,7 +15,7 @@ export const WithPhantomExtension = ({
 }: {
   setAlertMessage: (error: {
     type: "error" | "success" | null;
-    value: string | null;
+    value: React.ReactNode | null;
   }) => void;
   phantomSolanaProvider: PhantomSolanaProvider | null;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
