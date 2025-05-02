@@ -38,16 +38,18 @@ model Payment {
 }
 
 model PhantomDeepLink {
-  id         Int      @id @default(autoincrement())
-  publicKey  String
-  privateKey String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  mpid       String
-  orderId    String
-  requestId  String?
-  paymentId  Int
-  expiresAt  DateTime
+  id                            Int      @id @default(autoincrement())
+  publicKey                     String
+  privateKey                    String
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
+  mpid                          String
+  orderId                       String
+  requestId                     String?
+  paymentId                     Int
+  expiresAt                     DateTime
+  txId                          String?
+  phantom_encryption_public_key String?
 }
 
 model Boss {

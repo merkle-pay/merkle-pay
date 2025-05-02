@@ -137,6 +137,15 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
   }
 
+  await prisma.phantomDeepLink.update({
+    where: {
+      id: phantomDeepLink.id,
+    },
+    data: {
+      phantom_encryption_public_key: PHANTOM_ENCRYPTION_PUBLIC_KEY,
+    },
+  });
+
   const universalLink = await createPhantomPaymentUniversalLink(
     {
       recipient_address: paymentTableRecord.recipient_address,
