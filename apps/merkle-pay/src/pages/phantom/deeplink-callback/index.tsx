@@ -98,6 +98,15 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
   }
 
+  const parsedDataObject = JSON.parse(Buffer.from(decrypted).toString("utf8"));
+
+  await prisma.phantomDeepLink.update({
+    where: { id: phantomDeepLink.id },
+    data: {
+      txId: parsedDataObject.signature,
+    },
+  });
+
   return {
     props: {
       data: JSON.parse(Buffer.from(decrypted).toString("utf8")),
