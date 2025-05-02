@@ -14,6 +14,8 @@
     "@solana/spl-token": "catalog:pay",
     "@solana/pay": "catalog:pay",
     "@solana/qr-code-styling": "catalog:pay",
+    "@tronweb3/tronwallet-adapter-tronlink": "catalog:pay",
+    "@tronweb3/tronwallet-adapter-react-hooks": "catalog:pay",
     "@marsidev/react-turnstile": "catalog:pay",
     "better-auth": "catalog:pay",
     "bignumber.js": "catalog:pay",

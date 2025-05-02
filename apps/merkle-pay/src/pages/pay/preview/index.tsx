@@ -99,6 +99,7 @@ export default function PaymentPreviewPage({
 
   const handleConfirmPayment = async () => {
     const success = await createPaymentTableRecord();
+
     if (success) {
       router.push("/pay/confirm");
     } else {
@@ -148,6 +149,7 @@ export default function PaymentPreviewPage({
         validatedPaymentFormData,
         antibotToken
       );
+
       if (error || !data) {
         setAlertMessage({
           type: "error",
@@ -162,9 +164,20 @@ export default function PaymentPreviewPage({
         paymentTableRecord,
       } = data;
 
-      setPaymentTableRecord(paymentTableRecord);
-      setUrlForSolanaPayQrCode(urlForSolanaPayQrCode);
-      setReferencePublicKeyString(referencePublicKeyString);
+      if (validatedPaymentFormData.blockchain === "solana") {
+        setPaymentTableRecord(paymentTableRecord);
+        setUrlForSolanaPayQrCode(urlForSolanaPayQrCode);
+        setReferencePublicKeyString(referencePublicKeyString);
+        console.log("1", 1);
+        return true;
+      }
+
+      if (validatedPaymentFormData.blockchain === "tron") {
+        setPaymentTableRecord(paymentTableRecord);
+        console.log("2", 2);
+        return true;
+      }
+
       return true;
     } catch (err) {
       setAlertMessage({

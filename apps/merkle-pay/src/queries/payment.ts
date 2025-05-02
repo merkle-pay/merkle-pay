@@ -11,7 +11,8 @@ export const createPaymentTableRecordQuery = async (
   turnstileToken: string
 ) => {
   try {
-    const res = await fetch("/api/payment/init", {
+    const blockchain = paymentFormData.blockchain;
+    const res = await fetch(`/api/payment/init-${blockchain}`, {
       method: "POST",
       body: JSON.stringify({ paymentFormData }),
       headers: {
@@ -23,8 +24,8 @@ export const createPaymentTableRecordQuery = async (
     const json: unknown = await res.json();
 
     const dataSchema = z.object({
-      urlForSolanaPayQrCode: z.string(),
-      referencePublicKeyString: z.string(),
+      urlForSolanaPayQrCode: z.string().optional(),
+      referencePublicKeyString: z.string().optional(),
       paymentTableRecord: paymentTableRecordSchema,
     });
 

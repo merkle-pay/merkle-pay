@@ -5,8 +5,6 @@ export const tronWeb = new TronWeb({
   headers: { "TRON-PRO-API-KEY": process.env.NEXT_PUBLIC_TRON_GRID_API_KEY },
 });
 
-export const tronWebProvider = window.tronWeb;
-
 export const TRON_TRC20_TOKENS = {
   USDT: {
     address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",

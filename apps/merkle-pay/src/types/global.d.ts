@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TronWeb } from "tronweb";
+import { TronLinkWallet } from "@tronweb3/tronwallet-adapter-tronlink";
 import {
   PublicKey,
   Transaction,
@@ -56,6 +57,7 @@ declare global {
       ethereum?: PhantomEthereumProvider;
     };
     tronWeb?: TronWeb;
+    tronLink?: TronLinkWallet;
   }
 }
 

@@ -19,6 +19,8 @@ catalogs:
     "@arco-design/web-react": ^2.66.1
     "@marsidev/react-turnstile": ^1.1.0
     "@eslint/eslintrc": ^3
+    "@tronweb3/tronwallet-adapter-tronlink": ^1.1.12
+    "@tronweb3/tronwallet-adapter-react-hooks": ^1.1.10
     "@types/node": ^22
     "@types/react": ^19
     "@types/react-dom": ^19

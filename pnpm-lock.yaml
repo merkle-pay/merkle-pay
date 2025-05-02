@@ -244,6 +244,12 @@ catalogs:
     '@solana/web3.js':
       specifier: ^1.98.0
       version: 1.98.2
+    '@tronweb3/tronwallet-adapter-react-hooks':
+      specifier: ^1.1.10
+      version: 1.1.10
+    '@tronweb3/tronwallet-adapter-tronlink':
+      specifier: ^1.1.12
+      version: 1.1.12
     '@types/node':
       specifier: ^22
       version: 22.15.3
@@ -558,6 +564,12 @@ importers:
       '@solana/web3.js':
         specifier: catalog:pay
         version: 1.98.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@tronweb3/tronwallet-adapter-react-hooks':
+        specifier: catalog:pay
+        version: 1.1.10(bufferutil@4.0.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(utf-8-validate@5.0.10)
+      '@tronweb3/tronwallet-adapter-tronlink':
+        specifier: catalog:pay
+        version: 1.1.12(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       better-auth:
         specifier: catalog:pay
         version: 1.2.7
@@ -2409,6 +2421,21 @@ packages:
     peerDependenciesMeta:
       '@vue/compiler-sfc':
         optional: true
+
+  '@tronweb3/tronwallet-abstract-adapter@1.1.9':
+    resolution: {integrity: sha512-2wev5T/Z+Yt96nv2upZeq54v8zk8aXCg0p6yx1BpfY2y25lC0jEiul+F/6o5s2uIUXe2ENdbpMiGQz8+/Jy1EQ==}
+    engines: {node: '>=16', pnpm: '>=7'}
+
+  '@tronweb3/tronwallet-adapter-react-hooks@1.1.10':
+    resolution: {integrity: sha512-/6rOFGc9imOHIiqQ/a7nSkR3tFae0HeUovq5dD2qygu9Rmb09rbJhyV0Nc4wH+yTFORjYCguIUqCi2QBbH/WOA==}
+    engines: {node: '>=16', pnpm: '>=7'}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@tronweb3/tronwallet-adapter-tronlink@1.1.12':
+    resolution: {integrity: sha512-ArRTfvxhZeUXHQHdOtw7yo8ddKP6k2cafp8lvhfmCgExx04Fgm1b/pR38JdKvNkQCROGzHNgWkwfrheQRMMU6A==}
+    engines: {node: '>=16', pnpm: '>=7'}
 
   '@tybys/wasm-util@0.9.0':
     resolution: {integrity: sha512-6+7nlbMVX/PVDCwaIQ8nTOPveOcFLSt8GcXdx8hD0bt39uWxYT88uXzqTd4fTvqta7oeUJqudepapKNt2DYJFw==}
@@ -6698,6 +6725,34 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@tronweb3/tronwallet-abstract-adapter@1.1.9(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+    dependencies:
+      eventemitter3: 4.0.7
+      tronweb: 6.0.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@tronweb3/tronwallet-adapter-react-hooks@1.1.10(bufferutil@4.0.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@tronweb3/tronwallet-abstract-adapter': 1.1.9(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@tronweb3/tronwallet-adapter-tronlink': 1.1.12(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@tronweb3/tronwallet-adapter-tronlink@1.1.12(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@tronweb3/tronwallet-abstract-adapter': 1.1.9(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
   '@tybys/wasm-util@0.9.0':
     dependencies:
       tslib: 2.8.1
@@ -7631,7 +7686,7 @@ snapshots:
       eslint: 9.25.1(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.25.1(jiti@2.4.2)))(eslint@9.25.1(jiti@2.4.2))
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.25.1(jiti@2.4.2))
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.25.1(jiti@2.4.2)))(eslint@9.25.1(jiti@2.4.2)))(eslint@9.25.1(jiti@2.4.2))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.25.1(jiti@2.4.2))
       eslint-plugin-react: 7.37.5(eslint@9.25.1(jiti@2.4.2))
       eslint-plugin-react-hooks: 5.2.0(eslint@9.25.1(jiti@2.4.2))
@@ -7661,7 +7716,7 @@ snapshots:
       tinyglobby: 0.2.13
       unrs-resolver: 1.7.2
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.25.1(jiti@2.4.2))
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.25.1(jiti@2.4.2)))(eslint@9.25.1(jiti@2.4.2)))(eslint@9.25.1(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
@@ -7676,7 +7731,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.25.1(jiti@2.4.2)):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.31.1(eslint@9.25.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.25.1(jiti@2.4.2)))(eslint@9.25.1(jiti@2.4.2)))(eslint@9.25.1(jiti@2.4.2)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8

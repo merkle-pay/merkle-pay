@@ -18,6 +18,7 @@ import { useMediaQuery } from "@react-hookz/web";
 import { getPaymentRecordDescriptionData } from "src/utils/payment";
 import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
 import { SolanaPaymentMethods } from "src/components/pay-solana";
+import { TronPaymentMethods } from "src/components/pay-tron";
 
 export default function PaymentConfirmPage({
   APP_URL,
@@ -99,6 +100,9 @@ export default function PaymentConfirmPage({
             APP_URL={APP_URL}
             cfTurnstileRef={cfTurnstileRef}
           />
+        )}
+        {paymentTableRecord?.blockchain === "tron" && (
+          <TronPaymentMethods setAlertMessage={setAlertMessage} />
         )}
       </Space>
       <CfTurnstile ref={cfTurnstileRef} siteKey={CF_TURNSTILE_SITE_KEY} />
