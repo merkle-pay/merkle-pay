@@ -1,6 +1,6 @@
 {
   "name": "merkle-pay",
-  "version": "0.30.2",
+  "version": "0.30.3",
   "private": true,
   "packageManager": "pnpm@10.6.4",
   "engines": {
