@@ -115,14 +115,4 @@ d-clean:
 d-logs:
 	docker compose $(DOCKER_COMPOSE_ENV_FILE) logs -f
 
-# merkle-pay standalone image
-.PHONY: so-build so-run so-push
-
-so-build:
-	docker build -t merkle-pay-standalone .
-
-so-run:
-	docker run -d -p 3000:3000 --name mp-standalone --env-file $(PAY_DIR)/.env merkle-pay-standalone
-
-so-push:
-	git push so main
+ 
