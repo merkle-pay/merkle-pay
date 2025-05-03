@@ -48,14 +48,21 @@ export const WithTronLinkQrCode = ({
           value={paymentTableRecord.recipient_address}
           size={256}
           level={"M"}
+          imageSettings={{
+            src: "/logo.png",
+            x: undefined,
+            y: undefined,
+            height: 72,
+            width: 72,
+            opacity: 1,
+            excavate: true,
+          }}
         />
         <Space direction="vertical" size={4}>
-          <Typography.Title heading={5}>
-            Please scan the QR code with TronLink to pay.
-          </Typography.Title>
-          <Typography.Title heading={5}>
+          <Typography.Title heading={4}>
             Please make sure the amount is
-            <br />
+          </Typography.Title>
+          <Typography.Title heading={4} style={{ color: "red" }}>
             {`${paymentTableRecord.amount} ${paymentTableRecord.token}`}.
           </Typography.Title>
         </Space>
