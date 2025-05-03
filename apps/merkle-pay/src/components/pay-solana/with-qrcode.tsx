@@ -71,7 +71,7 @@ export const WithSolanaPayQrCode = ({
         className={clsx(styles.qrCodeContainer, {
           [styles.expanded]: isExpanded,
         })}
-        id="qr-code-container"
+        id="solana-pay-qrcode"
         ref={qrCodeRef}
       />
     </>

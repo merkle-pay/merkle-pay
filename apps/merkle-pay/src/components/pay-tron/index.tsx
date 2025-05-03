@@ -1,6 +1,7 @@
 import { Space } from "@arco-design/web-react";
 import { WithTronLinkExtension } from "./with-tronlink-extension";
 import { WithTronLinkApp } from "./with-tronlink-app";
+import { WithTronLinkQrCode } from "./with-tronlink-qrcode";
 
 export const TronPaymentMethods = ({
   setAlertMessage,
@@ -21,6 +22,7 @@ export const TronPaymentMethods = ({
 
   return (
     <Space direction="vertical" size={8} style={{ width: "100%" }}>
+      <WithTronLinkQrCode setAlertMessage={setAlertMessage} />
       {hasTronLinkExtension() && (
         <WithTronLinkExtension setAlertMessage={setAlertMessage} />
       )}

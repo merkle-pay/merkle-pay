@@ -23,6 +23,7 @@
     "clsx": "catalog:pay",
     "nanoid": "catalog:pay",
     "next": "catalog:pay",
+    "qrcode.react": "catalog:pay",
     "react": "catalog:pay",
     "react-dom": "catalog:pay",
     "react-icons": "catalog:pay",
