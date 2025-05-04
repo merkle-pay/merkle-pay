@@ -1,4 +1,5 @@
 import {
+  ApiResponse,
   PaymentFormData,
   PaymentStatusApiResponse,
   paymentTableRecordSchema,
@@ -99,4 +100,42 @@ export const fetchPaymentStatusQuery = async (
     data: result.data,
     error: null,
   };
+};
+
+export const updatePaymentTxIdQuery = async (mpid: string, txId: string) => {
+  try {
+    const response = await fetch(`/api/v1/payment/txId`, {
+      method: "POST",
+      body: JSON.stringify({ mpid, txId }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        data: null,
+        error: `API request failed with status ${response.status} and message ${response.statusText}`,
+      };
+    }
+
+    const json: ApiResponse<{ success: boolean }> = await response.json();
+
+    if (json.code !== 200 || !json.data) {
+      return {
+        data: null,
+        error: json.message || "Received unexpected data from API.",
+      };
+    }
+
+    return {
+      data: json.data,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: `Error updating payment txId: ${(error as Error).message}`,
+    };
+  }
 };

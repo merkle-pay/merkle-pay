@@ -120,11 +120,13 @@ export type PaymentActions = {
 
 export type PaymentStore = PaymentState & PaymentActions;
 
-export type PaymentStatusApiResponse = {
+export type ApiResponse<T> = {
   code: number;
-  data: { status: PaymentStatus } | null;
+  data: T | null;
   message: string;
 };
+
+export type PaymentStatusApiResponse = ApiResponse<{ status: PaymentStatus }>;
 
 export const paymentTableRecordSchema = z.object({
   id: z.number(),

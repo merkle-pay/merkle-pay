@@ -13,6 +13,7 @@ import {
 import { usePaymentStore } from "src/store/payment-store";
 import { TRON_TRC20_TOKENS } from "src/utils/tron";
 import { useState } from "react";
+import { updatePaymentTxIdQuery } from "src/queries/payment";
 
 const WithTronLinkExtensionComponent = ({
   setAlertMessage,
@@ -71,6 +72,7 @@ const WithTronLinkExtensionComponent = ({
         type: "error",
         value: "Payment record invalid",
       });
+      return;
     }
 
     const TRC20_TOKEN =
@@ -86,7 +88,11 @@ const WithTronLinkExtensionComponent = ({
     ).multipliedBy(10 ** tokenDecimals);
 
     if (amountAsBigNumber.isNaN() || amountAsBigNumber.lte(0)) {
-      throw new Error("Invalid amount");
+      setAlertMessage({
+        type: "error",
+        value: "Invalid amount",
+      });
+      return;
     }
 
     // --- Interact with TRC-20 Contract ---
@@ -109,11 +115,22 @@ const WithTronLinkExtensionComponent = ({
 
       setTxId(txId);
 
+      const { data, error } = await updatePaymentTxIdQuery(
+        paymentTableRecord!.mpid,
+        txId
+      );
+
       setAlertMessage({
         type: "success",
         value: (
           <Space direction="vertical" size={8}>
             <Typography.Title heading={5}>Transaction ID</Typography.Title>
+            {data?.success && !error && (
+              <Typography.Title heading={6} mark>
+                Please copy the txId, since it&apos;s not saved properly on the
+                server side.
+              </Typography.Title>
+            )}
             <Typography.Text>{txId}</Typography.Text>
             <Button
               type="primary"
