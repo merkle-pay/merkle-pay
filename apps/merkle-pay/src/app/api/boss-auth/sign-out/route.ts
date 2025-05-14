@@ -1,16 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "../../../../utils/boss-auth";
+import { NextResponse } from "next/server";
+import { bossAuth } from "src/utils/boss-auth";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   let response: NextResponse;
 
   try {
-    // Pass the headers from the incoming request to signOut
-    // This allows better-auth's bearer plugin to find the session token
-
-    await auth.api.signOut({
-      headers: request.headers,
-    });
+    await bossAuth.signOut();
     response = NextResponse.json({
       code: 200,
       message: "Logout successful",
@@ -27,8 +22,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Clear HttpOnly auth cookies
-  response.cookies.set("sessionToken", "", { maxAge: -1, path: "/" });
-  response.cookies.set("jwtToken", "", { maxAge: -1, path: "/" });
+  response.cookies.set("accessToken", "", { maxAge: -1, path: "/" });
+  response.cookies.set("refreshToken", "", { maxAge: -1, path: "/" });
   // Clear the client-readable flag cookie
   response.cookies.set("isAuthenticated", "", { maxAge: -1, path: "/" });
 

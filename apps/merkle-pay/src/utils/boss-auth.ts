@@ -1,75 +1,81 @@
 import { prisma } from "./prisma";
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
+import bcrypt from "bcryptjs";
+import { signJwt } from "./jwt";
 
-import { jwt } from "better-auth/plugins";
-import { bearer } from "better-auth/plugins";
-
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
-  }),
-  plugins: [
-    jwt({
-      jwt: {
-        issuer: process.env.NEXT_PUBLIC_APP_NAME!,
-        audience: process.env.NEXT_PUBLIC_APP_NAME!,
-        expirationTime: "30d",
-        definePayload: ({ user }) => {
-          return {
-            id: user.id,
-            email: user.email,
-            level: user.level,
-            business_name: user.business_name,
-            blockchains: user.blockchains,
-            wallets: user.wallets,
-          };
+export const bossAuth = {
+  async getBossByEmailOrUsername(email?: string, username?: string) {
+    const boss = await prisma.boss.findFirst({
+      where: { OR: [{ email }, { username }] },
+    });
+    return boss;
+  },
+  async getBossById(id: number) {
+    const boss = await prisma.boss.findUnique({ where: { id } });
+    return boss;
+  },
+  async signUp({
+    email,
+    username,
+    password,
+  }: {
+    email: string;
+    username: string;
+    password: string;
+  }) {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(password, salt);
+    try {
+      await prisma.boss.create({
+        data: {
+          email,
+          username,
+          password_hash: hash,
         },
-      },
-    }),
-    bearer(),
-  ],
-  user: {
-    modelName: "boss",
-    additionalFields: {
-      level: {
-        type: "number",
-        required: true,
-        default: 99,
-      },
-      business_name: {
-        type: "string",
-        required: true,
-      },
-      blockchains: {
-        type: "string[]",
-        default: ["solana"],
-      },
-      wallets: {
-        type: "string[]", //! convention: blockchain - name-address
-      },
-      backup_email: {
-        type: "string",
-      },
-    },
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+    }
+    return false;
   },
-  session: {
-    expiresIn: 30 * 24 * 60 * 60, // 30 days
-    storeSessionInDatabase: true,
-    updateAge: 60 * 60 * 24, // 1 day
+  async signIn({
+    email,
+    username,
+    password,
+  }: {
+    email?: string;
+    username?: string;
+    password: string;
+  }) {
+    const boss = await this.getBossByEmailOrUsername(email, username);
+
+    if (!boss || !boss.is_email_verified) {
+      return {
+        boss: null,
+        accessToken: null,
+        refreshToken: null,
+      };
+    }
+
+    const isPasswordValid = bcrypt.compareSync(password, boss.password_hash);
+    if (!isPasswordValid) {
+      return {
+        boss: null,
+        accessToken: null,
+        refreshToken: null,
+      };
+    }
+
+    const accessToken = await signJwt(boss);
+    const refreshToken = await signJwt(boss, "60d");
+
+    return {
+      boss,
+      accessToken,
+      refreshToken,
+    };
   },
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: true,
-    disableSignUp: process.env.ENABLE_SIGNUP === "NO",
+  async signOut() {
+    // TODO: Implement sign out
   },
-  socialProviders: {
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID ?? "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
-      enabled:
-        !!process.env.GITHUB_CLIENT_ID && !!process.env.GITHUB_CLIENT_SECRET,
-    },
-  },
-  appName: process.env.NEXT_PUBLIC_APP_NAME ?? "Merkle Pay Demo",
-});
+};

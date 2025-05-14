@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
-import { AntibotToken } from '@/types/antibot'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -21,16 +20,14 @@ import { PasswordInput } from '@/components/password-input'
 import { signUp } from '../../utils'
 
 type SignUpFormProps = HTMLAttributes<HTMLDivElement> & {
-  antibotToken: AntibotToken
+  getAntibotToken: () => Promise<string | undefined>
+  resetTurnstileToken: () => void
 }
 
 const formSchema = z
   .object({
-    business_name: z.string().min(4, {
-      message: 'Business name is required and must be at least 4 letters long',
-    }),
-    name: z.string().min(4, {
-      message: 'Name is required and must be at least 4 letters long',
+    username: z.string().min(4, {
+      message: 'Username is required and must be at least 4 letters long',
     }),
     email: z
       .string()
@@ -53,7 +50,8 @@ const formSchema = z
 
 export function SignUpForm({
   className,
-  antibotToken,
+  getAntibotToken,
+  resetTurnstileToken,
   ...props
 }: SignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -64,38 +62,36 @@ export function SignUpForm({
       email: '',
       password: '',
       confirmPassword: '',
-      business_name: '',
-      name: '',
+      username: '',
     },
   })
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    if (!antibotToken.isInitialized) {
-      return
-    }
-
-    if (antibotToken.isExpired) {
-      toast({
-        title: 'Turnstile token expired',
-      })
-      return
-    }
-
-    if (antibotToken.error) {
-      toast({
-        title: antibotToken.error,
-      })
-      return
-    }
-
     setIsLoading(true)
 
-    try {
-      const json = await signUp(data, antibotToken)
+    const antibotToken = await getAntibotToken()
+    if (!antibotToken) {
+      toast({
+        title: 'Failed to get Cloudflare Turnstile token',
+      })
+      return
+    }
 
-      if (json.code === 201) {
+    try {
+      const json = await signUp(
+        {
+          username: data.username,
+          email: data.email,
+          password: data.password,
+          confirmPassword: data.confirmPassword,
+        },
+        antibotToken
+      )
+
+      if (json.code === 201 && json.data) {
         navigate({ to: '/sign-in' })
       } else {
+        resetTurnstileToken()
         toast({
           title: json.message,
         })
@@ -116,28 +112,12 @@ export function SignUpForm({
           <div className='grid gap-2'>
             <FormField
               control={form.control}
-              name='business_name'
+              name='username'
               render={({ field }) => (
                 <FormItem className='space-y-1'>
-                  <FormLabel>Business Name</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder='use comma to separate multiple business names'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
-                <FormItem className='space-y-1'>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Name' {...field} />
+                    <Input placeholder='Username' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

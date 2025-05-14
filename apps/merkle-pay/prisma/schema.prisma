@@ -53,75 +53,42 @@ model PhantomDeepLink {
 }
 
 model Boss {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  level         Int       @default(99)
+  id                Int        @id @default(autoincrement())
+  username          String     @unique
+  email             String     @unique
+  password_hash     String
+  is_email_verified Boolean    @default(false)
+  avatar_image_url  String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  role              String     @default("boss")
+  backup_email      String?
+  first_name        String?
+  last_name         String?
+  tokens            Token[]    @relation("BossTokens")
+  business          Business[] @relation("BossBusinesses")
+}
+
+model Business {
+  id            Int      @id @default(autoincrement())
   business_name String
-  blockchains   String[]  @default(["solana"])
-  wallets       String[]  @default([])
-  backup_email  String?
-  sessions      Session[]
-  accounts      Account[]
-
-  @@unique([email])
-  @@map("boss")
+  blockchains   String[] @default(["solana"])
+  wallets       String[] @default([])
+  boss_id       Int
+  boss_email    String
+  boss          Boss     @relation("BossBusinesses", fields: [boss_id], references: [id])
 }
 
-model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  boss      Boss     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([token])
-  @@map("session")
-}
-
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  boss                  Boss      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@map("account")
-}
-
-model Verification {
-  id         String    @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime? @default(now())
-  updatedAt  DateTime? @updatedAt
-
-  @@map("verification")
-}
-
-model Jwks {
-  id         String   @id
-  publicKey  String
-  privateKey String
-  createdAt  DateTime @default(now())
-
-  @@map("jwks")
+model Token {
+  id               Int       @id @default(autoincrement())
+  boss_id          Int
+  boss_email       String
+  is_access_token  Boolean
+  is_refresh_token Boolean
+  scope            String?
+  is_valid         Boolean   @default(true)
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  boss             Boss      @relation("BossTokens", fields: [boss_id], references: [id])
 }

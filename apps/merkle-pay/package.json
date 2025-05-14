@@ -17,7 +17,7 @@
     "@tronweb3/tronwallet-adapter-tronlink": "catalog:pay",
     "@tronweb3/tronwallet-adapter-react-hooks": "catalog:pay",
     "@marsidev/react-turnstile": "catalog:pay",
-    "better-auth": "catalog:pay",
+    "bcryptjs": "catalog:pay",
     "bignumber.js": "catalog:pay",
     "bs58": "catalog:pay",
     "clsx": "catalog:pay",

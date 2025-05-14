@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../utils/prisma";
-import { verifyJwt } from "src/utils/verify-jwt";
+import { verifyJwt } from "src/utils/jwt";
 
 export async function GET(request: NextRequest) {
   const jwt = request.cookies.get("jwtToken")?.value;

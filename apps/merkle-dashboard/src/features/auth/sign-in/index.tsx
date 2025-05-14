@@ -1,36 +1,46 @@
-import { useState } from 'react'
-import { AntibotToken } from '@/types/antibot'
+import { useRef } from 'react'
 import { Card } from '@/components/ui/card'
-import { CfTurnstile } from '../../../components/cf-turnstile'
+import {
+  CfTurnstile,
+  CfTurnstileHandle,
+} from '../../../components/cf-turnstile'
 import AuthLayout from '../auth-layout'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn() {
-  const siteKey = window.mpGlobal?.turnstileSiteKey ?? ''
+  const siteKey =
+    window.mpGlobal?.turnstileSiteKey ??
+    import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ??
+    ''
 
-  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
-    token: '',
-    error: '',
-    isExpired: true,
-    isInitialized: false,
-  })
-  const handleAntibotToken = (params: AntibotToken) => {
-    setAntibotToken((prev) => ({ ...prev, ...params }))
+  const turnstileRef = useRef<CfTurnstileHandle>(null)
+
+  const getAntibotToken = async () => {
+    const antibotToken = await turnstileRef.current?.getResponseAsync()
+    return antibotToken
   }
+
+  const resetTurnstileToken = () => {
+    turnstileRef.current?.reset()
+  }
+
   return (
     <AuthLayout>
       <Card className='p-6'>
         <div className='flex flex-col space-y-2 text-left'>
           <h1 className='text-2xl font-semibold tracking-tight'>Login</h1>
           <p className='text-sm text-muted-foreground'>
-            Enter email and password below to login
+            Use your email OR username below to login
           </p>
         </div>
-        <UserAuthForm antibotToken={antibotToken} />
+        <UserAuthForm
+          getAntibotToken={getAntibotToken}
+          resetTurnstileToken={resetTurnstileToken}
+        />
         <div className='mt-4'>
           <CfTurnstile
             siteKey={siteKey}
-            handleVerification={handleAntibotToken}
+            ref={turnstileRef}
             options={{
               size: 'flexible',
             }}

@@ -1,22 +1,28 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import { Link } from '@tanstack/react-router'
-import { AntibotToken } from '@/types/antibot'
 import { Card } from '@/components/ui/card'
-import { CfTurnstile } from '../../../components/cf-turnstile'
+import {
+  CfTurnstile,
+  CfTurnstileHandle,
+} from '../../../components/cf-turnstile'
 import AuthLayout from '../auth-layout'
 import { SignUpForm } from './components/sign-up-form'
 
 export default function SignUp() {
-  const siteKey = window.mpGlobal?.turnstileSiteKey ?? ''
+  const siteKey =
+    window.mpGlobal?.turnstileSiteKey ??
+    import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ??
+    ''
 
-  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
-    token: '',
-    error: '',
-    isExpired: true,
-    isInitialized: false,
-  })
-  const handleAntibotToken = (params: AntibotToken) => {
-    setAntibotToken((prev) => ({ ...prev, ...params }))
+  const turnstileRef = useRef<CfTurnstileHandle>(null)
+
+  const getAntibotToken = async () => {
+    const antibotToken = await turnstileRef.current?.getResponseAsync()
+    return antibotToken
+  }
+
+  const resetTurnstileToken = () => {
+    turnstileRef.current?.reset()
   }
 
   return (
@@ -37,11 +43,14 @@ export default function SignUp() {
             </Link>
           </p>
         </div>
-        <SignUpForm antibotToken={antibotToken} />
+        <SignUpForm
+          getAntibotToken={getAntibotToken}
+          resetTurnstileToken={resetTurnstileToken}
+        />
         <div className='mt-4'>
           <CfTurnstile
             siteKey={siteKey}
-            handleVerification={handleAntibotToken}
+            ref={turnstileRef}
             options={{
               size: 'flexible',
             }}

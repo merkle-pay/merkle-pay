@@ -4,9 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
-import { AntibotToken } from '@/types/antibot'
-import { jwtDecode } from 'jwt-decode'
-import { useAuth, AuthUser } from '@/stores/authStore'
+import { useAuth } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -23,27 +21,32 @@ import { PasswordInput } from '@/components/password-input'
 import { signIn } from '../../utils'
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement> & {
-  antibotToken: AntibotToken
+  getAntibotToken: () => Promise<string | undefined>
+  resetTurnstileToken: () => void
 }
 
-const formSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: 'Please enter your email' })
-    .email({ message: 'Invalid email address' }),
-  password: z
-    .string()
-    .min(1, {
-      message: 'Please enter your password',
-    })
-    .min(7, {
-      message: 'Password must be at least 7 characters long',
-    }),
-})
+const formSchema = z
+  .object({
+    email: z.string().optional(),
+    username: z.string().optional(),
+    password: z
+      .string()
+      .min(1, {
+        message: 'Please enter your password',
+      })
+      .min(7, {
+        message: 'Password must be at least 7 characters long',
+      }),
+  })
+  .refine((data) => data.email || data.username, {
+    message: 'Please enter your email or username',
+    path: ['email', 'username'],
+  })
 
 export function UserAuthForm({
   className,
-  antibotToken,
+  getAntibotToken,
+  resetTurnstileToken,
   ...props
 }: UserAuthFormProps) {
   const auth = useAuth()
@@ -54,56 +57,36 @@ export function UserAuthForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
+      username: '',
       password: '',
     },
   })
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    if (!antibotToken.isInitialized) {
-      return
-    }
-
-    if (antibotToken.isExpired) {
-      toast({
-        title: 'Turnstile token expired',
-      })
-      return
-    }
-
-    if (antibotToken.error) {
-      toast({
-        title: antibotToken.error,
-      })
-      return
-    }
-
     setIsLoading(true)
 
     try {
+      const antibotToken = await getAntibotToken()
+      if (!antibotToken) {
+        toast({
+          title: 'Failed to get Cloudflare Turnstile token',
+        })
+        return
+      }
       const json = await signIn(data, antibotToken)
 
-      if (json.code === 200) {
-        const { sessionToken, jwtToken } = json.data
+      if (json.code === 200 && json.data && json.data.boss) {
+        const { boss } = json.data
 
-        // AuthUser is a subset of the decoded payload
-        const decodedPayload = jwtDecode<AuthUser>(jwtToken)
-
-        auth.setJwtToken(jwtToken)
-        auth.setSessionToken(sessionToken)
         auth.setUser({
-          id: decodedPayload.id,
-          name: decodedPayload.name,
-          email: decodedPayload.email,
-          blockchains: decodedPayload.blockchains,
-          wallets: decodedPayload.wallets,
-          image: decodedPayload.image,
-          exp: decodedPayload.exp,
-          level: decodedPayload.level,
-          business_name: decodedPayload.business_name,
-          backup_email: decodedPayload.backup_email,
+          username: boss.username,
+          email: boss.email,
+          avatar_image_url: boss.avatar_image_url,
+          role: boss.role,
         })
         navigate({ to: '/' })
       } else {
+        resetTurnstileToken()
         toast({
           title: json.message,
         })
@@ -122,6 +105,19 @@ export function UserAuthForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-2'>
+            <FormField
+              control={form.control}
+              name='username'
+              render={({ field }) => (
+                <FormItem className='space-y-1'>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder='username' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name='email'
