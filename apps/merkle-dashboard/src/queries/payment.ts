@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { logger } from '@/utils/logger'
 import { paymentSchema } from '@/features/payments/data/schema'
+import { baseFetch } from './base_fetch'
 
 const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:8888' : ''
 
@@ -12,16 +13,14 @@ export const fetchPayments = async ({
   pageSize: number
 }) => {
   try {
-    const response = await fetch(
+    const json = await baseFetch(
       `${API_BASE_URL}/api/dashboard/payments?page=${page}&pageSize=${pageSize}`,
       {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
       }
     )
-    const json: unknown = await response.json()
 
     const responseSchema = z.object({
       code: z.number(),

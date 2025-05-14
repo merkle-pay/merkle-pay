@@ -81,6 +81,7 @@ model Business {
 
 model Token {
   id               Int       @id @default(autoincrement())
+  token            String
   boss_id          Int
   boss_email       String
   is_access_token  Boolean

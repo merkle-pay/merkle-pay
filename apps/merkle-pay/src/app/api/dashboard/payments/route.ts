@@ -1,24 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../utils/prisma";
-import { verifyJwt } from "src/utils/jwt";
 
 export async function GET(request: NextRequest) {
-  const jwt = request.cookies.get("jwtToken")?.value;
-  const mpAuthRequired = request.headers.get("mp-auth-required");
-
   try {
-    if (mpAuthRequired === "true") {
-      const isVerified = await verifyJwt(jwt ?? "");
-
-      if (!isVerified) {
-        return NextResponse.json({
-          code: 401,
-          data: [],
-          message: "Unauthorized",
-        });
-      }
-    }
-
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page");
     const pageSize = searchParams.get("pageSize");

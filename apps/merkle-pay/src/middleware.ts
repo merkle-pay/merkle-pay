@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isHuman } from "./utils/is-human";
+import { isJwtValid } from "./utils/jwt";
 
 const allowedOrigins = ["http://localhost:9999", process.env.DOMAIN];
 
@@ -72,12 +73,38 @@ export async function middleware(request: NextRequest) {
   }
 
   if (shouldCheckAuth) {
-    const jwt = request.cookies.get("jwtToken")?.value;
-    if (!jwt) {
+    const accessToken = request.cookies.get("accessToken")?.value;
+    const refreshToken = request.cookies.get("refreshToken")?.value;
+
+    if (!accessToken || !refreshToken) {
       return NextResponse.json(
         { code: 401, data: null, message: "Unauthorized" },
         { status: 401, headers: corsHeaders }
       );
+    }
+
+    const {
+      isTokenExpired: isAccessTokenExpired,
+      isTokenValid: isAccessTokenValid,
+    } = await isJwtValid(accessToken);
+    const {
+      isTokenExpired: isRefreshTokenExpired,
+      isTokenValid: isRefreshTokenValid,
+    } = await isJwtValid(refreshToken);
+
+    if (isRefreshTokenExpired || !isRefreshTokenValid || !isAccessTokenValid) {
+      return NextResponse.json(
+        { code: 401, data: null, message: "Unauthorized" },
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    if (isAccessTokenExpired) {
+      return NextResponse.json({
+        code: 499,
+        data: null,
+        message: "Expired",
+      });
     }
   }
 
