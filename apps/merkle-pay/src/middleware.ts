@@ -93,10 +93,16 @@ export async function middleware(request: NextRequest) {
     } = await isJwtValid(refreshToken);
 
     if (isRefreshTokenExpired || !isRefreshTokenValid || !isAccessTokenValid) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { code: 401, data: null, message: "Unauthorized" },
         { status: 401, headers: corsHeaders }
       );
+
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
+      response.cookies.delete("isAuthenticated");
+
+      return response;
     }
 
     if (isAccessTokenExpired) {

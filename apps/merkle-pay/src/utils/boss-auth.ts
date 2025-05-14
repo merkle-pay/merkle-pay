@@ -24,6 +24,7 @@ export const bossAuth = {
   }) {
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
+
     try {
       await prisma.boss.create({
         data: {

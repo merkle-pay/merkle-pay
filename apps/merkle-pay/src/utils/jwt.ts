@@ -18,30 +18,35 @@ export const signJwt = async (boss: Boss, expiresIn: string = "24h") => {
 };
 
 export const verifyJwt = async (token: string) => {
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-  const { payload } = await jose.jwtVerify(token, secret, {
-    issuer: process.env.JWT_ISSUER,
-    audience: process.env.JWT_AUDIENCE,
-  });
+    const { payload } = await jose.jwtVerify(token, secret, {
+      issuer: process.env.JWT_ISSUER,
+      audience: process.env.JWT_AUDIENCE,
+    });
 
-  // {
-  //   email: 'guiyumin@gmail.com',
-  //   username: 'yumin',
-  //   iat: 1747258071,
-  //   iss: 'Merkle Pay Demo',
-  //   exp: 1752442071
-  // }
-  return {
-    ...payload,
-  };
+    // {
+    //   email: 'guiyumin@gmail.com',
+    //   username: 'yumin',
+    //   iat: 1747258071,
+    //   iss: 'Merkle Pay Demo',
+    //   exp: 1752442071
+    // }
+    return {
+      ...payload,
+    };
+  } catch (error) {
+    console.log("verifyJwt error", error);
+  }
+  return {};
 };
 
 export const isJwtValid = async (token: string) => {
-  const { email, username, exp } = await verifyJwt(token); // eslint-disable-line
+  const { email, username, exp } = await verifyJwt(token);
 
   return {
     isTokenExpired: exp && exp < Date.now() / 1000,
-    isTokenValid: true,
+    isTokenValid: email && username ? true : false,
   };
 };

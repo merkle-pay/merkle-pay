@@ -69,6 +69,7 @@ export function UserAuthForm({
       const antibotToken = await getAntibotToken()
       if (!antibotToken) {
         toast({
+          variant: 'destructive',
           title: 'Failed to get Cloudflare Turnstile token',
         })
         return
@@ -88,11 +89,13 @@ export function UserAuthForm({
       } else {
         resetTurnstileToken()
         toast({
+          variant: 'destructive',
           title: json.message,
         })
       }
     } catch (error) {
       toast({
+        variant: 'destructive',
         title: (error as Error).message,
       })
     } finally {

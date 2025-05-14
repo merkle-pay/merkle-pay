@@ -1,4 +1,4 @@
-export const baseFetch = async (
+export const mpFetch = async (
   url: string,
   options: RequestInit
 ): Promise<{
@@ -24,7 +24,7 @@ export const baseFetch = async (
     })
     const refreshTokenJson = await refreshTokenResponse.json()
     if (refreshTokenJson.code === 201) {
-      const result = await baseFetch(url, options)
+      const result = await mpFetch(url, options)
       return result
     }
   }
