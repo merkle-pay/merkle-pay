@@ -9,10 +9,7 @@ import AuthLayout from '../auth-layout'
 import { SignUpForm } from './components/sign-up-form'
 
 export default function SignUp() {
-  const siteKey =
-    window.mpGlobal?.turnstileSiteKey ??
-    import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ??
-    ''
+  const siteKey = import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ?? ''
 
   const turnstileRef = useRef<CfTurnstileHandle>(null)
 

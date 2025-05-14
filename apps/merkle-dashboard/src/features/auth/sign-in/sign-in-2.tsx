@@ -4,10 +4,7 @@ import { CfTurnstile, CfTurnstileHandle } from '@/components/cf-turnstile'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn2() {
-  const siteKey =
-    window.mpGlobal?.turnstileSiteKey ??
-    import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ??
-    ''
+  const siteKey = import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ?? ''
 
   const turnstileRef = useRef<CfTurnstileHandle>(null)
 
