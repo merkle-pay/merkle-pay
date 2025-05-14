@@ -21,14 +21,20 @@ export const signJwt = async (boss: Boss, expiresIn: string = "24h") => {
 export const verifyJwt = async (token: string) => {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-  const { payload, protectedHeader } = await jose.jwtVerify(token, secret, {
+  const { payload } = await jose.jwtVerify(token, secret, {
     issuer: process.env.JWT_ISSUER,
     audience: process.env.JWT_AUDIENCE,
   });
 
+  // {
+  //   email: 'guiyumin@gmail.com',
+  //   username: 'yumin',
+  //   iat: 1747258071,
+  //   iss: 'Merkle Pay Demo',
+  //   exp: 1752442071
+  // }
   return {
-    payload,
-    protectedHeader,
+    ...payload,
   };
 };
 
@@ -42,10 +48,8 @@ export const isJwtValid = async (token: string) => {
     };
   }
 
-  const { payload, protectedHeader } = await verifyJwt(token);
-
-  console.log("payload", payload);
-  console.log("protectedHeader", protectedHeader);
+  // ! Do i need email and username?
+  const { email, username } = await verifyJwt(token); // eslint-disable-line
 
   return {
     isTokenExpired: decoded.exp && decoded.exp < Date.now() / 1000,
