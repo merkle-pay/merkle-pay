@@ -1,20 +1,25 @@
-import { useState } from 'react'
-import { AntibotToken } from '@/types/antibot'
+import { useRef } from 'react'
 import Logo from '@/assets/logo.svg'
-import { CfTurnstile } from '@/components/cf-turnstile'
+import { CfTurnstile, CfTurnstileHandle } from '@/components/cf-turnstile'
 import { UserAuthForm } from './components/user-auth-form'
 
 export default function SignIn2() {
-  const siteKey = window.mpGlobal?.turnstileSiteKey ?? ''
-  const [antibotToken, setAntibotToken] = useState<AntibotToken>({
-    token: '',
-    error: '',
-    isExpired: true,
-    isInitialized: false,
-  })
-  const handleAntibotToken = (params: AntibotToken) => {
-    setAntibotToken((prev) => ({ ...prev, ...params }))
+  const siteKey =
+    window.mpGlobal?.turnstileSiteKey ??
+    import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ??
+    ''
+
+  const turnstileRef = useRef<CfTurnstileHandle>(null)
+
+  const getAntibotToken = async () => {
+    const antibotToken = await turnstileRef.current?.getResponseAsync()
+    return antibotToken
   }
+
+  const resetTurnstileToken = () => {
+    turnstileRef.current?.reset()
+  }
+
   return (
     <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
       <div className='relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex'>
@@ -63,11 +68,14 @@ export default function SignIn2() {
               to log into your account
             </p>
           </div>
-          <UserAuthForm antibotToken={antibotToken} />
+          <UserAuthForm
+            getAntibotToken={getAntibotToken}
+            resetTurnstileToken={resetTurnstileToken}
+          />
           <div className='mt-4'>
             <CfTurnstile
               siteKey={siteKey}
-              handleVerification={handleAntibotToken}
+              ref={turnstileRef}
               options={{
                 size: 'flexible',
               }}
