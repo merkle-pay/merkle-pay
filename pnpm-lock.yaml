@@ -241,6 +241,9 @@ catalogs:
     '@solana/web3.js':
       specifier: ^1.98.0
       version: 1.98.2
+    '@tronweb3/tronwallet-abstract-adapter':
+      specifier: ^1.1.9
+      version: 1.1.9
     '@tronweb3/tronwallet-adapter-react-hooks':
       specifier: ^1.1.10
       version: 1.1.10
@@ -561,6 +564,9 @@ importers:
       '@solana/web3.js':
         specifier: catalog:pay
         version: 1.98.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@tronweb3/tronwallet-abstract-adapter':
+        specifier: catalog:pay
+        version: 1.1.9(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@tronweb3/tronwallet-adapter-react-hooks':
         specifier: catalog:pay
         version: 1.1.10(bufferutil@4.0.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(utf-8-validate@5.0.10)
