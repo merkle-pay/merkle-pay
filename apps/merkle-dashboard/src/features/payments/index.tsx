@@ -24,9 +24,6 @@ export default function Payments() {
         <div className='mb-2 flex flex-wrap items-center justify-between gap-x-4 space-y-2'>
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>Payments</h2>
-            <p className='text-muted-foreground'>
-              Here&apos;s a list of your payments for this month!
-            </p>
           </div>
           <PaymentsPrimaryButtons />
         </div>
