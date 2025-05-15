@@ -7,8 +7,6 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID} #optional
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET} #optional
       - NEXT_PUBLIC_BUSINESS_NAME=${NEXT_PUBLIC_BUSINESS_NAME}
       - NEXT_PUBLIC_BLOCKCHAIN_OPTIONS=${NEXT_PUBLIC_BLOCKCHAIN_OPTIONS}
       - DATABASE_URL=${DATABASE_URL}
