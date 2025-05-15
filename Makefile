@@ -107,10 +107,9 @@ d-restart:
 d-down:
 	docker compose $(DOCKER_COMPOSE_ENV_FILE) down
 
-# Warning: Deletes all Docker resources and Caddy data/config
+# Warning: Deletes all Docker resources
 d-clean:
 	docker compose $(DOCKER_COMPOSE_ENV_FILE) down -v --rmi all --remove-orphans
-	rm -rf caddy/data/caddy caddy/config/caddy
 
 d-logs:
 	docker compose $(DOCKER_COMPOSE_ENV_FILE) logs -f
