@@ -49,7 +49,7 @@ export const columns: ColumnDef<User>[] = [
     ),
     meta: {
       className: cn(
-        'drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)] lg:drop-shadow-none',
+        'drop-shadow-[0_1px_2px_rgb(0_0_0/0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255/0.1)] lg:drop-shadow-none',
         'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
         'sticky left-6 md:table-cell'
       ),
