@@ -59,6 +59,7 @@
   "devDependencies": {
     "@eslint/js": "catalog:dashboard",
     "@faker-js/faker": "catalog:dashboard",
+    "@tailwindcss/postcss": "catalog:dashboard",
     "@tanstack/eslint-plugin-query": "catalog:dashboard",
     "@tanstack/react-query-devtools": "catalog:dashboard",
     "@tanstack/react-router-devtools": "catalog:dashboard",
@@ -69,7 +70,6 @@
     "@types/react": "catalog:dashboard",
     "@types/react-dom": "catalog:dashboard",
     "@vitejs/plugin-react-swc": "catalog:dashboard",
-    "autoprefixer": "catalog:dashboard",
     "eslint": "catalog:dashboard",
     "eslint-plugin-react-hooks": "catalog:dashboard",
     "eslint-plugin-react-refresh": "catalog:dashboard",
