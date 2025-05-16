@@ -2,13 +2,13 @@
 .PHONY: help i clean tag tags tree
 
 # Development Targets
-.PHONY: dev dev-pay dev-dashboard
+.PHONY: dev dev-pay dev-dashboard dev-server
 
 # Build Targets
-.PHONY: build build-pay build-dashboard
+.PHONY: build build-pay build-dashboard build-server
 
 # Linting Targets
-.PHONY: lint lint-pay lint-dashboard
+.PHONY: lint lint-pay lint-dashboard lint-server
 
 # Docker Targets
 .PHONY: d-up d-stop d-restart d-down d-clean d-logs
@@ -44,7 +44,7 @@ i:
 	pnpm install
 
 dev: i
-	$(MAKE) -j2 dev-pay dev-dashboard
+	$(MAKE) -j3 dev-pay dev-dashboard dev-server
 
 dev-pay:
 	pnpm --filter merkle-pay dev
@@ -52,8 +52,11 @@ dev-pay:
 dev-dashboard:
 	pnpm --filter merkle-dashboard dev
 
+dev-server:
+	pnpm --filter merkle-server dev
+
 build: i
-	$(MAKE) -j2 build-pay build-dashboard
+	$(MAKE) -j3 build-pay build-dashboard build-server
 
 build-pay:
 	pnpm --filter merkle-pay build
@@ -61,14 +64,20 @@ build-pay:
 build-dashboard:
 	pnpm --filter merkle-dashboard build
 
+build-server:
+	pnpm --filter merkle-server build
+
 lint:
-	$(MAKE) -j2 lint-pay lint-dashboard
+	$(MAKE) -j3 lint-pay lint-dashboard lint-server
 
 lint-pay:
 	pnpm --filter merkle-pay lint
 
 lint-dashboard:
 	pnpm --filter merkle-dashboard lint
+
+lint-server:
+	pnpm --filter merkle-server lint
 
 clean:
 	rm -rf node_modules || true
