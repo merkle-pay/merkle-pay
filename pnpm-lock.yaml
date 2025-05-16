@@ -327,8 +327,8 @@ catalogs:
       specifier: ^5.1.0
       version: 5.1.0
     '@sinclair/typebox':
-      specifier: ^0.24.31
-      version: 0.24.51
+      specifier: ^0.34.33
+      version: 0.34.33
     '@types/node':
       specifier: ^22
       version: 22.15.3
@@ -686,10 +686,10 @@ importers:
     devDependencies:
       '@fastify/type-provider-typebox':
         specifier: catalog:server
-        version: 5.1.0(@sinclair/typebox@0.24.51)
+        version: 5.1.0(@sinclair/typebox@0.34.33)
       '@sinclair/typebox':
         specifier: catalog:server
-        version: 0.24.51
+        version: 0.34.33
       '@types/node':
         specifier: catalog:server
         version: 22.15.3
@@ -2091,8 +2091,8 @@ packages:
   '@scure/bip39@1.3.0':
     resolution: {integrity: sha512-disdg7gHuTDZtY+ZdkmLpPCk7fxZSu3gBiEGuoC1XYxv9cGx3Z6cpTggCgW6odSOOIXCiDjuGejW+aJKCY/pIQ==}
 
-  '@sinclair/typebox@0.24.51':
-    resolution: {integrity: sha512-1P1OROm/rdubP5aFDSZQILU0vrLCJ4fvHt6EoqHEM+2D/G5MK3bIaymUKLit8Js9gbns5UyJnkP/TZROLw4tUA==}
+  '@sinclair/typebox@0.34.33':
+    resolution: {integrity: sha512-5HAV9exOMcXRUxo+9iYB5n09XxzCXnfy4VTNW4xnDv+FgjzAGY989C28BIdljKqmF+ZltUwujE3aossvcVtq6g==}
 
   '@solana/buffer-layout-utils@0.2.0':
     resolution: {integrity: sha512-szG4sxgJGktbuZYDg2FfNmkMi0DYQoVjN2h7ta1W1hPrwzarcFLBq9UpX1UjNXsNpT9dn+chgprtWGioUAr4/g==}
@@ -5537,9 +5537,9 @@ snapshots:
       '@fastify/forwarded': 3.0.0
       ipaddr.js: 2.2.0
 
-  '@fastify/type-provider-typebox@5.1.0(@sinclair/typebox@0.24.51)':
+  '@fastify/type-provider-typebox@5.1.0(@sinclair/typebox@0.34.33)':
     dependencies:
-      '@sinclair/typebox': 0.24.51
+      '@sinclair/typebox': 0.34.33
 
   '@floating-ui/core@1.6.9':
     dependencies:
@@ -6465,7 +6465,7 @@ snapshots:
       '@noble/hashes': 1.4.0
       '@scure/base': 1.1.9
 
-  '@sinclair/typebox@0.24.51': {}
+  '@sinclair/typebox@0.34.33': {}
 
   '@solana/buffer-layout-utils@0.2.0(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:

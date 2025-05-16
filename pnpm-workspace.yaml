@@ -117,7 +117,7 @@ catalogs:
     "ts-node": ^10.9.2
     "@types/node": ^22
     "@fastify/type-provider-typebox": ^5.1.0
-    "@sinclair/typebox": ^0.24.31
+    "@sinclair/typebox": ^0.34.33
 onlyBuiltDependencies:
   - prisma
   - "@prisma/engines"
