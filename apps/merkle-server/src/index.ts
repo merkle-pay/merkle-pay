@@ -1,6 +1,8 @@
 import Fastify from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
+import { routes as publicSolanaRoutes } from "./public-routes/solana";
+
 const fastify = Fastify({
   logger: true,
 }).withTypeProvider<TypeBoxTypeProvider>();
@@ -8,6 +10,8 @@ const fastify = Fastify({
 fastify.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+fastify.register(publicSolanaRoutes, { prefix: "/public/solana" });
 
 const start = async () => {
   try {
