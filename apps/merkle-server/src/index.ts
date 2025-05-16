@@ -1,7 +1,9 @@
+import "dotenv/config";
 import Fastify from "fastify";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
 import { routes as publicSolanaRoutes } from "./public-routes/solana";
+import { pgClient } from "./plugins/pg-client";
 
 const fastify = Fastify({
   logger: true,
@@ -10,6 +12,8 @@ const fastify = Fastify({
 fastify.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+fastify.register(pgClient);
 
 fastify.register(publicSolanaRoutes, { prefix: "/public/solana" });
 

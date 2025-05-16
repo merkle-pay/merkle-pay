@@ -14,7 +14,11 @@
   "packageManager": "pnpm@10.6.4",
   "dependencies": {
     "fastify": "catalog:server",
-    "p-retry": "catalog:server"
+    "fastify-plugin": "catalog:server",
+    "@fastify/postgres": "catalog:server",
+    "p-retry": "catalog:server",
+    "pg": "catalog:server",
+    "dotenv": "catalog:server"
   },
   "devDependencies": {
     "nodemon": "catalog:server",
