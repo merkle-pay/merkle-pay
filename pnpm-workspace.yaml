@@ -112,6 +112,12 @@ catalogs:
   server:
     "fastify": ^5.3.3
     "nodemon": ^3.1.10
+    "p-retry": ^6.2.1
+    "typescript": ^5.7.2
+    "ts-node": ^10.9.2
+    "@types/node": ^22
+    "@fastify/type-provider-typebox": ^5.1.0
+    "@sinclair/typebox": ^0.24.31
 onlyBuiltDependencies:
   - prisma
   - "@prisma/engines"
