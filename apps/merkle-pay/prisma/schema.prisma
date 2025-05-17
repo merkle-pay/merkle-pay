@@ -72,13 +72,16 @@ model Boss {
 model Business {
   id            Int      @id @default(autoincrement())
   business_name String
-  blockchains   String[] @default(["solana"])
+  blockchain    String
   wallets       String[] @default([])
+  tokens        String[] @default([])
   boss_id       Int
   boss_email    String
   boss          Boss     @relation("BossBusinesses", fields: [boss_id], references: [id])
 }
 
+// ! Auth Token, including refresh token and access token
+// ! DO NOT MISTAKE THIS WITH BLOCKCHAIN TOKENS
 model Token {
   id               Int       @id @default(autoincrement())
   token            String
