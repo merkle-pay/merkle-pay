@@ -169,7 +169,7 @@ _(개발 진행 상황 및 커뮤니티 요구에 따라 추가 체인에 대한
     ```bash
     # .env 파일을 편집하고 프로덕션 환경 변수를 추가하세요 (DB 연결, 비밀키 등)
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # -> 프로덕션 설정을 위해 apps/merkle-pay/.env를 신중하게 수정하세요
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 3.  **Docker Compose로 빌드 및 실행**

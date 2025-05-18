@@ -169,7 +169,7 @@ _（開発の進捗状況やコミュニティの要望に応じて、追加の�
     ```bash
     # .env ファイルを編集して本番環境の環境変数を追加します (DB 接続、シークレットなど)
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # -> 本番設定のために apps/merkle-pay/.env を慎重に編集します
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 3.  **Docker Compose でビルドして実行する**

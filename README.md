@@ -170,6 +170,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     ```bash
      # edit .env file and add your production env vars
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 3.  **Build & Run with Docker Compose**
