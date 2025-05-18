@@ -171,7 +171,7 @@ _（根据开发进度和社区需求，可能会增加对其他链的支持。�
     ```bash
     # 编辑 .env 文件并添加您的生产环境变量 (DB 连接、密钥等)
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # -> 仔细编辑 apps/merkle-pay/.env 以进行生产设置
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 3.  **使用 Docker Compose 构建并运行**

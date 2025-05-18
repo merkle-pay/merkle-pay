@@ -127,8 +127,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
 
      # step 2: frontend dev flag
-    touch apps/merkle-dashboard/.env.development
-    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 4.  **Database Setup & Migration**

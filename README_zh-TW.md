@@ -125,11 +125,9 @@ _（根據開發進度和社群需求，可能會增加對其他鏈的支援。�
 
     # 步驟 1: 後端設定
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # -> 編輯 apps/merkle-pay/.env，填入您的 PostgreSQL 連線字串等。
 
     # 步驟 2: 前端開發標誌
-    touch apps/merkle-dashboard/.env.development
-    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 4.  **資料庫設定 & 遷移**

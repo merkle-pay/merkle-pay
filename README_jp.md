@@ -125,11 +125,9 @@ _（開発の進捗状況やコミュニティの要望に応じて、追加の�
 
     # ステップ 1: バックエンド設定
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # -> PostgreSQL 接続文字列などで apps/merkle-pay/.env を編集します
 
     # ステップ 2: フロントエンド開発フラグ
-    touch apps/merkle-dashboard/.env.development
-    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 4.  **データベースのセットアップとマイグレーション**

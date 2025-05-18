@@ -125,11 +125,9 @@ _(개발 진행 상황 및 커뮤니티 요구에 따라 추가 체인에 대한
 
     # 단계 1: 백엔드 구성
     cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    # -> PostgreSQL 연결 문자열 등으로 apps/merkle-pay/.env 수정
 
     # 단계 2: 프론트엔드 개발 플래그
-    touch apps/merkle-dashboard/.env.development
-    echo "VITE_DEV=true" > apps/merkle-dashboard/.env.development
+    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
     ```
 
 4.  **데이터베이스 설정 및 마이그레이션**
