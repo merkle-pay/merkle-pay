@@ -27,7 +27,7 @@ import { type SidebarData } from '../types'
 export const sidebarData: SidebarData = {
   user: {
     name: 'Merkle Pay',
-    email: 'support@merklepay.io',
+    email: 'support@merklepay.com',
     avatar: LogoUrl,
   },
   teams: [
