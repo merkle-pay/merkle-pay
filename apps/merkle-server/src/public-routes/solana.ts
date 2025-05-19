@@ -12,10 +12,13 @@ type GetTxStatusQuerystring = Static<typeof GetTxStatusQuerystringSchema>;
 const GetTxStatusResponseSchema = Type.Object({
   code: Type.Number(),
   message: Type.String(),
-  data: Type.Object({
-    status: Type.String(),
-    txHash: Type.Optional(Type.String()),
-  }).or(Type.Null()),
+  data: Type.Union([
+    Type.Object({
+      status: Type.String(),
+      txHash: Type.Optional(Type.String()),
+    }),
+    Type.Null(),
+  ]),
 });
 // Infer the static type for the response
 type GetTxStatusResponse = Static<typeof GetTxStatusResponseSchema>;
