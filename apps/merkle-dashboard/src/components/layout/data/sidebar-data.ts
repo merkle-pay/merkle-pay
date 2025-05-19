@@ -3,6 +3,7 @@ import {
   IconBrowserCheck,
   IconBug,
   IconChecklist,
+  IconCoin,
   IconError404,
   IconHelp,
   IconLayoutDashboard,
@@ -149,8 +150,13 @@ export const sidebarData: SidebarData = {
           icon: IconSettings,
           items: [
             {
+              title: 'Business',
+              url: '/settings/business',
+              icon: IconCoin,
+            },
+            {
               title: 'Profile',
-              url: '/settings',
+              url: '/settings/profile',
               icon: IconUserCog,
             },
             {
