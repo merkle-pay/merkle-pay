@@ -54,7 +54,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant='ghost'
-          className='flex h-8 w-8 p-0 data-[state=open]:bg-muted'
+          className='data-[state=open]:bg-muted flex h-8 w-8 p-0'
         >
           <DotsHorizontalIcon className='h-4 w-4' />
           <span className='sr-only'>Open menu</span>
@@ -75,16 +75,41 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             await navigator.clipboard.writeText(payment.mpid)
             toast({
               title: 'MPID Copied',
+              description: payment.mpid,
             })
           }}
         >
           Copy MPID
         </DropdownMenuItem>
         <DropdownMenuItem
+          onClick={() => {
+            toast({
+              title: 'Message',
+              description: payment.raw.message,
+              action: (
+                <Button
+                  variant='outline'
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(payment.raw.message)
+                    toast({
+                      title: 'Message Copied',
+                    })
+                  }}
+                >
+                  Copy
+                </Button>
+              ),
+            })
+          }}
+        >
+          Check Message
+        </DropdownMenuItem>
+        <DropdownMenuItem
           onClick={async () => {
             await navigator.clipboard.writeText(payment.referencePublicKey)
             toast({
               title: 'Reference Public Key Copied',
+              description: payment.referencePublicKey,
             })
           }}
         >
