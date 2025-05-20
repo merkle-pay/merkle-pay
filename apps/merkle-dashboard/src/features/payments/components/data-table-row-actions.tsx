@@ -37,6 +37,8 @@ const getExplorerUrl = (payment: Payment): string | null => {
     case 'polygon':
     case 'base':
       return `https://etherscan.io/tx/${txId}`
+    case 'tron':
+      return `https://tronscan.org/#/transaction/${txId}`
     default:
       return null
   }
