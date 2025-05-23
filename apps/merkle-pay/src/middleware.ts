@@ -17,8 +17,11 @@ const routesRequiringTurnstile = [
 
 const routesRequiringAuth = ["/api/dashboard"];
 
-const dealWithCors = (response: NextResponse, origin: string) => {
+const dealWithCors = (response: NextResponse, origin?: string | null) => {
   if (process.env.NODE_ENV !== "production") {
+    if (!origin) {
+      throw new Error("Origin is empty");
+    }
     response.headers.set("Access-Control-Allow-Origin", origin);
     response.headers.set(
       "Access-Control-Allow-Methods",

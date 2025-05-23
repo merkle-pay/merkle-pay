@@ -3,8 +3,6 @@ import { logger } from '@/utils/logger'
 import { paymentSchema } from '@/features/payments/data/schema'
 import { mpFetch } from './mp_fetch'
 
-const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:8888' : ''
-
 export const fetchPayments = async ({
   page,
   pageSize,
@@ -14,7 +12,7 @@ export const fetchPayments = async ({
 }) => {
   try {
     const json = await mpFetch(
-      `${API_BASE_URL}/api/dashboard/payments?page=${page}&pageSize=${pageSize}`,
+      `/api/dashboard/payments?page=${page}&pageSize=${pageSize}`,
       {
         headers: {
           'Content-Type': 'application/json',
