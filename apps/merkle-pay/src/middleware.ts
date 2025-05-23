@@ -3,11 +3,10 @@ import type { NextRequest } from "next/server";
 import { isHuman } from "./utils/is-human";
 import { isJwtValid } from "./utils/jwt";
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const allowedOrigins = isProduction
-  ? [process.env.DOMAIN]
-  : ["http://localhost:8888", "http://localhost:9999"];
+const allowedDevelopmentOrigins = [
+  "http://localhost:8888",
+  "http://localhost:9999",
+];
 
 const routesRequiringTurnstile = [
   "/api/payment",
@@ -18,8 +17,25 @@ const routesRequiringTurnstile = [
 
 const routesRequiringAuth = ["/api/dashboard"];
 
+const dealWithCors = (response: NextResponse, origin: string) => {
+  if (process.env.NODE_ENV !== "production") {
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, mp-antibot-token"
+    );
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+  }
+  return response;
+};
+
 export async function middleware(request: NextRequest) {
   const origin = request.headers.get("Origin");
+  const isProduction = process.env.NODE_ENV === "production";
 
   if (request.method === "OPTIONS") {
     if (isProduction) {
@@ -29,11 +45,18 @@ export async function middleware(request: NextRequest) {
         { status: 403 }
       );
     } else {
+      if (!origin || !allowedDevelopmentOrigins.includes(origin)) {
+        return NextResponse.json(
+          { code: 403, data: null, message: "Forbidden" },
+          { status: 403 }
+        );
+      }
+
       // Allow all OPTIONS requests in development
       return new NextResponse(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": origin || "*",
+          "Access-Control-Allow-Origin": origin,
           "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
           "Access-Control-Allow-Headers":
             "Content-Type, Authorization, mp-antibot-token",
@@ -51,18 +74,17 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(path)
   );
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("mp-auth-required", shouldCheckAuth ? "true" : "false");
-
   if (shouldCheckTurnstile) {
     const turnstileToken = request.headers.get("mp-antibot-token");
-    const isTokenValid = turnstileToken && (await isHuman(turnstileToken));
+    const isTokenValid = await isHuman(turnstileToken);
 
     if (!isTokenValid) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { code: 403, data: null, message: "Human verification failed" },
         { status: 403 }
       );
+
+      return dealWithCors(response, origin);
     }
   }
 
@@ -70,13 +92,26 @@ export async function middleware(request: NextRequest) {
     const accessToken = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
-    if (!accessToken || !refreshToken) {
-      return NextResponse.json(
+    if (!refreshToken) {
+      const response = NextResponse.json(
         { code: 401, data: null, message: "Unauthorized" },
         { status: 401 }
       );
+      return dealWithCors(response, origin);
     }
 
+    // refresh token is valid, but access token is not valid
+    if (!accessToken) {
+      const response = NextResponse.json({
+        code: 499,
+        data: null,
+        message: "Expired",
+      });
+      return dealWithCors(response, origin);
+    }
+
+    // refresh token lives 24h
+    // access token lives 30d
     const {
       isTokenExpired: isAccessTokenExpired,
       isTokenValid: isAccessTokenValid,
@@ -96,35 +131,22 @@ export async function middleware(request: NextRequest) {
       response.cookies.delete("refreshToken");
       response.cookies.delete("isAuthenticated");
 
-      return response;
+      return dealWithCors(response, origin);
     }
 
     if (isAccessTokenExpired) {
-      return NextResponse.json({
+      const response = NextResponse.json({
         code: 499,
         data: null,
         message: "Expired",
       });
+      return dealWithCors(response, origin);
     }
   }
 
   const response = NextResponse.next();
 
-  if (!isProduction) {
-    // Allow all origins in development
-    response.headers.set("Access-Control-Allow-Origin", origin || "*");
-    response.headers.set(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    response.headers.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, mp-antibot-token"
-    );
-    response.headers.set("Access-Control-Allow-Credentials", "true");
-  }
-
-  return response;
+  return dealWithCors(response, origin);
 }
 
 export const config = {

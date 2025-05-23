@@ -1,4 +1,10 @@
-export async function isHuman(turnstileToken: string): Promise<boolean> {
+export async function isHuman(
+  turnstileToken?: string | null | undefined
+): Promise<boolean> {
+  if (!turnstileToken) {
+    return false;
+  }
+
   const verifyEndpoint =
     "https://challenges.cloudflare.com/turnstile/v0/siteverify";
   const secret = process.env.TURNSTILE_SECRET_KEY ?? "";
