@@ -3,7 +3,11 @@ import type { NextRequest } from "next/server";
 import { isHuman } from "./utils/is-human";
 import { isJwtValid } from "./utils/jwt";
 
-const allowedOrigins = ["http://localhost:9999", process.env.DOMAIN];
+const isProduction = process.env.NODE_ENV === "production";
+
+const allowedOrigins = isProduction
+  ? [process.env.DOMAIN]
+  : ["http://localhost:8888", "http://localhost:9999"];
 
 const routesRequiringTurnstile = [
   "/api/payment",
@@ -15,38 +19,28 @@ const routesRequiringTurnstile = [
 const routesRequiringAuth = ["/api/dashboard"];
 
 export async function middleware(request: NextRequest) {
+  const origin = request.headers.get("Origin");
+
   if (request.method === "OPTIONS") {
-    const origin = request.headers.get("Origin");
-    if (origin && allowedOrigins.includes(origin)) {
-      const requestHeaders = request.headers.get(
-        "Access-Control-Request-Headers"
+    if (isProduction) {
+      // Deny all OPTIONS requests in production
+      return NextResponse.json(
+        { code: 403, data: null, message: "Forbidden" },
+        { status: 403 }
       );
-
-      const allowedHeaders = requestHeaders ?? "*";
-
+    } else {
+      // Allow all OPTIONS requests in development
       return new NextResponse(null, {
         status: 204,
         headers: {
-          "Access-Control-Allow-Origin": origin,
+          "Access-Control-Allow-Origin": origin || "*",
           "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-          "Access-Control-Allow-Headers": allowedHeaders,
+          "Access-Control-Allow-Headers":
+            "Content-Type, Authorization, mp-antibot-token",
           "Access-Control-Allow-Credentials": "true",
         },
       });
-    } else {
-      return new NextResponse(null, { status: 403, statusText: "Forbidden" });
     }
-  }
-
-  const origin = request.headers.get("Origin");
-  const isOriginAllowed = origin && allowedOrigins.includes(origin);
-  const corsHeaders: Record<string, string> = {};
-  if (isOriginAllowed) {
-    corsHeaders["Access-Control-Allow-Origin"] = origin;
-    corsHeaders["Access-Control-Allow-Methods"] =
-      "GET, POST, PUT, DELETE, OPTIONS";
-    corsHeaders["Access-Control-Allow-Headers"] = "*";
-    corsHeaders["Access-Control-Allow-Credentials"] = "true";
   }
 
   const shouldCheckTurnstile = routesRequiringTurnstile.some((path) =>
@@ -67,7 +61,7 @@ export async function middleware(request: NextRequest) {
     if (!isTokenValid) {
       return NextResponse.json(
         { code: 403, data: null, message: "Human verification failed" },
-        { status: 403, headers: corsHeaders }
+        { status: 403 }
       );
     }
   }
@@ -79,7 +73,7 @@ export async function middleware(request: NextRequest) {
     if (!accessToken || !refreshToken) {
       return NextResponse.json(
         { code: 401, data: null, message: "Unauthorized" },
-        { status: 401, headers: corsHeaders }
+        { status: 401 }
       );
     }
 
@@ -95,7 +89,7 @@ export async function middleware(request: NextRequest) {
     if (isRefreshTokenExpired || !isRefreshTokenValid || !isAccessTokenValid) {
       const response = NextResponse.json(
         { code: 401, data: null, message: "Unauthorized" },
-        { status: 401, headers: corsHeaders }
+        { status: 401 }
       );
 
       response.cookies.delete("accessToken");
@@ -114,20 +108,25 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  const response = NextResponse.next();
 
-  Object.entries(corsHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value as string);
-  });
+  if (!isProduction) {
+    // Allow all origins in development
+    response.headers.set("Access-Control-Allow-Origin", origin || "*");
+    response.headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, mp-antibot-token"
+    );
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+  }
 
   return response;
 }
 
-// Configure matcher to apply middleware to all routes, excluding static files and Next.js internals
 export const config = {
   matcher: "/api/:path*",
 };
