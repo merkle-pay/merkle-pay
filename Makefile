@@ -16,7 +16,6 @@
 # Variables
 PAY_DIR := apps/merkle-pay
 DASHBOARD_DIR := apps/merkle-dashboard
-DOCKER_COMPOSE_ENV_FILE := --env-file $(PAY_DIR)/.env
 
 # Default target
 help:
@@ -47,14 +46,15 @@ dev: i
 	$(MAKE) -j3 dev-pay dev-dashboard dev-server
 
 dev-pay:
-	pnpm --filter merkle-pay dev
+	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay dev
 
 dev-dashboard:
-	pnpm --filter merkle-dashboard dev
+	pnpm exec dotenv -e .env -- pnpm --filter merkle-dashboard dev
 
 dev-server:
-	pnpm --filter merkle-server dev
+	pnpm exec dotenv -e .env -- pnpm --filter merkle-server dev
 
+# Build Targets do not use dotenv-cli, because they are from docker compose yml
 build: i
 	$(MAKE) -j3 build-pay build-dashboard build-server
 
@@ -101,26 +101,25 @@ tags:
 	git push --tags
 
 tree:
-	@command -v tree >/dev/null 2>&1 || { echo "Error: tree command not found"; exit 1; }
 	tree -I node_modules > tree.txt
 
 d-up:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) up -d
+	docker compose up -d
 
 d-stop:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) stop
+	docker compose stop
 
 d-restart:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) restart
+	docker compose restart
 
 d-down:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) down
+	docker compose down
 
 # Warning: Deletes all Docker resources
 d-clean:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) down -v --rmi all --remove-orphans
+	docker compose down -v --rmi all --remove-orphans
 
 d-logs:
-	docker compose $(DOCKER_COMPOSE_ENV_FILE) logs -f
+	docker compose logs -f
 
  
