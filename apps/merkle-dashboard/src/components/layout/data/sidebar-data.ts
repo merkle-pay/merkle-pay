@@ -150,8 +150,8 @@ export const sidebarData: SidebarData = {
           icon: IconSettings,
           items: [
             {
-              title: 'Business',
-              url: '/settings/business',
+              title: 'Create Business',
+              url: '/settings/create-business',
               icon: IconCoin,
             },
             {

@@ -1,0 +1,7 @@
+.business-form__Wallets,
+.business-form__Tokens {
+  & > div {
+    width: 100%;
+    flex-grow: 1;
+  }
+}

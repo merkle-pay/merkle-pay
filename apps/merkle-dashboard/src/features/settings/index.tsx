@@ -52,9 +52,9 @@ export default function Settings() {
 
 const sidebarNavItems = [
   {
-    title: 'Business',
+    title: 'Create Business',
     icon: <IconCoin size={18} />,
-    href: '/settings/business',
+    href: '/settings/create-business',
   },
   {
     title: 'Profile',
