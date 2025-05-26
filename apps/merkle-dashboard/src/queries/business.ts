@@ -29,7 +29,7 @@ export const fetchBusinesses = async () => {
       }
     )
   } catch (error) {
-    logger(`Error fetching payments: ${error}`)
+    logger(`Error fetching businesses: ${error}`)
   }
 
   return {

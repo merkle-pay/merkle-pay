@@ -6,8 +6,6 @@ export const businessSchema = z.object({
   blockchain: z.string(),
   wallets: z.array(z.string()),
   tokens: z.array(z.string()),
-  boss_id: z.number(),
-  boss_email: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })

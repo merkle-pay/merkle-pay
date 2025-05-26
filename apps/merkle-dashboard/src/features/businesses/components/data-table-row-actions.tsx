@@ -32,7 +32,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         <DropdownMenuItem>
           <Link
             to={`/settings/edit-business`}
-            params={{ business_id: business.id.toString() }}
+            search={{ business_id: business.id }}
           >
             Edit Business
           </Link>

@@ -35,7 +35,7 @@ export const columns: ColumnDef<Business>[] = [
       <DataTableColumnHeader column={column} title='Business Name' />
     ),
     cell: ({ row }) => (
-      <div className='w-[80px]'>{row.getValue('business_name')}</div>
+      <div className='w-30'>{row.getValue('business_name')}</div>
     ),
     enableGrouping: true,
     enableMultiSort: true,
@@ -47,9 +47,7 @@ export const columns: ColumnDef<Business>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Blockchain' />
     ),
-    cell: ({ row }) => (
-      <div className='w-[80px]'>{row.getValue('blockchain')}</div>
-    ),
+    cell: ({ row }) => <div className='w-10'>{row.getValue('blockchain')}</div>,
     enableGrouping: true,
     enableMultiSort: true,
     enableSorting: true,
@@ -60,16 +58,23 @@ export const columns: ColumnDef<Business>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Wallets' />
     ),
-    cell: ({ row }) => (
-      <div className='w-[80px]'>{row.getValue('wallets')}</div>
-    ),
+    cell: ({ row }) => {
+      const wallets = row.getValue('wallets') as string[] | null
+      return (
+        <div className='flex w-50 flex-col gap-1'>
+          {wallets?.map((wallet) => <span key={wallet}>{wallet}</span>)}
+        </div>
+      )
+    },
   },
   {
     accessorKey: 'tokens',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Tokens' />
     ),
-    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('tokens')}</div>,
+    cell: ({ row }) => (
+      <div className='w-[80px]'>{row.getValue('tokens')?.toString()}</div>
+    ),
     enableGrouping: true,
     enableMultiSort: true,
     enableSorting: true,
