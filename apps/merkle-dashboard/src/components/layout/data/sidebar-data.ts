@@ -19,6 +19,7 @@ import {
   IconUserCog,
   IconUserOff,
   IconUsers,
+  IconEdit,
 } from '@tabler/icons-react'
 import { AudioWaveform, GalleryVerticalEnd } from 'lucide-react'
 import Logo from '@/assets/logo.svg?react'
@@ -153,6 +154,11 @@ export const sidebarData: SidebarData = {
               title: 'Create Business',
               url: '/settings/create-business',
               icon: IconCoin,
+            },
+            {
+              title: 'Edit Business',
+              url: '/settings/edit-business',
+              icon: IconEdit,
             },
             {
               title: 'Profile',

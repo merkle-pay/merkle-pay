@@ -20,6 +20,7 @@ import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
 import { Route as AuthenticatedPaymentsIndexImport } from './routes/_authenticated/payments/index'
+import { Route as AuthenticatedSettingsEditBusinessImport } from './routes/_authenticated/settings/edit-business'
 import { Route as AuthenticatedSettingsCreateBusinessImport } from './routes/_authenticated/settings/create-business'
 
 // Create Virtual Routes
@@ -282,6 +283,13 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
+const AuthenticatedSettingsEditBusinessRoute =
+  AuthenticatedSettingsEditBusinessImport.update({
+    id: '/edit-business',
+    path: '/edit-business',
+    getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
+  } as any)
+
 const AuthenticatedSettingsCreateBusinessRoute =
   AuthenticatedSettingsCreateBusinessImport.update({
     id: '/create-business',
@@ -398,6 +406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsCreateBusinessImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
+    '/_authenticated/settings/edit-business': {
+      id: '/_authenticated/settings/edit-business'
+      path: '/edit-business'
+      fullPath: '/settings/edit-business'
+      preLoaderRoute: typeof AuthenticatedSettingsEditBusinessImport
+      parentRoute: typeof AuthenticatedSettingsRouteLazyImport
+    }
     '/_authenticated/settings/account': {
       id: '/_authenticated/settings/account'
       path: '/account'
@@ -482,6 +497,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedSettingsRouteLazyRouteChildren {
   AuthenticatedSettingsCreateBusinessRoute: typeof AuthenticatedSettingsCreateBusinessRoute
+  AuthenticatedSettingsEditBusinessRoute: typeof AuthenticatedSettingsEditBusinessRoute
   AuthenticatedSettingsAccountLazyRoute: typeof AuthenticatedSettingsAccountLazyRoute
   AuthenticatedSettingsAppearanceLazyRoute: typeof AuthenticatedSettingsAppearanceLazyRoute
   AuthenticatedSettingsDisplayLazyRoute: typeof AuthenticatedSettingsDisplayLazyRoute
@@ -494,6 +510,8 @@ const AuthenticatedSettingsRouteLazyRouteChildren: AuthenticatedSettingsRouteLaz
   {
     AuthenticatedSettingsCreateBusinessRoute:
       AuthenticatedSettingsCreateBusinessRoute,
+    AuthenticatedSettingsEditBusinessRoute:
+      AuthenticatedSettingsEditBusinessRoute,
     AuthenticatedSettingsAccountLazyRoute:
       AuthenticatedSettingsAccountLazyRoute,
     AuthenticatedSettingsAppearanceLazyRoute:
@@ -551,6 +569,7 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/settings/create-business': typeof AuthenticatedSettingsCreateBusinessRoute
+  '/settings/edit-business': typeof AuthenticatedSettingsEditBusinessRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -577,6 +596,7 @@ export interface FileRoutesByTo {
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
   '/settings/create-business': typeof AuthenticatedSettingsCreateBusinessRoute
+  '/settings/edit-business': typeof AuthenticatedSettingsEditBusinessRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -607,6 +627,7 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/settings/create-business': typeof AuthenticatedSettingsCreateBusinessRoute
+  '/_authenticated/settings/edit-business': typeof AuthenticatedSettingsEditBusinessRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
@@ -637,6 +658,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/settings/create-business'
+    | '/settings/edit-business'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -662,6 +684,7 @@ export interface FileRouteTypes {
     | '/503'
     | '/'
     | '/settings/create-business'
+    | '/settings/edit-business'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
@@ -690,6 +713,7 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/'
     | '/_authenticated/settings/create-business'
+    | '/_authenticated/settings/edit-business'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
@@ -787,6 +811,7 @@ export const routeTree = rootRoute
       "parent": "/_authenticated",
       "children": [
         "/_authenticated/settings/create-business",
+        "/_authenticated/settings/edit-business",
         "/_authenticated/settings/account",
         "/_authenticated/settings/appearance",
         "/_authenticated/settings/display",
@@ -822,6 +847,10 @@ export const routeTree = rootRoute
     },
     "/_authenticated/settings/create-business": {
       "filePath": "_authenticated/settings/create-business.tsx",
+      "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/settings/edit-business": {
+      "filePath": "_authenticated/settings/edit-business.tsx",
       "parent": "/_authenticated/settings"
     },
     "/_authenticated/settings/account": {

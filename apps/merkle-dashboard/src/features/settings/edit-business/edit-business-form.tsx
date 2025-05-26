@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import './create-business-form.scss'
+import './edit-business-form.scss'
 
 const businessFormSchema = z.object({
   business_name: z
@@ -35,7 +35,7 @@ const businessFormSchema = z.object({
 
 type BusinessFormValues = z.infer<typeof businessFormSchema>
 
-export function CreateBusinessForm() {
+export function EditBusinessForm() {
   const form = useForm<BusinessFormValues>({
     resolver: zodResolver(businessFormSchema),
     defaultValues: {
@@ -125,7 +125,7 @@ export function CreateBusinessForm() {
           {walletFields.map((field, index) => (
             <div
               key={field.id}
-              className='create-business-form__Wallets flex w-full items-end gap-2'
+              className='edit-business-form__Wallets flex w-full items-end gap-2'
             >
               <FormField
                 control={form.control}
@@ -163,7 +163,7 @@ export function CreateBusinessForm() {
           {tokenFields.map((field, index) => (
             <div
               key={field.id}
-              className='create-business-form__Tokens flex w-full items-end gap-2'
+              className='edit-business-form__Tokens flex w-full items-end gap-2'
             >
               <FormField
                 control={form.control}
