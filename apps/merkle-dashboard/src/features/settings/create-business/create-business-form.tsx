@@ -73,8 +73,8 @@ export function CreateBusinessForm() {
       body: JSON.stringify({
         business_name,
         blockchain: blockchain.toLowerCase(),
-        wallets: wallets.map((wallet) => wallet.value).toString(),
-        tokens: tokens.map((token) => token.value).toString(),
+        wallets: wallets.map((wallet) => wallet.value),
+        tokens: tokens.map((token) => token.value),
       }),
     })
 
@@ -90,6 +90,7 @@ export function CreateBusinessForm() {
       title: 'Business created',
       description: 'Your business has been created successfully',
     })
+    form.reset()
   }
 
   return (
