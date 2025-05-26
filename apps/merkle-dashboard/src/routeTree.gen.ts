@@ -20,6 +20,7 @@ import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
 import { Route as AuthenticatedPaymentsIndexImport } from './routes/_authenticated/payments/index'
+import { Route as AuthenticatedBusinessesIndexImport } from './routes/_authenticated/businesses/index'
 import { Route as AuthenticatedSettingsEditBusinessImport } from './routes/_authenticated/settings/edit-business'
 import { Route as AuthenticatedSettingsCreateBusinessImport } from './routes/_authenticated/settings/create-business'
 
@@ -227,6 +228,13 @@ const AuthenticatedPaymentsIndexRoute = AuthenticatedPaymentsIndexImport.update(
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any,
 )
+
+const AuthenticatedBusinessesIndexRoute =
+  AuthenticatedBusinessesIndexImport.update({
+    id: '/businesses/',
+    path: '/businesses/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 const AuthenticatedSettingsProfileLazyRoute =
   AuthenticatedSettingsProfileLazyImport.update({
@@ -448,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsProfileLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
+    '/_authenticated/businesses/': {
+      id: '/_authenticated/businesses/'
+      path: '/businesses'
+      fullPath: '/businesses'
+      preLoaderRoute: typeof AuthenticatedBusinessesIndexImport
+      parentRoute: typeof AuthenticatedRouteImport
+    }
     '/_authenticated/payments/': {
       id: '/_authenticated/payments/'
       path: '/payments'
@@ -533,6 +548,7 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedBusinessesIndexRoute: typeof AuthenticatedBusinessesIndexRoute
   AuthenticatedPaymentsIndexRoute: typeof AuthenticatedPaymentsIndexRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
@@ -544,6 +560,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedBusinessesIndexRoute: AuthenticatedBusinessesIndexRoute,
   AuthenticatedPaymentsIndexRoute: AuthenticatedPaymentsIndexRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
@@ -575,6 +592,7 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileLazyRoute
+  '/businesses': typeof AuthenticatedBusinessesIndexRoute
   '/payments': typeof AuthenticatedPaymentsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
@@ -602,6 +620,7 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileLazyRoute
+  '/businesses': typeof AuthenticatedBusinessesIndexRoute
   '/payments': typeof AuthenticatedPaymentsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
@@ -633,6 +652,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/_authenticated/settings/profile': typeof AuthenticatedSettingsProfileLazyRoute
+  '/_authenticated/businesses/': typeof AuthenticatedBusinessesIndexRoute
   '/_authenticated/payments/': typeof AuthenticatedPaymentsIndexRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
@@ -664,6 +684,7 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/businesses'
     | '/payments'
     | '/apps'
     | '/chats'
@@ -690,6 +711,7 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/businesses'
     | '/payments'
     | '/apps'
     | '/chats'
@@ -719,6 +741,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/settings/profile'
+    | '/_authenticated/businesses/'
     | '/_authenticated/payments/'
     | '/_authenticated/apps/'
     | '/_authenticated/chats/'
@@ -787,6 +810,7 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
+        "/_authenticated/businesses/",
         "/_authenticated/payments/",
         "/_authenticated/apps/",
         "/_authenticated/chats/",
@@ -872,6 +896,10 @@ export const routeTree = rootRoute
     "/_authenticated/settings/profile": {
       "filePath": "_authenticated/settings/profile.lazy.tsx",
       "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/businesses/": {
+      "filePath": "_authenticated/businesses/index.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/payments/": {
       "filePath": "_authenticated/payments/index.tsx",

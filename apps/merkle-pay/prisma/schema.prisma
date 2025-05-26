@@ -77,6 +77,8 @@ model Business {
   tokens        String[] @default([])
   boss_id       Int
   boss_email    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   boss          Boss     @relation("BossBusinesses", fields: [boss_id], references: [id])
 }
 

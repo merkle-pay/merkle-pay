@@ -64,6 +64,11 @@ export const sidebarData: SidebarData = {
           icon: IconChecklist,
         },
         {
+          title: 'Businesses',
+          url: '/businesses',
+          icon: IconCoin,
+        },
+        {
           title: 'Apps',
           url: '/apps',
           icon: IconPackages,

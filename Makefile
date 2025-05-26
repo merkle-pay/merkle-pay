@@ -122,4 +122,16 @@ d-clean:
 d-logs:
 	docker compose logs -f
 
- 
+# Prisma for merkle-pay
+pp-fmt:
+	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma format
+
+pp-gen:
+	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma generate
+
+pp-migrate:
+	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma migrate dev --create-only --name $(NAME)
+
+pp-deploy:
+	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma-deploy
+
