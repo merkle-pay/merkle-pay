@@ -5,7 +5,7 @@ import { generateAndSaveNaclKeys } from "src/queries/solana";
 
 import { paymentTableRecordSchema } from "src/types/payment";
 import { z } from "zod";
-import { CfTurnstileHandle } from "../cf-turnstile";
+import { TurnstileInstance } from "@marsidev/react-turnstile";
 
 export const WithPhantomApp = ({
   setAlertMessage,
@@ -19,7 +19,7 @@ export const WithPhantomApp = ({
   }) => void;
   paymentTableRecord: z.infer<typeof paymentTableRecordSchema> | null;
   APP_URL: string;
-  cfTurnstileRef: React.RefObject<CfTurnstileHandle | null>;
+  cfTurnstileRef: React.RefObject<TurnstileInstance | null>;
 }) => {
   const { isMobileDevice } = useIsMobileDevice();
 
@@ -44,7 +44,7 @@ export const WithPhantomApp = ({
       return;
     }
     try {
-      const antibotToken = await cfTurnstileRef.current?.getResponseAsync();
+      const antibotToken = await cfTurnstileRef.current?.getResponsePromise();
       const { dAppPublicKey, error, requestId } = await generateAndSaveNaclKeys(
         {
           mpid: paymentTableRecord.mpid,

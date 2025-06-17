@@ -16,7 +16,7 @@ import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 
 import { useMediaQuery } from "@react-hookz/web";
 import { getPaymentRecordDescriptionData } from "src/utils/payment";
-import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { SolanaPaymentMethods } from "src/components/pay-solana";
 import { TronPaymentMethods } from "src/components/pay-tron";
 
@@ -36,7 +36,7 @@ export default function PaymentConfirmPage({
     }
   };
 
-  const cfTurnstileRef = useRef<CfTurnstileHandle>(null);
+  const cfTurnstileRef = useRef<TurnstileInstance | null>(null);
 
   const { isMobileDevice } = useIsMobileDevice();
 
@@ -108,7 +108,7 @@ export default function PaymentConfirmPage({
           />
         )}
       </Space>
-      <CfTurnstile ref={cfTurnstileRef} siteKey={CF_TURNSTILE_SITE_KEY} />
+      <Turnstile ref={cfTurnstileRef} siteKey={CF_TURNSTILE_SITE_KEY} />
       <Space size={8} className={styles.buttons}>
         <Button
           type="outline"

@@ -13,7 +13,7 @@ import { fromZodError } from "zod-validation-error";
 import styles from "./index.module.scss";
 import { IconArrowLeft } from "@arco-design/web-react/icon";
 import { useMediaQuery } from "@react-hookz/web";
-import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { createPaymentTableRecordQuery } from "src/queries/payment";
 import { useRef, useState } from "react";
 import { getPaymentFormDataDescriptionData } from "src/utils/payment";
@@ -31,13 +31,12 @@ export default function PaymentPreviewPage({
     setReferencePublicKeyString,
   } = usePaymentStore();
 
-  const turnstileRef = useRef<CfTurnstileHandle>(null);
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
 
   const router = useRouter();
 
   const isMobileLayout = useMediaQuery("(max-width: 768px)");
   const [isLoading, setIsLoading] = useState(false);
-  const [antibotToken, setAntibotToken] = useState<string>("");
 
   const [alertMessage, setAlertMessage] = useState<{
     type: "error" | "success" | null;
@@ -112,6 +111,8 @@ export default function PaymentPreviewPage({
   };
 
   const createPaymentTableRecord = async () => {
+    const antibotToken = await turnstileRef.current?.getResponsePromise();
+
     if (!antibotToken) {
       setAlertMessage({
         type: "error",
@@ -226,7 +227,13 @@ export default function PaymentPreviewPage({
         }}
       />
 
-      <CfTurnstile siteKey={TURNSTILE_SITE_KEY} setToken={setAntibotToken} />
+      <Turnstile
+        siteKey={TURNSTILE_SITE_KEY}
+        ref={turnstileRef}
+        options={{
+          size: "flexible",
+        }}
+      />
 
       <Space size={16}>
         <Button
@@ -239,7 +246,7 @@ export default function PaymentPreviewPage({
         </Button>
         <Button
           type="primary"
-          disabled={isLoading || !antibotToken}
+          disabled={isLoading}
           loading={isLoading}
           onClick={handleConfirmPayment}
         >

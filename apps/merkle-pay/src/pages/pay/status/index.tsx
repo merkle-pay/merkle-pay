@@ -13,7 +13,7 @@ import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
 import { useEffect, useState, useRef } from "react";
 import { PaymentStatus } from "src/utils/prisma";
 
-import { CfTurnstile, CfTurnstileHandle } from "src/components/cf-turnstile";
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { fetchPaymentStatusQuery } from "src/queries/payment";
 
 type Props = {
@@ -49,12 +49,12 @@ export default function PaymentStatusPage(props: Props) {
   const tryStatusRef = useRef<number>(0);
 
   // !TODO: we need to reset the turnstile token after every poll
-  const turnstileRef = useRef<CfTurnstileHandle>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const _antibotToken = await turnstileRef.current?.getResponseAsync();
+        const _antibotToken = await turnstileRef.current?.getResponsePromise();
         if (!_antibotToken) return;
         if (!mpid) return;
 
@@ -163,7 +163,7 @@ export default function PaymentStatusPage(props: Props) {
       {status.error && (
         <Typography.Text type="error">Error: {status.error}</Typography.Text>
       )}
-      <CfTurnstile ref={turnstileRef} siteKey={turnstileSiteKey} />
+      <Turnstile ref={turnstileRef} siteKey={turnstileSiteKey} />
     </Space>
   );
 }
