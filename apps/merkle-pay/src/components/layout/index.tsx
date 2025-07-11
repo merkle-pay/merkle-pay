@@ -24,7 +24,6 @@ export const Layout = ({
   businessName: string;
   tokenOptions: {
     solana: string[];
-    tron: string[];
   };
   BLOCKCHAIN_OPTIONS: string[];
   returnUrl: string;

@@ -26,7 +26,6 @@ const initialState: PaymentState = {
   businessName: "", // configurable
   tokenOptions: {
     solana: [],
-    tron: [],
   },
   blockchainOptions: [], // configurable
   returnUrl: "", // configurable

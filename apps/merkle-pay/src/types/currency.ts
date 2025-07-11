@@ -21,7 +21,7 @@ export interface StableCoin extends CryptoCurrency {
   name: "USDC" | "USDT";
   symbol: "USDC" | "USDT";
   logo: string;
-  blockchain: "solana" | "ethereum" | "bitcoin" | "tron" | "fogo";
+  blockchain: "solana" | "ethereum" | "bitcoin" | "fogo";
 }
 
 export type Blockchain = StableCoin["blockchain"];

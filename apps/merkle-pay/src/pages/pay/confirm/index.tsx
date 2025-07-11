@@ -18,7 +18,6 @@ import { useMediaQuery } from "@react-hookz/web";
 import { getPaymentRecordDescriptionData } from "src/utils/payment";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { SolanaPaymentMethods } from "src/components/pay-solana";
-import { TronPaymentMethods } from "src/components/pay-tron";
 
 export default function PaymentConfirmPage({
   APP_URL,
@@ -99,12 +98,6 @@ export default function PaymentConfirmPage({
             isMobileDevice={isMobileDevice}
             APP_URL={APP_URL}
             cfTurnstileRef={cfTurnstileRef}
-          />
-        )}
-        {paymentTableRecord?.blockchain === "tron" && (
-          <TronPaymentMethods
-            setAlertMessage={setAlertMessage}
-            isMobileDevice={isMobileDevice}
           />
         )}
       </Space>

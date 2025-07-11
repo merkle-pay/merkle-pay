@@ -47,11 +47,9 @@ import { Blockchain } from "src/types/currency";
 export default function PayPage({
   BUSINESS_NAME_FROM_ENV,
   SOLANA_WALLETS,
-  TRON_WALLETS,
 }: {
   BUSINESS_NAME_FROM_ENV: string | null;
   SOLANA_WALLETS: RecipientWallet[];
-  TRON_WALLETS: RecipientWallet[];
 }) {
   const [form] = Form.useForm<PaymentFormData>();
   const router = useRouter();
@@ -146,12 +144,11 @@ export default function PayPage({
   // blockchain here is only for confirm the blockchain type,
   // if it's not in the blockchainsFromContext, there will be an error
   // if it's empty, its value will be determined by the wallet selected
-  const isWalletsConfigured =
-    SOLANA_WALLETS?.length > 0 || TRON_WALLETS?.length > 0;
+  const isWalletsConfigured = SOLANA_WALLETS?.length > 0;
 
   // If blockchain is set, check if it's supported
   const isBlockchainSupported = router.query.blockchain
-    ? [...SOLANA_WALLETS, ...TRON_WALLETS].find(
+    ? SOLANA_WALLETS.find(
         (wallet) => wallet.blockchain === router.query.blockchain
       )
     : true;
@@ -319,33 +316,19 @@ export default function PayPage({
           <Input />
         </Form.Item>
 
-        <Form.Item shouldUpdate noStyle>
-          {(values) => {
-            let _recipientWallets = SOLANA_WALLETS;
-            switch (values.blockchain) {
-              case "tron":
-                _recipientWallets = TRON_WALLETS;
-                break;
-              default:
-                break;
-            }
-            return (
-              <Form.Item
-                label="Recipient"
-                field="recipient_address"
-                required
-                className={clsx(styles.formItem, styles.fullWidth)}
-              >
-                <Select placeholder="Select recipient's wallet address">
-                  {_recipientWallets.map((option: RecipientWallet) => (
-                    <Select.Option key={option.address} value={option.address}>
-                      {option.address}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            );
-          }}
+        <Form.Item
+          label="Recipient"
+          field="recipient_address"
+          required
+          className={clsx(styles.formItem, styles.fullWidth)}
+        >
+          <Select placeholder="Select recipient's wallet address">
+            {SOLANA_WALLETS.map((option: RecipientWallet) => (
+              <Select.Option key={option.address} value={option.address}>
+                {option.address}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
 
         <Form.Item
@@ -384,21 +367,10 @@ export const getServerSideProps = async () => {
     })
   );
 
-  const TRON_WALLETS_PUBLIC_ENV =
-    process.env.NEXT_PUBLIC_TRON_WALLETS?.split(",") ?? [];
-  const TRON_WALLETS: RecipientWallet[] = TRON_WALLETS_PUBLIC_ENV.map(
-    (wallet) => ({
-      id: `tron-${wallet}`,
-      address: wallet,
-      blockchain: "tron",
-    })
-  );
-
   return {
     props: {
       BUSINESS_NAME_FROM_ENV,
       SOLANA_WALLETS,
-      TRON_WALLETS,
     },
   };
 };

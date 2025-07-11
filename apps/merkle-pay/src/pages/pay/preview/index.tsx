@@ -173,12 +173,6 @@ export default function PaymentPreviewPage({
         return true;
       }
 
-      if (validatedPaymentFormData.blockchain === "tron") {
-        setPaymentTableRecord(paymentTableRecord);
-        console.log("2", 2);
-        return true;
-      }
-
       return true;
     } catch (err) {
       setAlertMessage({

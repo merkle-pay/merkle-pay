@@ -10,7 +10,6 @@ export default function App({ Component, pageProps }: AppProps) {
     process.env.NEXT_PUBLIC_BLOCKCHAIN_OPTIONS?.split(",") ?? [];
   const tokenOptions = {
     solana: process.env.NEXT_PUBLIC_SOLANA_TOKEN_OPTIONS?.split(",") ?? [],
-    tron: process.env.NEXT_PUBLIC_TRON_TOKEN_OPTIONS?.split(",") ?? [],
   };
   const returnUrl = process.env.NEXT_PUBLIC_RETURN_URL ?? "";
 
