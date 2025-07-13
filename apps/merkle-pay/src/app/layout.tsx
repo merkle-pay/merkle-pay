@@ -8,8 +8,6 @@ import { cn } from "src/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Merkle Pay: The Future of Crypto Payments",
   description:
