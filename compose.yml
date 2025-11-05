@@ -1,4 +1,16 @@
 services:
+  # Database migrations - Run before main app starts
+  merkle-migrate:
+    build:
+      context: ./migrate
+      dockerfile: Dockerfile
+    container_name: merkle-pay-migrate
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    networks:
+      - merkle-network
+    restart: "no"
+
   merkle-pay:
     build:
       context: .
@@ -22,6 +34,9 @@ services:
       - NEXT_PUBLIC_SOLANA_TOKEN_OPTIONS=${NEXT_PUBLIC_SOLANA_TOKEN_OPTIONS}
       - NEXT_PUBLIC_SOLANA_RPC_ENDPOINT=${NEXT_PUBLIC_SOLANA_RPC_ENDPOINT}
       - VITE_CF_TURNSTILE_SITE_KEY=${VITE_CF_TURNSTILE_SITE_KEY}
+    depends_on:
+      merkle-migrate:
+        condition: service_completed_successfully
     networks:
       - merkle-network
 
