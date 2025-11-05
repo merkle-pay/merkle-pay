@@ -19,19 +19,20 @@ const routesRequiringAuth = ["/api/dashboard"];
 
 const dealWithCors = (response: NextResponse, origin?: string | null) => {
   if (process.env.NODE_ENV !== "production") {
-    if (!origin) {
-      throw new Error("Origin is empty");
+    // Only set CORS headers if there's an origin (cross-origin request)
+    // Same-origin requests don't have an Origin header
+    if (origin) {
+      response.headers.set("Access-Control-Allow-Origin", origin);
+      response.headers.set(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+      );
+      response.headers.set(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, mp-antibot-token"
+      );
+      response.headers.set("Access-Control-Allow-Credentials", "true");
     }
-    response.headers.set("Access-Control-Allow-Origin", origin);
-    response.headers.set(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    response.headers.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, mp-antibot-token"
-    );
-    response.headers.set("Access-Control-Allow-Credentials", "true");
   }
   return response;
 };
