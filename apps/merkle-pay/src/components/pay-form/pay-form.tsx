@@ -263,7 +263,7 @@ export function PayForm({ businessNameFromEnv, solanaWallets }: PayFormProps) {
                     }}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select blockchain" />
                       </SelectTrigger>
                     </FormControl>
@@ -294,7 +294,7 @@ export function PayForm({ businessNameFromEnv, solanaWallets }: PayFormProps) {
                     }}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select token symbol" />
                       </SelectTrigger>
                     </FormControl>
@@ -390,7 +390,7 @@ export function PayForm({ businessNameFromEnv, solanaWallets }: PayFormProps) {
                     }}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select recipient's wallet address" />
                       </SelectTrigger>
                     </FormControl>
