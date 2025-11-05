@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button } from "@arco-design/web-react";
+import { Button } from "@/components/ui/button";
 import { sendSolanaPaymentWithPhantomExtension } from "src/utils/solana";
 import { PhantomSolanaProvider } from "src/types/global";
 import { z } from "zod";
@@ -50,9 +50,8 @@ export const WithPhantomExtension = ({
 
   return (
     <Button
-      type="primary"
-      long
-      size="large"
+      size="lg"
+      className="w-full"
       onClick={handlePayWithPhantomExtension}
     >
       Pay with Phantom Extension

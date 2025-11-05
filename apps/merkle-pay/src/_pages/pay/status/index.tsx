@@ -1,20 +1,15 @@
 import { getPaymentByMpid, updatePaymentTxId } from "src/services/payment";
 import styles from "./index.module.scss";
-import {
-  Space,
-  Typography,
-  Spin,
-  Tooltip,
-  Message,
-  Button,
-} from "@arco-design/web-react";
 import { GetServerSidePropsContext } from "next";
 import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
 import { useEffect, useState, useRef } from "react";
 import { PaymentStatus } from "src/utils/prisma";
-
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { fetchPaymentStatusQuery } from "src/queries/payment";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 type Props = {
   status: PaymentStatus | null;
@@ -129,42 +124,50 @@ export default function PaymentStatusPage(props: Props) {
   }, [mpid, needPolling, status.value]);
 
   return (
-    <Space direction="vertical" size="medium" className={styles.container}>
-      <Typography.Title>Payment Status</Typography.Title>
-      <Typography.Text>Payment MPID: {mpid ?? "Not found"}</Typography.Text>
+    <div className="flex flex-col gap-4 w-full">
+      <h1>Payment Status</h1>
+      <p>Payment MPID: {mpid ?? "Not found"}</p>
       {txId && (
-        <Space direction="horizontal" size="medium">
-          <Tooltip content={txId}>
-            <Typography.Text
-              className={styles.txIdText}
-              onClick={async () => {
-                await navigator.clipboard.writeText(txId);
-                Message.success("txId copied to clipboard");
-              }}
-            >
-              Payment TXID: {`${txId.slice(0, 8)}...${txId.slice(-8)}`}
-            </Typography.Text>
-          </Tooltip>
+        <div className="flex items-center gap-4">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p
+                  className={styles.txIdText}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(txId);
+                    toast.success("txId copied to clipboard");
+                  }}
+                >
+                  Payment TXID: {`${txId.slice(0, 8)}...${txId.slice(-8)}`}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{txId}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button
-            type="outline"
-            href={`https://solscan.io/tx/${txId}`}
-            target="_blank"
+            variant="outline"
+            asChild
           >
-            View on Solscan
+            <a href={`https://solscan.io/tx/${txId}`} target="_blank" rel="noopener noreferrer">
+              View on Solscan
+            </a>
           </Button>
-        </Space>
+        </div>
       )}
       {status.value && (
-        <Typography.Text>
-          Payment Status: {status.value}
-          {status.isFetching && <Spin size={24} style={{ marginLeft: 8 }} />}
-        </Typography.Text>
+        <div className="flex items-center gap-2">
+          <p>Payment Status: {status.value}</p>
+          {status.isFetching && <Loader2 className="h-4 w-4 animate-spin" />}
+        </div>
       )}
       {status.error && (
-        <Typography.Text type="error">Error: {status.error}</Typography.Text>
+        <p className="text-destructive">Error: {status.error}</p>
       )}
       <Turnstile ref={turnstileRef} siteKey={turnstileSiteKey} />
-    </Space>
+    </div>
   );
 }
 

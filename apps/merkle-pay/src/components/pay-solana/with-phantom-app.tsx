@@ -1,4 +1,4 @@
-import { Button } from "@arco-design/web-react";
+import { Button } from "@/components/ui/button";
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
 
 import { generateAndSaveNaclKeys } from "src/queries/solana";
@@ -83,9 +83,8 @@ export const WithPhantomApp = ({
 
   return (
     <Button
-      type="primary"
-      size="large"
-      long
+      size="lg"
+      className="w-full"
       onClick={async () => {
         await handlePhantomApp();
       }}

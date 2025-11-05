@@ -6,31 +6,39 @@ import { Payment, PaymentStatus } from "./schemas";
 const db = Database.getInstance();
 
 export const findByMpid = async (mpid: string): Promise<Payment | null> => {
-  const [payment] = await db.query<Payment>(
-    `
+  const result = await db.query<Payment>({
+    text: `
       SELECT * FROM payment WHERE mpid = $1
     `,
-    [mpid]
-  );
+    params: [mpid],
+  });
 
-  return payment || null;
+  if (result.error || !result.data) {
+    return null;
+  }
+
+  return result.data[0] || null;
 };
 
 export const updateStatus = async (
   mpid: string,
   status: PaymentStatus
 ): Promise<Payment | null> => {
-  const [payment] = await db.query<Payment>(
-    `
-      UPDATE payment 
-      SET status = $1, updatedAt = CURRENT_TIMESTAMP 
-      WHERE mpid = $2 
+  const result = await db.query<Payment>({
+    text: `
+      UPDATE payment
+      SET status = $1, updatedAt = CURRENT_TIMESTAMP
+      WHERE mpid = $2
       RETURNING *
     `,
-    [status, mpid]
-  );
+    params: [status, mpid],
+  });
 
-  return payment || null;
+  if (result.error || !result.data) {
+    return null;
+  }
+
+  return result.data[0] || null;
 };
 
 export const findPayments = async (params: {
@@ -41,23 +49,35 @@ export const findPayments = async (params: {
   const offset = (page - 1) * pageSize;
   const limit = pageSize;
 
-  return await db.query<Payment>(
-    `
-      SELECT * FROM payment 
-      ORDER BY createdAt DESC 
+  const result = await db.query<Payment>({
+    text: `
+      SELECT * FROM payment
+      ORDER BY createdAt DESC
       LIMIT $1 OFFSET $2
     `,
-    [limit, offset]
-  );
+    params: [limit, offset],
+  });
+
+  if (result.error || !result.data) {
+    return [];
+  }
+
+  return result.data;
 };
 
 export const findPaymentsByClientId = async (
   clientId: string
 ): Promise<Payment[]> => {
-  return await db.query<Payment>(
-    `
+  const result = await db.query<Payment>({
+    text: `
       SELECT * FROM payment WHERE clientId = $1
     `,
-    [clientId]
-  );
+    params: [clientId],
+  });
+
+  if (result.error || !result.data) {
+    return [];
+  }
+
+  return result.data;
 };

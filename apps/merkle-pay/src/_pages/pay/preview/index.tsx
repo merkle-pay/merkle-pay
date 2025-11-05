@@ -1,22 +1,16 @@
-import {
-  Button,
-  Descriptions,
-  Space,
-  Typography,
-  Alert,
-  Result,
-} from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import { paymentFormDataSchema } from "../../../types/payment";
 import { fromZodError } from "zod-validation-error";
-import styles from "./index.module.scss";
-import { IconArrowLeft } from "@arco-design/web-react/icon";
+import { ArrowLeft } from "lucide-react";
 import { useMediaQuery } from "@react-hookz/web";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { createPaymentTableRecordQuery } from "src/queries/payment";
 import { useRef, useState } from "react";
 import { getPaymentFormDataDescriptionData } from "src/utils/payment";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function PaymentPreviewPage({
   TURNSTILE_SITE_KEY,
@@ -58,41 +52,31 @@ export default function PaymentPreviewPage({
   // either way, redirect back to the payment page
   if (!success || !paymentFormDataValueFromStore.blockchain) {
     return (
-      <Result
-        status="error"
-        title={
-          paymentFormDataValueFromStore.blockchain
+      <div className="flex flex-col items-center justify-center gap-4 p-8">
+        <div className="rounded-full bg-destructive/10 p-3">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+        </div>
+        <h2 className="text-2xl font-semibold">
+          {paymentFormDataValueFromStore.blockchain
             ? "Payment form data is invalid"
-            : "Payment form not filled"
-        }
-        subTitle={
-          paymentFormDataValueFromStore.blockchain ? (
-            <Space direction="vertical" size={16}>
-              <Typography.Text>
-                Please fill the payment form again.
-              </Typography.Text>
+            : "Payment form not filled"}
+        </h2>
+        <div className="flex flex-col gap-2 text-center text-muted-foreground">
+          {paymentFormDataValueFromStore.blockchain ? (
+            <>
+              <p>Please fill the payment form again.</p>
               {fromZodError(error!).details.map((detail, index) => {
-                return (
-                  <Typography.Text key={index}>
-                    {detail.message}
-                  </Typography.Text>
-                );
+                return <p key={index}>{detail.message}</p>;
               })}
-            </Space>
+            </>
           ) : (
-            `Please fill the payment form.`
-          )
-        }
-        extra={[
-          <Button
-            key="again"
-            type="primary"
-            onClick={() => router.push("/pay")}
-          >
-            Fill the payment form
-          </Button>,
-        ]}
-      ></Result>
+            <p>Please fill the payment form.</p>
+          )}
+        </div>
+        <Button onClick={() => router.push("/pay")}>
+          Fill the payment form
+        </Button>
+      </div>
     );
   }
 
@@ -184,42 +168,56 @@ export default function PaymentPreviewPage({
     }
   };
 
+  const descriptionData = getPaymentFormDataDescriptionData(validatedPaymentFormData);
+
   return (
-    <Space direction="vertical" size={16} className={styles.container}>
+    <div className="flex flex-col gap-4 w-full" style={{ maxWidth: '600px' }}>
       {alertMessage.value && alertMessage.type === "error" && (
-        <div className={styles.error}>
-          <Alert
-            closable
-            type="error"
-            title="Error"
-            content={alertMessage.value}
-          />
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{alertMessage.value}</AlertDescription>
+        </Alert>
       )}
       {alertMessage.value && alertMessage.type === "success" && (
-        <div className={styles.success}>
-          <Alert
-            closable
-            type="success"
-            title="Success"
-            content={alertMessage.value}
-          />
-        </div>
+        <Alert>
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>{alertMessage.value}</AlertDescription>
+        </Alert>
       )}
+
       <h1>Payment Preview</h1>
-      <Descriptions
-        column={isMobileLayout ? 1 : 2}
-        border
-        layout={"horizontal"}
-        data={getPaymentFormDataDescriptionData(validatedPaymentFormData)}
-        size={"medium"}
-        labelStyle={{ fontWeight: 600, color: "#000" }}
-        valueStyle={{
-          overflowWrap: "break-word",
-          wordBreak: "break-all",
-          minWidth: "140px",
-        }}
-      />
+
+      <div className="border rounded-md">
+        <div className={`grid ${isMobileLayout ? 'grid-cols-1' : 'grid-cols-2'} divide-y ${!isMobileLayout && 'divide-x'}`}>
+          {descriptionData.map((item, index) => (
+            <div
+              key={index}
+              className={`flex ${isMobileLayout ? 'flex-col' : 'flex-row'} border-b last:border-b-0 ${
+                index % 2 === 0 && !isMobileLayout ? '' : 'col-start-2'
+              }`}
+              style={{
+                gridColumn: isMobileLayout ? '1' : index % 2 === 0 ? '1' : '2',
+              }}
+            >
+              <div className="font-semibold bg-muted px-4 py-3 min-w-[140px]" style={{ color: '#000' }}>
+                {item.label}
+              </div>
+              <div
+                className="px-4 py-3 flex-1"
+                style={{
+                  overflowWrap: 'break-word',
+                  wordBreak: 'break-all',
+                  minWidth: '140px',
+                }}
+              >
+                {item.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <Turnstile
         siteKey={TURNSTILE_SITE_KEY}
@@ -229,25 +227,23 @@ export default function PaymentPreviewPage({
         }}
       />
 
-      <Space size={16}>
+      <div className="flex gap-4">
         <Button
-          type="outline"
-          icon={<IconArrowLeft />}
+          variant="outline"
           onClick={() => router.push(paymentFormUrl)}
           disabled={isLoading}
         >
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
         <Button
-          type="primary"
           disabled={isLoading}
-          loading={isLoading}
           onClick={handleConfirmPayment}
         >
-          Confirm Payment
+          {isLoading ? "Loading..." : "Confirm Payment"}
         </Button>
-      </Space>
-    </Space>
+      </div>
+    </div>
   );
 }
 

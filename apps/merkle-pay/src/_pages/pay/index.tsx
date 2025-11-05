@@ -1,24 +1,34 @@
-import {
-  Form,
-  Input,
-  Button,
-  Select,
-  InputNumber,
-  Typography,
-  Space,
-  Message,
-} from "@arco-design/web-react";
-import { IconArrowRight } from "@arco-design/web-react/icon";
 import { useRouter } from "next/router";
 import { PaymentFormData, paymentFormDataSchema } from "../../types/payment";
 import { fromZodError } from "zod-validation-error";
-
 import { usePaymentStore } from "../../store/payment-store";
 import { RecipientWallet } from "../../types/recipient";
 import styles from "./index.module.scss";
 import { useEffect } from "react";
 import clsx from "clsx";
 import { Blockchain } from "src/types/currency";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { ArrowRight } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // solana:
 //        <recipient>?amount=<amount>
@@ -51,7 +61,6 @@ export default function PayPage({
   BUSINESS_NAME_FROM_ENV: string | null;
   SOLANA_WALLETS: RecipientWallet[];
 }) {
-  const [form] = Form.useForm<PaymentFormData>();
   const router = useRouter();
 
   const {
@@ -63,19 +72,33 @@ export default function PayPage({
     returnUrl: returnUrlFromStore,
   } = usePaymentStore();
 
+  const form = useForm<PaymentFormData>({
+    defaultValues: {
+      businessName: businessNameFromStore,
+      payer: "",
+      blockchain: undefined,
+      token: undefined,
+      amount: undefined,
+      orderId: "",
+      message: "",
+      recipient_address: "",
+      returnUrl: returnUrlFromStore,
+    },
+  });
+
   useEffect(() => {
     if (!router.isReady) return;
-    form.setFieldsValue({
+    form.reset({
       ...router.query,
       amount: router.query.amount ? Number(router.query.amount) : undefined,
-      businessName: businessNameFromStore, // should not be updated
-      returnUrl: returnUrlFromStore, // should not be updated
+      businessName: businessNameFromStore,
+      returnUrl: returnUrlFromStore,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, form, businessNameFromStore, returnUrlFromStore]);
+  }, [router.isReady, businessNameFromStore, returnUrlFromStore]);
 
   const updateQueryParam = () => {
-    const formValues = form.getFieldsValue();
+    const formValues = form.getValues();
     const _searchParams = new URLSearchParams(
       router.query as unknown as Record<string, string>
     );
@@ -116,7 +139,7 @@ export default function PayPage({
     });
 
     if (!parsedPaymentFormData.success) {
-      Message.error(fromZodError(parsedPaymentFormData.error).message);
+      toast.error(fromZodError(parsedPaymentFormData.error).message);
       return;
     }
 
@@ -127,17 +150,25 @@ export default function PayPage({
     router.push("/pay/preview");
   };
 
-  const message = form.getFieldValue("message");
+  const message = form.watch("message");
+  const blockchain = form.watch("blockchain");
+  const token = form.watch("token");
+  const amount = form.watch("amount");
+  const orderId = form.watch("orderId");
+  const recipient_address = form.watch("recipient_address");
+  const returnUrl = form.watch("returnUrl");
+  const businessName = form.watch("businessName");
+
   const hasMessageLessThan40 =
     typeof message === "string" && message.length <= 40;
   const isPreviewButtonActive =
-    form.getFieldValue("blockchain") &&
-    form.getFieldValue("token") &&
-    form.getFieldValue("amount") &&
-    form.getFieldValue("orderId") &&
-    form.getFieldValue("recipient_address") &&
-    form.getFieldValue("returnUrl") &&
-    form.getFieldValue("businessName") &&
+    blockchain &&
+    token &&
+    amount &&
+    orderId &&
+    recipient_address &&
+    returnUrl &&
+    businessName &&
     (!message || hasMessageLessThan40); // no message or message is less than 40 characters
 
   // allow empty values in router.query
@@ -155,201 +186,261 @@ export default function PayPage({
 
   if (!isWalletsConfigured || !isBlockchainSupported) {
     return (
-      <Space direction="vertical" size={16}>
-        <Typography.Title>Configuration Error</Typography.Title>
+      <div className="flex flex-col gap-4">
+        <h1>Configuration Error</h1>
         {!isWalletsConfigured && (
-          <Typography.Text>
-            No wallet addresses have been configured.
-          </Typography.Text>
+          <p>No wallet addresses have been configured.</p>
         )}
         {!isBlockchainSupported && (
-          <Typography.Text>
-            No wallet addresses have been configured for this blockchain.
-          </Typography.Text>
+          <p>No wallet addresses have been configured for this blockchain.</p>
         )}
-        <Typography.Text>
+        <p>
           Please contact the administrator to set up receiving wallet addresses.
-        </Typography.Text>
-      </Space>
+        </p>
+      </div>
     );
   }
 
   return (
     <>
       <h1>Pay</h1>
-      <Form
-        className={styles.form}
-        form={form}
-        layout="vertical"
-        onValuesChange={() => {
-          updateQueryParam();
-        }}
-      >
-        <Form.Item
-          label="Business Name"
-          field="businessName"
-          required
-          className={styles.formItem}
+      <Form {...form}>
+        <form
+          className={styles.form}
+          onSubmit={(e) => e.preventDefault()}
         >
-          <Input readOnly />
-        </Form.Item>
+          <FormField
+            control={form.control}
+            name="businessName"
+            render={({ field }) => (
+              <FormItem className={styles.formItem}>
+                <FormLabel>Business Name *</FormLabel>
+                <FormControl>
+                  <Input readOnly {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Form.Item
-          label="Payer"
-          field="payer"
-          required
-          className={styles.formItem}
-        >
-          <Input />
-        </Form.Item>
+          <FormField
+            control={form.control}
+            name="payer"
+            render={({ field }) => (
+              <FormItem className={styles.formItem}>
+                <FormLabel>Payer *</FormLabel>
+                <FormControl>
+                  <Input {...field} onChange={(e) => {
+                    field.onChange(e);
+                    updateQueryParam();
+                  }} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Form.Item
-          label="Blockchain"
-          field="blockchain"
-          required
-          className={styles.formItem}
-        >
-          <Select
-            placeholder="Select blockchain"
-            onChange={() => {
-              form.resetFields(["recipient_address", "token"]);
-            }}
-          >
-            {blockchainOptions.map((option) => (
-              <Select.Option key={option} value={option}>
-                {option}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          shouldUpdate={(prevValues, nextValues) => {
-            return prevValues.blockchain !== nextValues.blockchain;
-          }}
-          noStyle
-        >
-          {(values) => {
-            const _tokenOptions =
-              tokenOptions[
-                (values.blockchain ??
-                  router.query.blockchain ??
-                  "solana") as Blockchain
-              ];
-            return (
-              <Form.Item
-                label="Token"
-                field="token"
-                required
-                className={styles.formItem}
-              >
-                <Select placeholder="Select token symbol">
-                  {_tokenOptions!.map((option) => (
-                    <Select.Option key={option} value={option}>
-                      {option}
-                    </Select.Option>
-                  ))}
+          <FormField
+            control={form.control}
+            name="blockchain"
+            render={({ field }) => (
+              <FormItem className={styles.formItem}>
+                <FormLabel>Blockchain *</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    form.setValue("recipient_address", "");
+                    form.setValue("token", "");
+                    updateQueryParam();
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select blockchain" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {blockchainOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              </Form.Item>
-            );
-          }}
-        </Form.Item>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Form.Item
-          label="Amount"
-          field="amount"
-          required
-          className={styles.formItem}
-          validateStatus={
-            Number(router.query.amount) > 0 || router.query.amount === undefined
-              ? undefined
-              : "error"
-          }
-          help={
-            Number(router.query.amount) > 0 || router.query.amount === undefined
-              ? undefined
-              : "Amount must be greater than 0"
-          }
-        >
-          <InputNumber />
-        </Form.Item>
-        <Form.Item
-          label="Order Id"
-          field="orderId"
-          required
-          className={styles.formItem}
-          validateStatus={
-            !!router.query.orderId?.length && router.query.orderId?.length > 100
-              ? "error"
-              : undefined
-          }
-          help={
-            !!router.query.orderId?.length && router.query.orderId?.length > 100
-              ? "Order ID is too long for memo instruction (max 100 characters)."
-              : undefined
-          }
-        >
-          <Input />
-        </Form.Item>
+          <FormField
+            control={form.control}
+            name="token"
+            render={({ field }) => {
+              const _tokenOptions =
+                tokenOptions[
+                  (blockchain ?? router.query.blockchain ?? "solana") as Blockchain
+                ];
+              return (
+                <FormItem className={styles.formItem}>
+                  <FormLabel>Token *</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      updateQueryParam();
+                    }}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select token symbol" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {_tokenOptions!.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
 
-        <Form.Item
-          label="Message"
-          field="message"
-          extra="Optional"
-          className={clsx(styles.formItem, styles.fullWidth)}
-          validateStatus={
-            router.query.message === undefined ||
-            router.query.message === null ||
-            router.query.message.length === 0 ||
-            router.query.message.length <= 40
-              ? undefined
-              : "error"
-          }
-          help={
-            router.query.message === undefined ||
-            router.query.message === null ||
-            router.query.message.length === 0 ||
-            router.query.message.length <= 40
-              ? undefined
-              : "Message must be less than 40 characters"
-          }
-        >
-          <Input />
-        </Form.Item>
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className={styles.formItem}>
+                <FormLabel>Amount *</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value === "" ? undefined : Number(e.target.value);
+                      field.onChange(value);
+                      updateQueryParam();
+                    }}
+                  />
+                </FormControl>
+                {Number(router.query.amount) > 0 || router.query.amount === undefined ? null : (
+                  <p className="text-sm text-destructive">Amount must be greater than 0</p>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Form.Item
-          label="Recipient"
-          field="recipient_address"
-          required
-          className={clsx(styles.formItem, styles.fullWidth)}
-        >
-          <Select placeholder="Select recipient's wallet address">
-            {SOLANA_WALLETS.map((option: RecipientWallet) => (
-              <Select.Option key={option.address} value={option.address}>
-                {option.address}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
+          <FormField
+            control={form.control}
+            name="orderId"
+            render={({ field }) => (
+              <FormItem className={styles.formItem}>
+                <FormLabel>Order Id *</FormLabel>
+                <FormControl>
+                  <Input {...field} onChange={(e) => {
+                    field.onChange(e);
+                    updateQueryParam();
+                  }} />
+                </FormControl>
+                {!!router.query.orderId?.length && router.query.orderId?.length > 100 ? (
+                  <p className="text-sm text-destructive">
+                    Order ID is too long for memo instruction (max 100 characters).
+                  </p>
+                ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Form.Item
-          label="Return Url"
-          field="returnUrl"
-          required
-          className={clsx(styles.formItem, styles.fullWidth)}
-          extra="Override this value in the environment variable NEXT_PUBLIC_RETURN_URL or provide it in the url"
-        >
-          <Input readOnly />
-        </Form.Item>
+          <FormField
+            control={form.control}
+            name="message"
+            render={({ field }) => (
+              <FormItem className={clsx(styles.formItem, styles.fullWidth)}>
+                <FormLabel>Message</FormLabel>
+                <FormControl>
+                  <Input {...field} onChange={(e) => {
+                    field.onChange(e);
+                    updateQueryParam();
+                  }} />
+                </FormControl>
+                <FormDescription>Optional</FormDescription>
+                {router.query.message &&
+                typeof router.query.message === "string" &&
+                router.query.message.length > 40 ? (
+                  <p className="text-sm text-destructive">
+                    Message must be less than 40 characters
+                  </p>
+                ) : null}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button
-          onClick={goToPreview}
-          type="outline"
-          disabled={!isPreviewButtonActive}
-          icon={<IconArrowRight />}
-          className={styles.previewButton}
-        >
-          Preview
-        </Button>
+          <FormField
+            control={form.control}
+            name="recipient_address"
+            render={({ field }) => (
+              <FormItem className={clsx(styles.formItem, styles.fullWidth)}>
+                <FormLabel>Recipient *</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    updateQueryParam();
+                  }}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select recipient's wallet address" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {SOLANA_WALLETS.map((option: RecipientWallet) => (
+                      <SelectItem key={option.address} value={option.address}>
+                        {option.address}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="returnUrl"
+            render={({ field }) => (
+              <FormItem className={clsx(styles.formItem, styles.fullWidth)}>
+                <FormLabel>Return Url *</FormLabel>
+                <FormControl>
+                  <Input readOnly {...field} />
+                </FormControl>
+                <FormDescription>
+                  Override this value in the environment variable NEXT_PUBLIC_RETURN_URL or provide it in the url
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            onClick={goToPreview}
+            variant="outline"
+            disabled={!isPreviewButtonActive}
+            className={styles.previewButton}
+          >
+            Preview
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </form>
       </Form>
     </>
   );

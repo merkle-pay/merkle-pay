@@ -1,23 +1,15 @@
-import {
-  Button,
-  Space,
-  Typography,
-  Alert,
-  Descriptions,
-  Result,
-} from "@arco-design/web-react";
 import { usePaymentStore } from "../../../store/payment-store";
 import { useRouter } from "next/router";
 import styles from "./index.module.scss";
-import { IconArrowLeft, IconArrowRight } from "@arco-design/web-react/icon";
+import { ArrowLeft, ArrowRight, AlertCircle } from "lucide-react";
 import { useRef, useState } from "react";
-
 import { useIsMobileDevice } from "src/hooks/use-is-mobile-device";
-
 import { useMediaQuery } from "@react-hookz/web";
 import { getPaymentRecordDescriptionData } from "src/utils/payment";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { SolanaPaymentMethods } from "src/components/pay-solana";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function PaymentConfirmPage({
   APP_URL,
@@ -49,48 +41,51 @@ export default function PaymentConfirmPage({
 
   if (!paymentTableRecord) {
     return (
-      <Result
-        status="error"
-        title="Payment not created or invalid"
-        subTitle="Please fill the payment form."
-        extra={[
-          <Button key="again" type="primary" onClick={() => goToUrl("/pay")}>
-            Fill the payment form
-          </Button>,
-        ]}
-      ></Result>
+      <div className="flex flex-col items-center justify-center gap-4 p-8">
+        <div className="rounded-full bg-destructive/10 p-3">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+        </div>
+        <h2 className="text-2xl font-semibold">Payment not created or invalid</h2>
+        <p className="text-muted-foreground">Please fill the payment form.</p>
+        <Button onClick={() => goToUrl("/pay")}>
+          Fill the payment form
+        </Button>
+      </div>
     );
   }
 
+  const descriptionData = getPaymentRecordDescriptionData(paymentTableRecord);
+
   return (
-    <Space direction="vertical" size={48} className={styles.container}>
-      <Space direction="vertical" size={8}>
+    <div className="flex flex-col gap-12 w-full" style={{ maxWidth: '600px' }}>
+      <div className="flex flex-col gap-2">
         {alertMessage.value && alertMessage.type && (
-          <Alert
-            closable
-            type={alertMessage.type}
-            title={alertMessage.type.toUpperCase()}
-            content={alertMessage.value}
-            onClose={() => {
-              setAlertMessage({
-                type: null,
-                value: null,
-              });
-            }}
-          />
+          <Alert variant={alertMessage.type === "error" ? "destructive" : "default"}>
+            <AlertTitle>{alertMessage.type.toUpperCase()}</AlertTitle>
+            <AlertDescription>{alertMessage.value}</AlertDescription>
+          </Alert>
         )}
-        <Typography.Title className={styles.title}>
-          Payment Confirmation
-        </Typography.Title>
-        <Descriptions
-          border
-          size="large"
-          column={isMobileLayout ? 1 : 2}
-          colon=" : "
-          layout="horizontal"
-          data={getPaymentRecordDescriptionData(paymentTableRecord)}
-          labelStyle={{ fontWeight: 600, color: "#000" }}
-        />
+        <h1 className={styles.title}>Payment Confirmation</h1>
+        <div className="border rounded-md">
+          <div className={`grid ${isMobileLayout ? 'grid-cols-1' : 'grid-cols-2'} divide-y ${!isMobileLayout && 'divide-x'}`}>
+            {descriptionData.map((item, index) => (
+              <div
+                key={index}
+                className={`flex ${isMobileLayout ? 'flex-col' : 'flex-row'} border-b last:border-b-0`}
+                style={{
+                  gridColumn: isMobileLayout ? '1' : index % 2 === 0 ? '1' : '2',
+                }}
+              >
+                <div className="font-semibold bg-muted px-4 py-3 min-w-[140px]" style={{ color: '#000' }}>
+                  {item.label}
+                </div>
+                <div className="px-4 py-3 flex-1">
+                  {item.value}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         {paymentTableRecord?.blockchain === "solana" && (
           <SolanaPaymentMethods
             setAlertMessage={setAlertMessage}
@@ -100,35 +95,34 @@ export default function PaymentConfirmPage({
             cfTurnstileRef={cfTurnstileRef}
           />
         )}
-      </Space>
+      </div>
       <Turnstile ref={cfTurnstileRef} siteKey={CF_TURNSTILE_SITE_KEY} />
-      <Space size={8} className={styles.buttons}>
+      <div className="flex gap-2 flex-wrap">
         <Button
-          type="outline"
-          icon={<IconArrowLeft />}
+          variant="outline"
           onClick={() => {
             goToUrl(paymentFormUrl || "/pay");
           }}
         >
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Payment Form
         </Button>
 
         <Button
+          variant="outline"
           className={styles.checkStatusButton}
-          type="outline"
-          status="success"
           onClick={() => {
             if (paymentTableRecord?.mpid) {
               goToUrl(`/pay/status?mpid=${paymentTableRecord.mpid}`);
             }
           }}
           disabled={!paymentTableRecord?.mpid}
-          icon={<IconArrowRight />}
         >
           I have paid. Check status
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
-      </Space>
-    </Space>
+      </div>
+    </div>
   );
 }
 

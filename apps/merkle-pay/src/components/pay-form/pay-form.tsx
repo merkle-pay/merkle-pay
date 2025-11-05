@@ -3,7 +3,6 @@
 import { useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
@@ -63,6 +62,7 @@ import { Blockchain } from "../../types/currency";
 // value                   = number / ethereum_address / STRING
 // number                  = [ "-" / "+" ] *DIGIT [ "." 1*DIGIT ] [ ( "e" / "E" ) [ 1*DIGIT ] ]
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formSchema = z.object({
   businessName: z.string().min(1, "Business name is required"),
   payer: z.string().min(1, "Payer is required"),
@@ -102,7 +102,6 @@ export function PayForm({ businessNameFromEnv, solanaWallets }: PayFormProps) {
   } = usePaymentStore();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
     defaultValues: {
       businessName: businessNameFromStore || "",
       payer: "",

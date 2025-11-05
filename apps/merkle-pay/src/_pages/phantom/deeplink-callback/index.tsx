@@ -1,14 +1,9 @@
-import {
-  Button,
-  Result,
-  Space,
-  Spin,
-  Typography,
-} from "@arco-design/web-react";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { prisma } from "src/utils/prisma";
 import { GetServerSidePropsContext } from "next";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 export default function DeepLinkCallback({
   errorCode,
@@ -22,24 +17,24 @@ export default function DeepLinkCallback({
   };
 }) {
   if (errorCode || errorMessage) {
-    return <Result status="error" title={errorCode} subTitle={errorMessage} />;
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 p-8">
+        <div className="rounded-full bg-destructive/10 p-3">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+        </div>
+        <h2 className="text-2xl font-semibold">{errorCode}</h2>
+        <p className="text-muted-foreground">{errorMessage}</p>
+      </div>
+    );
   }
 
   return (
-    <Space direction="vertical" size={48}>
-      <Typography.Title heading={3}>Processing Payment...</Typography.Title>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "50vh",
-        }}
-      >
+    <div className="flex flex-col gap-12">
+      <h3 className="text-xl font-semibold">Processing Payment...</h3>
+      <div className="flex justify-center items-center min-h-[50vh]">
         {data?.signature ? (
           <Button
-            type="primary"
-            long
+            className="w-full"
             onClick={() => {
               window.open(`https://solscan.io/tx/${data.signature}`, "_blank");
             }}
@@ -47,10 +42,10 @@ export default function DeepLinkCallback({
             Payment successful. Check your transaction on Solana Explorer.
           </Button>
         ) : (
-          <Spin dot />
+          <Loader2 className="h-8 w-8 animate-spin" />
         )}
       </div>
-    </Space>
+    </div>
   );
 }
 

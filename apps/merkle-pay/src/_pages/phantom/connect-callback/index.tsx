@@ -1,13 +1,12 @@
-import { Alert, Space, Button, Typography } from "@arco-design/web-react";
-
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { GetServerSidePropsContext } from "next";
 import { prisma } from "src/utils/prisma";
-
 import { PhantomConnectCallbackData } from "src/utils/phantom";
-
 import { createPhantomPaymentUniversalLink } from "src/utils/solana";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function ConnectCallback({
   isError,
@@ -23,33 +22,31 @@ export default function ConnectCallback({
   const error = isError ? `Error: ${errorCode} - ${errorMessage}` : null;
 
   if (isError || error) {
-    return <Alert type="error" content={error} />;
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
   }
 
   return (
-    <Space direction="vertical" size={48}>
-      <Typography.Title heading={3}>Ready to Pay</Typography.Title>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "50vh",
-        }}
-      >
+    <div className="flex flex-col gap-12">
+      <h3 className="text-xl font-semibold">Ready to Pay</h3>
+      <div className="flex justify-center items-center min-h-[50vh]">
         <Button
-          type="primary"
-          size="large"
+          size="lg"
           onClick={() => {
             if (universalLink) {
               window.location.href = universalLink;
             }
           }}
         >
-          <Typography.Title heading={3}>Let&apos;s GO!</Typography.Title>
+          <h3 className="text-xl">Let&apos;s GO!</h3>
         </Button>
       </div>
-    </Space>
+    </div>
   );
 }
 
