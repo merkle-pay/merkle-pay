@@ -7,15 +7,12 @@
     "dev": "next dev -p 8888",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "prisma": "prisma",
-    "prisma-deploy": "bash scripts/confirm-prisma-deploy.sh"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "catalog:pay",
     "lucide-react": "catalog:pay",
     "@marsidev/react-turnstile": "catalog:pay",
-    "@prisma/client": "catalog:pay",
     "@radix-ui/react-accordion": "catalog:pay",
     "@radix-ui/react-alert-dialog": "catalog:pay",
     "@radix-ui/react-aspect-ratio": "catalog:pay",
@@ -62,7 +59,6 @@
     "next": "catalog:pay",
     "next-themes": "catalog:pay",
     "postcss": "catalog:pay",
-    "prisma": "catalog:pay",
     "pg": "catalog:pay",
     "@types/pg": "catalog:pay",
     "qrcode.react": "catalog:pay",

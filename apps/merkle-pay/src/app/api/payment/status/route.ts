@@ -4,7 +4,8 @@ import {
   updatePaymentStatus,
   updatePaymentTxIdIfNotSet,
 } from "src/services/payment";
-import { PaymentStatus, PaymentTableRecord } from "src/utils/prisma";
+import { PaymentStatus } from "src/types/database";
+import type { Payment as PaymentTableRecord } from "src/types/database";
 
 import {
   Connection,

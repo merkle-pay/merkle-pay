@@ -3,7 +3,7 @@ import styles from "./index.module.scss";
 import { GetServerSidePropsContext } from "next";
 import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
 import { useEffect, useState, useRef } from "react";
-import { PaymentStatus } from "src/utils/prisma";
+import { PaymentStatus } from "src/types/database";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { fetchPaymentStatusQuery } from "src/queries/payment";
 import { Button } from "@/components/ui/button";

@@ -37,6 +37,10 @@ help:
 	@echo "  so-build        - Build merkle-pay standalone image"
 	@echo "  so-run          - Run merkle-pay standalone container"
 	@echo "  so-push         - Push merkle-pay standalone image to remote repository"
+	@echo "  migrate-status  - Check migration status"
+	@echo "  migrate-up      - Run pending migrations"
+	@echo "  migrate-down    - Rollback last migration"
+	@echo "  migrate-create NAME=<name> - Create new migration"
 
 
 i:
@@ -122,16 +126,16 @@ d-clean:
 d-logs:
 	docker compose logs -f
 
-# Prisma for merkle-pay
-pp-fmt:
-	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma format
+# Database Migrations (standalone service)
+migrate-status:
+	cd migrate && npm run migrate:status
 
-pp-gen:
-	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma generate
+migrate-up:
+	cd migrate && npm run migrate:up
 
-pp-migrate:
-	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma migrate dev --create-only --name $(NAME)
+migrate-down:
+	cd migrate && npm run migrate:down
 
-pp-deploy:
-	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay prisma-deploy
+migrate-create:
+	cd migrate && npm run migrate:create -- $(NAME)
 

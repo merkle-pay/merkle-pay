@@ -1,18 +1,29 @@
-import { prisma } from "./prisma";
+import { query, queryOne } from "../lib/db";
 import bcrypt from "bcryptjs";
 import { signJwt } from "./jwt";
-import { Boss } from "../../prisma/client";
+import { Boss } from "../types/database";
 
 export const bossAuth = {
   async getBossByEmailOrUsername(email?: string, username?: string) {
-    const boss = await prisma.boss.findFirst({
-      where: { OR: [{ email }, { username }] },
-    });
-    return boss;
+    if (email) {
+      return queryOne<Boss>(
+        `SELECT * FROM "Boss" WHERE email = $1`,
+        [email]
+      );
+    }
+    if (username) {
+      return queryOne<Boss>(
+        `SELECT * FROM "Boss" WHERE username = $1`,
+        [username]
+      );
+    }
+    return null;
   },
   async getBossById(id: number) {
-    const boss = await prisma.boss.findUnique({ where: { id } });
-    return boss;
+    return queryOne<Boss>(
+      `SELECT * FROM "Boss" WHERE id = $1`,
+      [id]
+    );
   },
   async signUp({
     email,
@@ -27,13 +38,11 @@ export const bossAuth = {
     const hash = bcrypt.hashSync(password, salt);
 
     try {
-      await prisma.boss.create({
-        data: {
-          email,
-          username,
-          password_hash: hash,
-        },
-      });
+      await query(
+        `INSERT INTO "Boss" (email, username, password_hash, "createdAt", "updatedAt")
+         VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        [email, username, hash]
+      );
       return true;
     } catch (error) {
       console.error(error);
@@ -71,30 +80,22 @@ export const bossAuth = {
     const accessToken = await signJwt(boss);
     const refreshToken = await signJwt(boss, "60d");
 
-    await prisma.token.createMany({
-      data: [
-        {
-          token: accessToken,
-          boss_id: boss.id,
-          boss_email: boss.email,
-          is_access_token: true,
-          is_refresh_token: false,
-          scope: null,
-          is_valid: true,
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-        },
-        {
-          token: refreshToken,
-          boss_id: boss.id,
-          boss_email: boss.email,
-          is_access_token: false,
-          is_refresh_token: true,
-          scope: null,
-          is_valid: true,
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-        },
-      ],
-    });
+    await query(
+      `INSERT INTO "Token" (token, boss_id, boss_email, is_access_token, is_refresh_token, scope, is_valid, "expiresAt", "createdAt", "updatedAt")
+       VALUES
+       ($1, $2, $3, true, false, NULL, true, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+       ($5, $6, $7, false, true, NULL, true, $8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      [
+        accessToken,
+        boss.id,
+        boss.email,
+        new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+        refreshToken,
+        boss.id,
+        boss.email,
+        new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+      ]
+    );
 
     return {
       boss,
@@ -109,30 +110,22 @@ export const bossAuth = {
     const accessToken = await signJwt(boss);
     const refreshToken = await signJwt(boss, "60d");
 
-    await prisma.token.createMany({
-      data: [
-        {
-          token: accessToken,
-          boss_id: boss.id,
-          boss_email: boss.email,
-          is_access_token: true,
-          is_refresh_token: false,
-          scope: null,
-          is_valid: true,
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-        },
-        {
-          token: refreshToken,
-          boss_id: boss.id,
-          boss_email: boss.email,
-          is_access_token: false,
-          is_refresh_token: true,
-          scope: null,
-          is_valid: true,
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-        },
-      ],
-    });
+    await query(
+      `INSERT INTO "Token" (token, boss_id, boss_email, is_access_token, is_refresh_token, scope, is_valid, "expiresAt", "createdAt", "updatedAt")
+       VALUES
+       ($1, $2, $3, true, false, NULL, true, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+       ($5, $6, $7, false, true, NULL, true, $8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      [
+        accessToken,
+        boss.id,
+        boss.email,
+        new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+        refreshToken,
+        boss.id,
+        boss.email,
+        new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+      ]
+    );
 
     return {
       boss,

@@ -1,12 +1,13 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { GetServerSidePropsContext } from "next";
-import { prisma } from "src/utils/prisma";
+import { prisma } from "src/lib/prisma-compat";
 import { PhantomConnectCallbackData } from "src/utils/phantom";
 import { createPhantomPaymentUniversalLink } from "src/utils/solana";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { PhantomDeepLink, Payment } from "src/types/database";
 
 export default function ConnectCallback({
   isError,
@@ -67,7 +68,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     where: {
       requestId: requestId as string,
     },
-  });
+  }) as PhantomDeepLink | null;
 
   if (!phantomDeepLink) {
     return {
@@ -122,7 +123,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     where: {
       mpid: phantomDeepLink.mpid,
     },
-  });
+  }) as Payment | null;
 
   if (!paymentTableRecord) {
     return {

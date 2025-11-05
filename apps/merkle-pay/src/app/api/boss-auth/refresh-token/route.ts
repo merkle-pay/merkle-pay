@@ -2,7 +2,8 @@ import { bossAuth } from "src/utils/boss-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 import { verifyJwt } from "src/utils/jwt";
-import { prisma } from "src/utils/prisma";
+import { prisma } from "src/lib/prisma-compat";
+import { Boss } from "src/types/database";
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         email,
         username,
       },
-    });
+    }) as Boss | null;
 
     if (!boss) {
       return NextResponse.json({

@@ -17,7 +17,8 @@ import BigNumber from "bignumber.js";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 
-import { PaymentStatus, PaymentTableRecord } from "./prisma";
+import { PaymentStatus } from "../types/database";
+import type { Payment as PaymentTableRecord } from "../types/database";
 import { PaymentFormData } from "src/types/payment";
 import { PhantomSolanaProvider } from "src/types/global";
 

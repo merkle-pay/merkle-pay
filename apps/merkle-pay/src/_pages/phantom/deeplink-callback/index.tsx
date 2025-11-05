@@ -1,9 +1,10 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
-import { prisma } from "src/utils/prisma";
+import { prisma } from "src/lib/prisma-compat";
 import { GetServerSidePropsContext } from "next";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2 } from "lucide-react";
+import { PhantomDeepLink } from "src/types/database";
 
 export default function DeepLinkCallback({
   errorCode,
@@ -63,7 +64,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   const phantomDeepLink = await prisma.phantomDeepLink.findFirst({
     where: { mpid: mpid as string },
-  });
+  }) as PhantomDeepLink | null;
 
   if (!phantomDeepLink || !phantomDeepLink.phantom_encryption_public_key) {
     return {
