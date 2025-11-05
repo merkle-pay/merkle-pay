@@ -126,7 +126,10 @@ export type ApiResponse<T> = {
   message: string;
 };
 
-export type PaymentStatusApiResponse = ApiResponse<{ status: PaymentStatus }>;
+export type PaymentStatusApiResponse = ApiResponse<{
+  status: PaymentStatus;
+  txId?: string | null;
+}>;
 
 export const paymentTableRecordSchema = z.object({
   id: z.number(),
