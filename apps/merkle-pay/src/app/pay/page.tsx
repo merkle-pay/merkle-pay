@@ -1,5 +1,6 @@
 import { PayForm, PayFormProvider } from "../../components/pay-form";
 import { RecipientWallet } from "../../types/recipient";
+import { Suspense } from "react";
 
 // solana:
 //        <recipient>?amount=<amount>
@@ -54,10 +55,12 @@ export default function PayPage() {
         tokenOptions={tokenOptions}
         blockchainOptions={blockchainOptions}
       >
-        <PayForm
-          businessNameFromEnv={BUSINESS_NAME_FROM_ENV}
-          solanaWallets={SOLANA_WALLETS}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <PayForm
+            businessNameFromEnv={BUSINESS_NAME_FROM_ENV}
+            solanaWallets={SOLANA_WALLETS}
+          />
+        </Suspense>
       </PayFormProvider>
     </div>
   );
