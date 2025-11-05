@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateNaclKeysBs58Encoded } from "src/utils/phantom";
-import { prisma } from "src/lib/prisma-compat";
+import { prisma } from "src/lib/db-compat";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { nanoid } from "nanoid";

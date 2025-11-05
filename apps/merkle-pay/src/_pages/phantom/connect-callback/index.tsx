@@ -1,7 +1,7 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { GetServerSidePropsContext } from "next";
-import { prisma } from "src/lib/prisma-compat";
+import { prisma } from "src/lib/db-compat";
 import { PhantomConnectCallbackData } from "src/utils/phantom";
 import { createPhantomPaymentUniversalLink } from "src/utils/solana";
 import { Button } from "@/components/ui/button";

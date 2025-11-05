@@ -29,8 +29,6 @@ catalogs:
     sass: ^1.86.0
     tweetnacl: ^1.0.3
     "@react-hookz/web": ^25.1.1
-    prisma: ^6.8.2
-    "@prisma/client": ^6.8.2
     typescript: ~5.7.2
     zod: ^3.23.8
     zod-validation-error: ^3.4.0
@@ -168,6 +166,3 @@ catalogs:
     "@types/node": ^22
     "@fastify/type-provider-typebox": ^5.1.0
     "@sinclair/typebox": ^0.34.33
-onlyBuiltDependencies:
-  - prisma
-  - "@prisma/engines"

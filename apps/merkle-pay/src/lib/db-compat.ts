@@ -1,5 +1,22 @@
-// Legacy Prisma compatibility layer - SERVER ONLY
-// This provides the same API as Prisma for backward compatibility
+/**
+ * Prisma Compatibility Layer - SERVER ONLY
+ *
+ * This file provides a Prisma-like API for backward compatibility during migration.
+ * The application has migrated from Prisma ORM to direct PostgreSQL queries using node-postgres.
+ *
+ * Purpose:
+ * - Allows existing code to continue using `prisma.model.method()` syntax
+ * - Translates these calls to parameterized SQL queries via node-postgres
+ * - Prevents SQL injection through parameterized queries ($1, $2, etc.)
+ *
+ * Migration Path:
+ * - This is a temporary compatibility layer
+ * - New code should use direct SQL queries: `query()` and `queryOne()` from './db'
+ * - Gradually refactor existing code to use direct SQL queries
+ * - Eventually remove this compatibility layer
+ *
+ * @see ./db.ts for direct SQL query functions
+ */
 
 import { query, queryOne } from './db';
 

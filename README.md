@@ -96,7 +96,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 - **Data Integrity**: Relational structure and constraints (like Foreign Keys) ensure data consistency, crucial for linking payments to merchants accurately across different chains.
 - **Transactional Reliability (ACID)**: Guarantees that operations (like updating payment status) complete fully or not at all, vital for financial applications.
 - **Structured Querying**: SQL provides powerful and standard ways to query and analyze payment data as the platform grows.
-- **Mature Ecosystem**: Excellent tooling and ORM support (e.g., Prisma) in the Node.js/TypeScript ecosystem.
+- **Mature Ecosystem**: Excellent tooling and database support (e.g., node-postgres) in the Node.js/TypeScript ecosystem.
 
 ### Installation & Setup for <u>LOCAL DEVELOPMENT</u>
 
@@ -123,8 +123,8 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 4.  **Database Setup & Migration**
 
     ```bash
-     # Apply migration to database (password is 'yesyesyes')
-    make pp-deploy
+    # Apply migrations to database
+    make migrate-up
     ```
 
 5.  **Run Locally**

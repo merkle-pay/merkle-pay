@@ -1,6 +1,6 @@
 import nacl from "tweetnacl";
 import bs58 from "bs58";
-import { prisma } from "src/lib/prisma-compat";
+import { prisma } from "src/lib/db-compat";
 import { GetServerSidePropsContext } from "next";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2 } from "lucide-react";

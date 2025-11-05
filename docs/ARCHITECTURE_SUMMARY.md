@@ -24,8 +24,8 @@ merkle-pay/
   - `/pay/preview` - Payment confirmation preview
   - `/pay/confirm` - Payment methods & QR code
   - `/pay/status` - Transaction status tracking (Server + Client Components)
-- **Tech:** Next.js 15 (App Router), Solana Web3.js, Prisma, Zod, Zustand
-- **Database:** PostgreSQL via Prisma ORM
+- **Tech:** Next.js 15 (App Router), Solana Web3.js, node-postgres, Zod, Zustand
+- **Database:** PostgreSQL via direct SQL queries (node-postgres)
 
 ### 2. Merkle Dashboard (Vite/React)
 - **Purpose:** Admin dashboard for merchants to view payments
@@ -101,7 +101,7 @@ Session management for Phantom mobile wallet integration
 ### Validation Layers
 1. **Zod schemas** - Runtime validation at API boundaries
 2. **TypeScript types** - Compile-time type checking
-3. **Prisma models** - Database schema enforcement
+3. **PostgreSQL constraints** - Database schema enforcement (CHECK, NOT NULL, UNIQUE)
 
 ### Authentication
 - JWT-based with refresh token pattern
@@ -172,7 +172,7 @@ pnpm install          # Install dependencies
 
 ### Backend
 - **Next.js API Routes** (merkle-pay)
-- **Prisma ORM**
+- **node-postgres (pg)** - Direct SQL queries
 - **PostgreSQL**
 - **JWT** (Jose)
 - **Bcryptjs** (password hashing)
@@ -204,10 +204,11 @@ pnpm install          # Install dependencies
 app/api/           API routes
 components/        UI components (by feature)
 services/          Database operations
+lib/               Database connection (db.ts, db-compat.ts)
 utils/             Helper functions
 types/             TypeScript + Zod schemas
 hooks/             Custom React hooks
-prisma/            Schema + generated client
+database/          SQL migration files
 ```
 
 ### Merkle Dashboard (`apps/merkle-dashboard/src/`)
@@ -267,9 +268,10 @@ Expired (EXPIRED)
 5. Implement error handling with toast
 
 ### Database Migrations
-1. Update prisma/schema.prisma
-2. Create migration via `pnpm prisma migrate dev`
-3. Deploy to production when ready
+1. Create SQL migration file in src/database/migrations/
+2. Run migration via `pnpm db:migrate`
+3. Update TypeScript types in src/types/database.ts
+4. Deploy to production when ready
 
 ---
 
