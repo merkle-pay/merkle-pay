@@ -18,9 +18,14 @@ merkle-pay/
 - **Purpose:** Customer-facing payment form and primary API backend
 - **Key Routes:**
   - `POST /api/payment/init-solana` - Initialize payment
-  - `GET /api/payment/status?mpid=<id>` - Check payment status
+  - `GET /api/payment/status?mpid=<id>` - Check payment status (polling)
   - `POST /api/boss-auth/sign-in` - Merchant authentication
-- **Tech:** Next.js 15, Solana Web3.js, Prisma, Zod, Zustand
+- **Payment Flow Pages (App Router):**
+  - `/pay` - Payment form
+  - `/pay/preview` - Payment confirmation preview
+  - `/pay/confirm` - Payment methods & QR code
+  - `/pay/status` - Transaction status tracking (Server + Client Components)
+- **Tech:** Next.js 15 (App Router), Solana Web3.js, Prisma, Zod, Zustand
 - **Database:** PostgreSQL via Prisma ORM
 
 ### 2. Merkle Dashboard (Vite/React)
@@ -79,6 +84,18 @@ Session management for Phantom mobile wallet integration
 
 ## Key Architectural Patterns
 
+### App Router (Server & Client Components)
+
+**Payment Status Page Pattern:**
+- **Server Component (`page.tsx`):** Fetches initial data from database, passes props to client
+- **Client Component (`payment-status-client.tsx`):** Handles polling, user interactions, real-time updates
+- **Benefits:** Fast initial load, direct DB access, no CORS issues, type-safe prop passing
+
+**Migration from Pages Router:**
+- `getServerSideProps` → Server Component async function
+- Client-side hooks → Separate Client Component with `"use client"`
+- `next/router` → `next/navigation`
+
 ### API Response Format (Consistent across all endpoints)
 ```typescript
 {
@@ -98,6 +115,12 @@ Session management for Phantom mobile wallet integration
 - Access tokens: 24 hours (httpOnly)
 - Refresh tokens: 60 days (httpOnly)
 - Cookie-based storage in browser
+
+### Middleware & CORS
+- **Same-origin requests:** No Origin header required (fixes App Router fetch)
+- **Cross-origin requests:** CORS headers set for dashboard → API communication
+- **Turnstile verification:** Bot protection on payment/auth routes
+- **JWT validation:** Access/refresh token checks on dashboard routes
 
 ### Error Handling
 - Global error handler in dashboard (main.tsx)

@@ -2,6 +2,13 @@
 
 This document provides a comprehensive overview of the Merkle Pay monorepo structure, intended for AI assistants and developers to understand the codebase architecture without reading dozens of individual files.
 
+**Recent Updates:**
+
+- ✅ Implemented Server Component + Client Component pattern for data fetching
+- ✅ Fixed middleware CORS handling for same-origin requests (App Router compatibility)
+- ✅ Updated type definitions for payment status API responses to include `txId`
+- ✅ Improved UI consistency with Shadcn/UI card-based layouts across payment pages
+
 ## High-Level Architecture
 
 **Merkle Pay** is a non-custodial multi-chain payment platform enabling merchants to receive stablecoin payments directly to their wallets. The monorepo uses pnpm workspaces and contains three main applications plus supporting infrastructure.
@@ -19,6 +26,7 @@ merkle-pay/
 ```
 
 **Tech Stack Summary:**
+
 - **Monorepo:** pnpm workspaces (v10.6.4+), Node.js 20.10+
 - **Database:** PostgreSQL with Prisma ORM
 - **Auth:** JWT-based (access + refresh tokens)
@@ -33,6 +41,7 @@ merkle-pay/
 **Purpose:** Customer-facing payment form and primary API backend
 
 **Tech Stack:**
+
 - **Framework:** Next.js 15.2.3 (App Router)
 - **UI:** Shadcn/UI + Radix UI + TailwindCSS
 - **Blockchain:** Solana Web3.js, SPL Token
@@ -42,13 +51,14 @@ merkle-pay/
 - **Port:** 8888
 
 **Directory Structure:**
+
 ```
 src/
 ├── app/
 │   ├── api/                          # API routes
 │   │   ├── payment/
 │   │   │   ├── init-solana/          # POST: Initialize Solana payment
-│   │   │   ├── status/               # GET: Check payment status
+│   │   │   ├── status/               # GET: Check payment status (polling endpoint)
 │   │   │   ├── txId/                 # POST: Submit transaction ID
 │   │   │   └── phantom/              # Phantom wallet specific routes
 │   │   ├── dashboard/                # Dashboard admin API
@@ -60,14 +70,19 @@ src/
 │   │       ├── sign-in/              # POST: Login
 │   │       ├── sign-out/             # POST: Logout
 │   │       └── refresh-token/        # POST: Refresh JWT
-│   ├── pay/                          # Payment page (Next.js dynamic route)
+│   ├── pay/                          # Payment flow pages (App Router)
+│   │   ├── page.tsx                  # Payment form
+│   │   ├── preview/                  # Payment preview & confirmation
+│   │   ├── confirm/                  # Payment methods & QR code
+│   │   └── status/                   # Transaction status tracking
+│   │       ├── page.tsx              # Server Component (initial data fetch)
+│   │       └── payment-status-client.tsx  # Client Component (polling)
 │   ├── layout.tsx                    # Root layout
 │   ├── page.tsx                      # Home page
 │   └── globals.css                   # Global styles
-├── _pages/                           # Deprecated/legacy pages (being converted to RSC)
-│   ├── pay/
-│   ├── phantom/
-│   └── status/
+├── _pages/                           # Deprecated/legacy Pages Router code (archived)
+│   ├── pay/                          # Old payment pages (migrated to app/)
+│   └── phantom/                      # Phantom-specific legacy routes
 ├── components/
 │   ├── ui/                           # Shadcn UI components
 │   ├── pay-solana/                   # Solana payment components
@@ -108,6 +123,7 @@ package.json                          # Dependencies
 ```
 
 **Key Configuration (Environment Variables):**
+
 ```
 # Blockchain
 NEXT_PUBLIC_BLOCKCHAIN_OPTIONS=solana,base
@@ -135,6 +151,7 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=<public_turnstile_key>
 **Purpose:** Admin dashboard for merchants to view and manage payments
 
 **Tech Stack:**
+
 - **Framework:** Vite + React 19
 - **Routing:** TanStack Router (replaces React Router)
 - **UI:** Shadcn/UI + Radix UI + TailwindCSS
@@ -145,6 +162,7 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=<public_turnstile_key>
 - **Port:** 9999 (dev), built to `/dist` for production
 
 **Directory Structure:**
+
 ```
 src/
 ├── main.tsx                    # App entry point with router setup
@@ -195,12 +213,14 @@ package.json
 ```
 
 **API Integration Pattern:**
+
 - **Base URL:** `/api` (proxied by Caddy to merkle-pay app)
 - **Auth:** Cookies contain `accessToken` and `refreshToken`
 - **Query Client Setup:** TanStack Query with retry logic and error handling
 - **Router:** TanStack Router with basepath `/dashboard`
 
 **Key Stores:**
+
 - `useAuthStore`: Stores logged-in user info
 - Individual feature stores for settings, preferences
 
@@ -211,12 +231,14 @@ package.json
 **Purpose:** Microservice for blockchain-specific operations and off-chain monitoring
 
 **Tech Stack:**
+
 - **Framework:** Fastify 5.3.3 with TypeBox schema validation
 - **Database:** Native PostgreSQL driver (pg)
 - **Port:** 9000
 - **Runtime:** Node.js with ts-node for development
 
 **Directory Structure:**
+
 ```
 src/
 ├── index.ts                    # Server entry point
@@ -234,6 +256,7 @@ package.json
 ```
 
 **API Routes:**
+
 ```
 GET  /public/solana/tx-status?mpid=<mpid>
      - Check transaction status on Solana blockchain
@@ -242,6 +265,7 @@ GET  /public/solana/tx-status?mpid=<mpid>
 ```
 
 **Integration Points:**
+
 - **Database:** Connects to same PostgreSQL as merkle-pay
 - **Blockchain:** Queries Solana RPC endpoints
 - **Auth:** Public routes (no authentication required)
@@ -257,6 +281,7 @@ GET  /public/solana/tx-status?mpid=<mpid>
 **Core Models:**
 
 #### **Payment Model**
+
 Tracks every payment transaction across blockchains.
 
 ```prisma
@@ -275,25 +300,25 @@ model Payment {
   id                  Int           @id @default(autoincrement())
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
-  
+
   // Amount and token
   amount              Float         // Numeric amount (e.g., 100.50)
   token               String        // Token name (USDC, USDT, SOL)
   blockchain          String        // Chain (solana, base, polygon)
-  
+
   // Merchant reference
   orderId             String        // Merchant's order ID
   business_name       String        // Business display name
-  
+
   // Wallet addresses
   recipient_address   String        // Where payment goes
   payer_address       String?       // Who paid (if known)
-  
+
   // Tracking
   mpid                String        @unique // Merkle Pay ID (nanoid)
   referencePublicKey  String        @unique // For Solana Pay reference
   txId                String?       // Blockchain transaction hash
-  
+
   // Storage
   status              PaymentStatus
   raw                 Json          // Raw payment form data
@@ -301,6 +326,7 @@ model Payment {
 ```
 
 **Key Fields Explained:**
+
 - **mpid:** Unique identifier for payment tracking (nanoid)
 - **referencePublicKey:** Used in Solana Pay to identify payment via blockchain query
 - **txId:** Populated after transaction is found/submitted
@@ -308,6 +334,7 @@ model Payment {
 - **status:** State machine for payment lifecycle
 
 #### **PhantomDeepLink Model**
+
 Manages Phantom wallet deeplink sessions for mobile payments.
 
 ```prisma
@@ -315,15 +342,15 @@ model PhantomDeepLink {
   id                            Int      @id @default(autoincrement())
   publicKey                     String   // Payer's public key
   privateKey                    String   // Temporary private key for encryption
-  
+
   mpid                          String   // Reference to Payment
   orderId                       String
   requestId                     String?
   paymentId                     Int      // Foreign key to Payment
-  
+
   expiresAt                     DateTime // Session expiration
   txId                          String?
-  
+
   phantom_encryption_public_key String?
   createdAt                     DateTime @default(now())
   updatedAt                     DateTime @updatedAt
@@ -331,6 +358,7 @@ model PhantomDeepLink {
 ```
 
 #### **Boss Model**
+
 Merchant/admin accounts.
 
 ```prisma
@@ -339,23 +367,24 @@ model Boss {
   username            String   @unique
   email               String   @unique
   password_hash       String   // bcryptjs hash
-  
+
   is_email_verified   Boolean  @default(false)
   avatar_image_url    String?
   backup_email        String?
   first_name          String?
   last_name           String?
-  
+
   role                String   @default("boss") // Role-based access
-  
+
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-  
+
   tokens              Token[]  @relation("BossTokens")
 }
 ```
 
 #### **Business Model**
+
 Merchant business entities.
 
 ```prisma
@@ -363,16 +392,17 @@ model Business {
   id            Int      @id @default(autoincrement())
   business_name String
   blockchain    String   // Primary blockchain
-  
+
   wallets       String[] @default([])  // Array of recipient wallets
   tokens        String[] @default([])  // Supported tokens
-  
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 ```
 
 #### **Token Model**
+
 JWT token storage for session management.
 
 ```prisma
@@ -381,22 +411,23 @@ model Token {
   token            String    // JWT token value
   boss_id          Int
   boss_email       String
-  
+
   is_access_token  Boolean   // True for short-lived access tokens
   is_refresh_token Boolean   // True for long-lived refresh tokens
-  
+
   scope            String?
   is_valid         Boolean   @default(true)
   expiresAt        DateTime?
-  
+
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-  
+
   boss             Boss      @relation("BossTokens", fields: [boss_id], references: [id])
 }
 ```
 
 **Key Design Patterns:**
+
 - **ACID Compliance:** PostgreSQL transactions for payment state changes
 - **Referential Integrity:** Foreign keys ensure data consistency
 - **Indexing:** Unique constraints on `mpid` and `referencePublicKey` for fast lookups
@@ -494,17 +525,18 @@ model Token {
 
 **Key Transaction Parameters:**
 
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| **amount** | Numeric value | `100.50` |
-| **token** | Token symbol | `USDC`, `USDT`, `SOL` |
-| **decimal** | Token decimal places | USDC/USDT: 6, SOL: 9 |
-| **lamports/units** | Smallest unit value | amount × 10^decimals |
-| **reference** | Ephemeral keypair public key | Solana Pay standard |
-| **memo** | On-chain memo text | "Business Name -- OrderID" |
-| **commitment** | Confirmation level | `"confirmed"` or `"finalized"` |
+| Parameter          | Description                  | Example                        |
+| ------------------ | ---------------------------- | ------------------------------ |
+| **amount**         | Numeric value                | `100.50`                       |
+| **token**          | Token symbol                 | `USDC`, `USDT`, `SOL`          |
+| **decimal**        | Token decimal places         | USDC/USDT: 6, SOL: 9           |
+| **lamports/units** | Smallest unit value          | amount × 10^decimals           |
+| **reference**      | Ephemeral keypair public key | Solana Pay standard            |
+| **memo**           | On-chain memo text           | "Business Name -- OrderID"     |
+| **commitment**     | Confirmation level           | `"confirmed"` or `"finalized"` |
 
 **Token Configuration:**
+
 ```typescript
 export const SplTokens = {
   USDC: {
@@ -523,6 +555,7 @@ export const SplTokens = {
 ```
 
 **Timing Constants:**
+
 ```typescript
 MERKLE_PAY_EXPIRE_TIME = 2 hours       // Payment link validity
 POLLING_INTERVAL_MS = 2 seconds        // Status check frequency
@@ -537,11 +570,13 @@ REQUIRED_CONFIRMATION_LEVEL = "confirmed"
 **Status:** In progress, partially implemented
 
 **Standards:**
+
 - **EIP-681:** Ethereum Payment Request Standard
 - **Format:** `ethereum:<recipient>?value=<wei>&data=<hex>`
 - **QR Code:** Encoded URI
 
 **Future Implementation Pattern:**
+
 ```
 1. Build EIP-681 URI from payment parameters
 2. Add "cents trick" randomization to amount for disambiguation
@@ -590,6 +625,7 @@ REQUIRED_CONFIRMATION_LEVEL = "confirmed"
 ```
 
 **Token Schema (in Database):**
+
 - **is_access_token:** Short-lived (for API auth)
 - **is_refresh_token:** Long-lived (for token rotation)
 - **is_valid:** Can be revoked server-side
@@ -598,6 +634,7 @@ REQUIRED_CONFIRMATION_LEVEL = "confirmed"
 ### 4.2 API Endpoints Summary
 
 **Payment Endpoints:**
+
 ```
 POST /api/payment/init-solana
   Request: { paymentFormData: PaymentFormData }
@@ -613,6 +650,7 @@ POST /api/payment/txId
 ```
 
 **Dashboard Endpoints:**
+
 ```
 GET /api/dashboard/payments?page=<page>&pageSize=<size>
   Response: { code, data: { payments: Payment[], total: number }, message }
@@ -626,6 +664,7 @@ POST /api/dashboard/txId
 ```
 
 **Authentication Endpoints:**
+
 ```
 POST /api/boss-auth/sign-up
   Request: { username, email, password }
@@ -645,6 +684,7 @@ POST /api/boss-auth/refresh-token
 ```
 
 **Phantom Wallet Endpoints:**
+
 ```
 GET /api/payment/phantom/dapp-encryption-public-key
   Response: { code, data: { dappEncryptionPublicKey, dappPrivateKey }, message }
@@ -653,17 +693,20 @@ GET /api/payment/phantom/dapp-encryption-public-key
 ### 4.3 Communication Between Apps
 
 **Merkle Dashboard → Merkle Pay API:**
+
 - Base URL: `/api` (Caddy proxies to merkle-pay:8888)
 - Authentication: Cookies contain JWT tokens
 - HTTP Client: Axios with custom wrapper (`mpFetch`)
 - Error Handling: Global error handler in main.tsx listens for 401/403/500 errors
 
 **Merkle Server → PostgreSQL:**
+
 - Direct connection via DATABASE_URL
 - Native pg driver (not Prisma)
 - Used for public Solana tx status queries
 
 **Dashboard → Backend Data Flow:**
+
 ```
 Component (Payments Page)
     ↓
@@ -686,19 +729,84 @@ Response: { code, data: { payments, total }, message }
 
 ## 5. Key Architectural Patterns
 
-### 5.1 Response Format Consistency
+### 5.1 App Router Architecture (Server & Client Components)
+
+**Next.js App Router Pattern for Data Fetching:**
+
+The payment flow pages use a hybrid Server Component + Client Component pattern:
+
+**Server Component (page.tsx):**
+
+```typescript
+// app/pay/status/page.tsx
+import { getPaymentByMpid, updatePaymentTxId } from "src/services/payment";
+
+export default async function PaymentStatusPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const mpid = params.mpid;
+
+  // Server-side data fetching (direct database access)
+  const payment = await getPaymentByMpid(mpid);
+
+  // Pass data to Client Component
+  return (
+    <PaymentStatusClient
+      status={payment.status}
+      mpid={mpid}
+      txId={payment.txId}
+      needPolling={!SETTLED_TX_STATUSES.has(payment.status)}
+    />
+  );
+}
+```
+
+**Client Component (payment-status-client.tsx):**
+
+```typescript
+"use client";
+
+export default function PaymentStatusClient({ status, mpid, txId, needPolling }) {
+  // Client-side interactivity: polling, state management, user interactions
+  useEffect(() => {
+    if (needPolling) {
+      // Poll /api/payment/status endpoint
+      const interval = setInterval(fetchStatus, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [needPolling]);
+
+  return <div>Status: {status}</div>;
+}
+```
+
+**Key Benefits:**
+
+- **Server Components:** Fast initial load, direct database access, no client bundle
+- **Client Components:** Interactive features (polling, toast notifications, copy-to-clipboard)
+- **No CORS Issues:** Server-side code stays on server, client code uses same-origin API calls
+- **Type Safety:** Props passed from Server to Client are fully typed
+
+**Migration Pattern from Pages Router:**
+
+1. `getServerSideProps` logic → Server Component async function
+2. Component with `useEffect` → Client Component with `"use client"` directive
+3. `next/router` imports → `next/navigation` imports
+4. Pass initial data as props from Server Component to Client Component
+
+### 5.2 Response Format Consistency
 
 All API responses follow a standardized format:
 
 ```typescript
 type ApiResponse<T> = {
-  code: number;      // HTTP-like status (200, 400, 401, 404, 500)
-  data: T | null;    // Payload or null on error
-  message: string;   // Human-readable message
+  code: number; // HTTP-like status (200, 400, 401, 404, 500)
+  data: T | null; // Payload or null on error
+  message: string; // Human-readable message
 };
 ```
 
 **Example Success Response:**
+
 ```json
 {
   "code": 200,
@@ -708,6 +816,7 @@ type ApiResponse<T> = {
 ```
 
 **Example Error Response:**
+
 ```json
 {
   "code": 404,
@@ -716,16 +825,18 @@ type ApiResponse<T> = {
 }
 ```
 
-### 5.2 Validation & Type Safety
+### 5.3 Validation & Type Safety
 
 **Three-Layer Validation:**
 
 1. **Zod Schemas** (Type-safe runtime validation)
+
    - `PaymentFormData` schema in types/payment.ts
    - Request/response schemas in API routes
    - Database response schemas in queries
 
 2. **TypeScript Types** (Compile-time checking)
+
    - Generated from Prisma models
    - Exported from utils/prisma.ts
 
@@ -733,6 +844,7 @@ type ApiResponse<T> = {
    - Model definitions ensure DB schema consistency
 
 **Example Validation Pipeline:**
+
 ```typescript
 // Route handler
 const parsed = paymentFormDataSchema.safeParse(json);
@@ -747,20 +859,59 @@ const { paymentFormData } = parsed.data;
 // paymentFormData is now type-safe
 ```
 
-### 5.3 State Management
+### 5.4 State Management
 
 **Frontend (Dashboard):**
+
 - **Server State:** TanStack Query (React Query) with queryClient
 - **Auth State:** Zustand (useAuthStore)
 - **UI State:** Local React state or component-level Zustand stores
 
 **Frontend (Payment Page):**
+
 - **Payment State:** Zustand store for form data, QR codes, status
 - **Blockchain State:** React state for wallet connection, transaction feedback
 
-### 5.4 Error Handling
+### 5.5 Middleware & CORS Handling
+
+**Middleware Pattern (src/middleware.ts):**
+
+The middleware handles CORS, authentication, and bot protection:
+
+```typescript
+const dealWithCors = (response: NextResponse, origin?: string | null) => {
+  if (process.env.NODE_ENV !== "production") {
+    // Only set CORS headers if there's an origin (cross-origin request)
+    // Same-origin requests don't have an Origin header
+    if (origin) {
+      response.headers.set("Access-Control-Allow-Origin", origin);
+      response.headers.set(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+      );
+      response.headers.set(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, mp-antibot-token"
+      );
+      response.headers.set("Access-Control-Allow-Credentials", "true");
+    }
+  }
+  return response;
+};
+```
+
+**Key Middleware Features:**
+
+- **CORS:** Handles cross-origin requests from dashboard (localhost:9999) to API (localhost:8888)
+- **Same-Origin Support:** Doesn't require Origin header for same-origin requests (fixes App Router fetch issues)
+- **Turnstile Verification:** Routes requiring `/api/payment/*`, `/api/boss-auth/*` check `mp-antibot-token`
+- **JWT Authentication:** Routes under `/api/dashboard/*` validate access/refresh tokens
+- **Matcher:** Applies only to `/api/:path*` routes
+
+### 5.6 Error Handling
 
 **Global Error Handling (Dashboard):**
+
 ```typescript
 // main.tsx QueryCache configuration
 queryCache: new QueryCache({
@@ -769,23 +920,24 @@ queryCache: new QueryCache({
       if (error.response?.status === 401) {
         // Session expired
         useAuthStore.getState().auth.signout();
-        router.navigate({ to: '/sign-in' });
+        router.navigate({ to: "/sign-in" });
       }
       if (error.response?.status === 500) {
         // Server error
-        router.navigate({ to: '/500' });
+        router.navigate({ to: "/500" });
       }
     }
-  }
-})
+  },
+});
 ```
 
 **Blockchain Error Handling:**
+
 - Transaction failures captured via `tx.meta.err`
 - Status marked as FAILED in database
 - User notified via toast notifications
 
-### 5.5 Deployment & Infrastructure
+### 5.7 Deployment & Infrastructure
 
 **Docker Compose Orchestration (`compose.yml`):**
 
@@ -815,12 +967,14 @@ Volumes: dashboard-dist (build output)
 ```
 
 **Environment-Specific Configs:**
+
 - `.env` file at root (source of truth)
 - Docker Compose reads via environment variables
 - Next.js reads at build & runtime
-- Vite reads at build time only (prefixed with VITE_)
+- Vite reads at build time only (prefixed with VITE\_)
 
 **Development vs Production:**
+
 - **Dev:** `make dev` runs pnpm workspaces in parallel on localhost
   - merkle-pay: http://localhost:8888
   - merkle-dashboard: http://localhost:9999
@@ -834,37 +988,37 @@ Volumes: dashboard-dist (build output)
 
 ### Merkle Pay App
 
-| Directory | Purpose |
-|-----------|---------|
-| `src/app/api` | API route handlers (POST/GET/PUT/DELETE) |
-| `src/components` | React UI components organized by feature |
-| `src/services` | Business logic for data operations (DB queries) |
-| `src/utils` | Helper functions (blockchain, auth, validation) |
-| `src/types` | TypeScript interfaces and Zod schemas |
-| `src/hooks` | Custom React hooks |
-| `src/database/migrations` | Custom migration system (SQL files) |
-| `prisma` | Prisma schema and generated client |
-| `public` | Static assets served by Next.js |
+| Directory                 | Purpose                                         |
+| ------------------------- | ----------------------------------------------- |
+| `src/app/api`             | API route handlers (POST/GET/PUT/DELETE)        |
+| `src/components`          | React UI components organized by feature        |
+| `src/services`            | Business logic for data operations (DB queries) |
+| `src/utils`               | Helper functions (blockchain, auth, validation) |
+| `src/types`               | TypeScript interfaces and Zod schemas           |
+| `src/hooks`               | Custom React hooks                              |
+| `src/database/migrations` | Custom migration system (SQL files)             |
+| `prisma`                  | Prisma schema and generated client              |
+| `public`                  | Static assets served by Next.js                 |
 
 ### Merkle Dashboard
 
-| Directory | Purpose |
-|-----------|---------|
-| `src/features` | Feature modules (auth, payments, dashboard, settings, etc.) |
-| `src/queries` | API query functions (fetch operations) |
-| `src/stores` | Zustand state management |
-| `src/hooks` | Custom React hooks (useToast, useMobile, etc.) |
-| `src/components/ui` | Reusable UI components (shadcn/ui) |
-| `src/context` | React Context providers (theme, font) |
-| `src/utils` | Utility functions (error handling, logger) |
+| Directory           | Purpose                                                     |
+| ------------------- | ----------------------------------------------------------- |
+| `src/features`      | Feature modules (auth, payments, dashboard, settings, etc.) |
+| `src/queries`       | API query functions (fetch operations)                      |
+| `src/stores`        | Zustand state management                                    |
+| `src/hooks`         | Custom React hooks (useToast, useMobile, etc.)              |
+| `src/components/ui` | Reusable UI components (shadcn/ui)                          |
+| `src/context`       | React Context providers (theme, font)                       |
+| `src/utils`         | Utility functions (error handling, logger)                  |
 
 ### Merkle Server
 
-| Directory | Purpose |
-|-----------|---------|
-| `src/index.ts` | Fastify server initialization |
-| `src/plugins` | Fastify plugins (DB connection, auth, etc.) |
-| `src/public-routes` | Public API endpoints (no auth required) |
+| Directory           | Purpose                                     |
+| ------------------- | ------------------------------------------- |
+| `src/index.ts`      | Fastify server initialization               |
+| `src/plugins`       | Fastify plugins (DB connection, auth, etc.) |
+| `src/public-routes` | Public API endpoints (no auth required)     |
 
 ---
 
@@ -873,11 +1027,13 @@ Volumes: dashboard-dist (build output)
 ### Environment Variables Convention
 
 **Naming:**
+
 - `NEXT_PUBLIC_*`: Exposed to frontend (Next.js/Vite)
 - `VITE_*`: Vite-specific variables
 - Other: Backend-only secrets
 
 **Critical Variables:**
+
 ```
 DATABASE_URL               # PostgreSQL connection string
 JWT_SECRET                 # Secret key for signing JWTs
@@ -932,6 +1088,7 @@ CANCELLED         REFUNDED
 ### Token Mint Addresses
 
 **Solana Mainnet:**
+
 - USDC: `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` (6 decimals)
 - USDT: `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB` (6 decimals)
 - SOL: `So11111111111111111111111111111111111111112` (9 decimals)
@@ -939,17 +1096,20 @@ CANCELLED         REFUNDED
 ### Associated Token Account (ATA)
 
 For SPL token transfers, the system derives Associated Token Accounts (ATAs):
+
 ```typescript
 const senderTokenAccount = await getAssociatedTokenAddress(
-  tokenMint,  // e.g., USDC mint
-  senderPublicKey  // User's wallet
+  tokenMint, // e.g., USDC mint
+  senderPublicKey // User's wallet
 );
 ```
+
 This is deterministic - same user and mint always produce the same ATA.
 
 ### Phantom Wallet Integration
 
 **Methods Supported:**
+
 1. **QR Code (Solana Pay):** Standard @solana/pay encoding
 2. **Browser Extension:** `window.phantom?.solana.signAndSendTransaction()`
 3. **Mobile Deeplink:** Encrypted payload with shared secret
@@ -966,7 +1126,7 @@ const [{ pageIndex, pageSize }, setPagination] = useState({
 });
 
 const { data, isPending } = useQuery({
-  queryKey: ['payments', pageIndex, pageSize],
+  queryKey: ["payments", pageIndex, pageSize],
   queryFn: () => fetchPayments({ page: pageIndex, pageSize }),
   staleTime: 1000 * 60, // 1 minute
 });
@@ -1086,6 +1246,7 @@ make d-down             # Stop and remove containers
 ## 12. Future Enhancements
 
 **Planned Blockchains:**
+
 - Base (EVM) - In progress
 - Polygon PoS
 - Arbitrum One
@@ -1093,6 +1254,7 @@ make d-down             # Stop and remove containers
 - Sui (Future)
 
 **Planned Features:**
+
 - Webhook notifications for payment status
 - Batch payment support
 - Recurring/subscription payments
@@ -1106,6 +1268,7 @@ make d-down             # Stop and remove containers
 ## 13. Useful Resources & Links
 
 **Documentation:**
+
 - Next.js: https://nextjs.org/docs
 - Solana Web3.js: https://solana-labs.github.io/solana-web3.js/
 - Solana Pay: https://solanapay.com/
@@ -1115,10 +1278,12 @@ make d-down             # Stop and remove containers
 - TanStack Query: https://tanstack.com/query/latest
 
 **Blockchain Explorers:**
+
 - Solana Mainnet: https://explorer.solana.com/
 - Solana Devnet: https://explorer.solana.com/?cluster=devnet
 
 **Tools:**
+
 - Phantom Wallet: https://phantom.app
 - Solflare: https://solflare.com
 
@@ -1136,4 +1301,3 @@ This Merkle Pay monorepo demonstrates modern full-stack Web3 application archite
 6. **Open Source:** MIT licensed, self-hostable, fully transparent
 
 The architecture prioritizes **simplicity**, **safety**, and **extensibility** while maintaining **security** and **type safety** at every level.
-
