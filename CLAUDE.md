@@ -4,6 +4,7 @@ This document provides a comprehensive overview of the Merkle Pay monorepo struc
 
 **Recent Updates:**
 
+- ✅ Removed `apps/merkle-server` - consolidated all blockchain logic into merkle-pay app
 - ✅ Implemented Server Component + Client Component pattern for data fetching
 - ✅ Fixed middleware CORS handling for same-origin requests (App Router compatibility)
 - ✅ Updated type definitions for payment status API responses to include `txId`
@@ -11,14 +12,13 @@ This document provides a comprehensive overview of the Merkle Pay monorepo struc
 
 ## High-Level Architecture
 
-**Merkle Pay** is a non-custodial multi-chain payment platform enabling merchants to receive stablecoin payments directly to their wallets. The monorepo uses pnpm workspaces and contains three main applications plus supporting infrastructure.
+**Merkle Pay** is a non-custodial multi-chain payment platform enabling merchants to receive stablecoin payments directly to their wallets. The monorepo uses pnpm workspaces and contains two main applications plus supporting infrastructure.
 
 ```
 merkle-pay/
 ├── apps/
 │   ├── merkle-pay          # Next.js payment form & API backend (port 8888)
-│   ├── merkle-dashboard    # Vite/React admin dashboard (port 9999)
-│   └── merkle-server       # Fastify-based microservice (port 9000)
+│   └── merkle-dashboard    # Vite/React admin dashboard (port 9999)
 ├── packages/               # Shared libraries (currently empty structure)
 ├── caddy/                  # Reverse proxy/SSL termination
 ├── compose.yml             # Docker Compose orchestration
@@ -223,52 +223,6 @@ package.json
 
 - `useAuthStore`: Stores logged-in user info
 - Individual feature stores for settings, preferences
-
----
-
-### 1.3 Merkle Server (`apps/merkle-server`)
-
-**Purpose:** Microservice for blockchain-specific operations and off-chain monitoring
-
-**Tech Stack:**
-
-- **Framework:** Fastify 5.3.3 with TypeBox schema validation
-- **Database:** Native PostgreSQL driver (pg)
-- **Port:** 9000
-- **Runtime:** Node.js with ts-node for development
-
-**Directory Structure:**
-
-```
-src/
-├── index.ts                    # Server entry point
-├── plugins/
-│   └── pg-client.ts            # PostgreSQL connection plugin
-├── public-routes/
-│   └── solana.ts               # Solana-specific routes
-│       └── /tx-status          # GET: Query transaction status
-└── libs/
-    # Utility libraries (future)
-
-nodemon.json                    # Development auto-reload config
-tsconfig.json
-package.json
-```
-
-**API Routes:**
-
-```
-GET  /public/solana/tx-status?mpid=<mpid>
-     - Check transaction status on Solana blockchain
-     - Query params: mpid (Merkle Pay ID)
-     - Returns: { code, message, data: { status, txHash? } }
-```
-
-**Integration Points:**
-
-- **Database:** Connects to same PostgreSQL as merkle-pay
-- **Blockchain:** Queries Solana RPC endpoints
-- **Auth:** Public routes (no authentication required)
 
 ---
 
@@ -699,12 +653,6 @@ GET /api/payment/phantom/dapp-encryption-public-key
 - HTTP Client: Axios with custom wrapper (`mpFetch`)
 - Error Handling: Global error handler in main.tsx listens for 401/403/500 errors
 
-**Merkle Server → PostgreSQL:**
-
-- Direct connection via DATABASE_URL
-- Native pg driver (not Prisma)
-- Used for public Solana tx status queries
-
 **Dashboard → Backend Data Flow:**
 
 ```
@@ -956,8 +904,7 @@ Services:
 │   ├── Routes:
 │   │   ├── / → merkle-pay (payment form)
 │   │   ├── /api → merkle-pay (backend API)
-│   │   ├── /dashboard → dashboard-dist (static files)
-│   │   └── /public/solana → merkle-server (Solana routes)
+│   │   └── /dashboard → dashboard-dist (static files)
 │   └── SSL: Automatic (Let's Encrypt)
 └── PostgreSQL (shared database)
     └── Persists data across restarts
@@ -978,7 +925,6 @@ Volumes: dashboard-dist (build output)
 - **Dev:** `make dev` runs pnpm workspaces in parallel on localhost
   - merkle-pay: http://localhost:8888
   - merkle-dashboard: http://localhost:9999
-  - merkle-server: http://localhost:9000
 - **Prod:** Docker Compose with Caddy routing
   - Single domain with paths
 
@@ -1011,14 +957,6 @@ Volumes: dashboard-dist (build output)
 | `src/components/ui` | Reusable UI components (shadcn/ui)                          |
 | `src/context`       | React Context providers (theme, font)                       |
 | `src/utils`         | Utility functions (error handling, logger)                  |
-
-### Merkle Server
-
-| Directory           | Purpose                                     |
-| ------------------- | ------------------------------------------- |
-| `src/index.ts`      | Fastify server initialization               |
-| `src/plugins`       | Fastify plugins (DB connection, auth, etc.) |
-| `src/public-routes` | Public API endpoints (no auth required)     |
 
 ---
 
@@ -1163,7 +1101,7 @@ const { data, isPending } = useQuery({
 2. **Add Token Mints** to `utils/[blockchain].ts`
 3. **Create Payment Component** in `components/pay-[blockchain]/`
 4. **Add Transaction Builder** following Solana pattern
-5. **Implement Status Checker** (API route + merkle-server route)
+5. **Implement Status Checker** (API route in merkle-pay)
 6. **Add to Environment Options** (NEXT_PUBLIC_BLOCKCHAIN_OPTIONS)
 
 ---
@@ -1182,7 +1120,6 @@ make dev
 # Run individual apps
 make dev-pay           # Next.js on 8888
 make dev-dashboard     # Vite on 9999
-make dev-server        # Fastify on 9000
 ```
 
 ### Building

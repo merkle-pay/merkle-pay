@@ -8,11 +8,10 @@ A brief summary of the key architectural concepts. See CLAUDE.md for comprehensi
 merkle-pay/
 ├── apps/merkle-pay          Next.js (Port 8888): Payment form + API backend
 ├── apps/merkle-dashboard    Vite/React (Port 9999): Admin dashboard
-├── apps/merkle-server       Fastify (Port 9000): Microservice for blockchain ops
 └── caddy/                   Reverse proxy + SSL termination
 ```
 
-## Three Main Applications
+## Two Main Applications
 
 ### 1. Merkle Pay (Next.js)
 - **Purpose:** Customer-facing payment form and primary API backend
@@ -34,12 +33,6 @@ merkle-pay/
 - **Tech:** Vite, React 19, TanStack Router, TanStack Query, Zustand
 - **State:** Auth via Zustand, server state via React Query
 - **Port:** 9999 (dev), served at `/dashboard` in production
-
-### 3. Merkle Server (Fastify)
-- **Purpose:** Microservice for blockchain-specific operations
-- **Key Route:** `GET /public/solana/tx-status?mpid=<id>`
-- **Tech:** Fastify 5, TypeBox, Native PostgreSQL driver
-- **Port:** 9000
 
 ## Database Models
 
@@ -179,7 +172,6 @@ pnpm install          # Install dependencies
 
 ### Backend
 - **Next.js API Routes** (merkle-pay)
-- **Fastify** (merkle-server)
 - **Prisma ORM**
 - **PostgreSQL**
 - **JWT** (Jose)
@@ -195,7 +187,6 @@ pnpm install          # Install dependencies
 **Docker Compose:**
 - merkle-pay: Next.js Docker image
 - merkle-dashboard: Builds to static dist/, served by Caddy
-- merkle-server: Fastify container
 - caddy: Reverse proxy with automatic SSL (Let's Encrypt)
 - PostgreSQL: Shared database
 
@@ -204,7 +195,6 @@ pnpm install          # Install dependencies
 / → merkle-pay (payment form)
 /api → merkle-pay (API backend)
 /dashboard → merkle-dashboard (static React app)
-/public/solana → merkle-server (blockchain ops)
 ```
 
 ## File Organization
@@ -268,7 +258,6 @@ Expired (EXPIRED)
 2. Build transaction in component
 3. Add API route for status checking
 4. Update NEXT_PUBLIC_BLOCKCHAIN_OPTIONS
-5. Implement merkle-server route if needed
 
 ### Add Dashboard Feature
 1. Create feature directory in src/features/

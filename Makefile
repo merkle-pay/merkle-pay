@@ -2,13 +2,13 @@
 .PHONY: help i clean tag tags tree
 
 # Development Targets
-.PHONY: dev dev-pay dev-dashboard dev-server
+.PHONY: dev dev-pay dev-dashboard
 
 # Build Targets
-.PHONY: build build-pay build-dashboard build-server
+.PHONY: build build-pay build-dashboard
 
 # Linting Targets
-.PHONY: lint lint-pay lint-dashboard lint-server
+.PHONY: lint lint-pay lint-dashboard
 
 # Docker Targets
 .PHONY: d-up d-stop d-restart d-down d-clean d-logs
@@ -47,7 +47,7 @@ i:
 	pnpm install
 
 dev: i
-	$(MAKE) -j3 dev-pay dev-dashboard dev-server
+	$(MAKE) -j2 dev-pay dev-dashboard
 
 dev-pay:
 	pnpm exec dotenv -e .env -- pnpm --filter merkle-pay dev
@@ -55,12 +55,9 @@ dev-pay:
 dev-dashboard:
 	pnpm exec dotenv -e .env -- pnpm --filter merkle-dashboard dev
 
-dev-server:
-	pnpm exec dotenv -e .env -- pnpm --filter merkle-server dev
-
 # Build Targets do not use dotenv-cli, because they are from docker compose yml
 build: i
-	$(MAKE) -j3 build-pay build-dashboard build-server
+	$(MAKE) -j2 build-pay build-dashboard
 
 build-pay:
 	pnpm --filter merkle-pay build
@@ -68,20 +65,14 @@ build-pay:
 build-dashboard:
 	pnpm --filter merkle-dashboard build
 
-build-server:
-	pnpm --filter merkle-server build
-
 lint:
-	$(MAKE) -j3 lint-pay lint-dashboard lint-server
+	$(MAKE) -j2 lint-pay lint-dashboard
 
 lint-pay:
 	pnpm --filter merkle-pay lint
 
 lint-dashboard:
 	pnpm --filter merkle-dashboard lint
-
-lint-server:
-	pnpm --filter merkle-server lint
 
 clean:
 	rm -rf node_modules || true
