@@ -75,7 +75,7 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 - **Unique Payment Disambiguation**: Uses amount randomization (the "cents trick") for EVM payments and leverages Solana Pay's reference mechanism to reliably distinguish between potentially simultaneous payments, ensuring accurate mapping in the database.
 - **Stablecoin Focus**: Designed primarily for USDT, USDC, and native chain assets (like SOL) on supported chains.
 - **Open-Source & Self-Hostable**: Deploy using Docker or manually deploy to platforms like Vercel.
-- **Basic UI**: Utilizes Arco Design for a clean, functional interface. (Focus is currently on functionality, UI contributions welcome!)
+- **Modern UI**: Built with Shadcn/UI and Radix UI components for a clean, accessible interface using TailwindCSS.
 
 ---
 
