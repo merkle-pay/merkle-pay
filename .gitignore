@@ -42,7 +42,7 @@ yarn-error.log*
 next-env.d.ts
 
 *.txt
-*.zip
+
 # ai
 .kiro/
 
