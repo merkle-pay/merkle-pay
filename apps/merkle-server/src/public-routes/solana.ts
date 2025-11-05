@@ -65,10 +65,6 @@ export async function routes(
           // fetch tx status from solana
         }
 
-        if (payment.blockchain === "tron") {
-          // fetch tx status from tron
-        }
-
         return reply.status(200).send({
           code: 200,
           message: "Blockchain not supported",

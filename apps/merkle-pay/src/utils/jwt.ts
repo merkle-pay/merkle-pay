@@ -1,5 +1,5 @@
 import * as jose from "jose";
-import { Boss } from "../../prisma/client";
+import { Boss } from "../types/database";
 
 export const signJwt = async (boss: Boss, expiresIn: string = "24h") => {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);

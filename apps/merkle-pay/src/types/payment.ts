@@ -1,7 +1,7 @@
 import { StableCoin } from "./currency";
 import { z } from "zod";
 
-import { PaymentStatus } from "../utils/prisma";
+import { PaymentStatus } from "./database";
 
 export const payPageQuerySchema = z.object({
   blockchain: z

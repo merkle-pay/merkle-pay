@@ -1,9 +1,5 @@
-import {
-  PrismaClient,
-  PaymentStatus,
-  Payment as PaymentTableRecord,
-} from "../../prisma/client";
+// This file only exports TYPES - no runtime code
+// All types are re-exported from the database types file
 
-export const prisma = new PrismaClient();
-export type { PaymentTableRecord };
-export { PaymentStatus };
+export { PaymentStatus } from '../types/database';
+export type { Payment as PaymentTableRecord } from '../types/database';

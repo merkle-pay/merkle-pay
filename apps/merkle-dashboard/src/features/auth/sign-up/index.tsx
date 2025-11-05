@@ -1,20 +1,17 @@
 import { useRef } from 'react'
 import { Link } from '@tanstack/react-router'
+import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile'
 import { Card } from '@/components/ui/card'
-import {
-  CfTurnstile,
-  CfTurnstileHandle,
-} from '../../../components/cf-turnstile'
 import AuthLayout from '../auth-layout'
 import { SignUpForm } from './components/sign-up-form'
 
 export default function SignUp() {
   const siteKey = import.meta.env.VITE_CF_TURNSTILE_SITE_KEY ?? ''
 
-  const turnstileRef = useRef<CfTurnstileHandle>(null)
+  const turnstileRef = useRef<TurnstileInstance | null>(null)
 
   const getAntibotToken = async () => {
-    const antibotToken = await turnstileRef.current?.getResponseAsync()
+    const antibotToken = await turnstileRef.current?.getResponsePromise()
     return antibotToken
   }
 
@@ -29,12 +26,12 @@ export default function SignUp() {
           <h1 className='text-lg font-semibold tracking-tight'>
             Create an account
           </h1>
-          <p className='text-sm text-muted-foreground'>
+          <p className='text-muted-foreground text-sm'>
             Enter your email and password to create an account. <br />
             Already have an account?{' '}
             <Link
               to='/sign-in'
-              className='underline underline-offset-4 hover:text-primary'
+              className='hover:text-primary underline underline-offset-4'
             >
               Sign In
             </Link>
@@ -45,7 +42,7 @@ export default function SignUp() {
           resetTurnstileToken={resetTurnstileToken}
         />
         <div className='mt-4'>
-          <CfTurnstile
+          <Turnstile
             siteKey={siteKey}
             ref={turnstileRef}
             options={{
@@ -53,18 +50,18 @@ export default function SignUp() {
             }}
           />
         </div>
-        <p className='mt-4 px-8 text-center text-sm text-muted-foreground'>
+        <p className='text-muted-foreground mt-4 px-8 text-center text-sm'>
           By creating an account, you agree to our{' '}
           <a
             href='/terms'
-            className='underline underline-offset-4 hover:text-primary'
+            className='hover:text-primary underline underline-offset-4'
           >
             Terms of Service
           </a>{' '}
           and{' '}
           <a
             href='/privacy'
-            className='underline underline-offset-4 hover:text-primary'
+            className='hover:text-primary underline underline-offset-4'
           >
             Privacy Policy
           </a>

@@ -37,6 +37,10 @@ help:
 	@echo "  so-build        - Build merkle-pay standalone image"
 	@echo "  so-run          - Run merkle-pay standalone container"
 	@echo "  so-push         - Push merkle-pay standalone image to remote repository"
+	@echo "  migrate-status  - Check migration status"
+	@echo "  migrate-up      - Run pending migrations"
+	@echo "  migrate-down    - Rollback last migration"
+	@echo "  migrate-create NAME=<name> - Create new migration"
 
 
 i:
@@ -122,4 +126,16 @@ d-clean:
 d-logs:
 	docker compose logs -f
 
- 
+# Database Migrations (standalone service)
+migrate-status:
+	cd migrate && npm run migrate:status
+
+migrate-up:
+	cd migrate && npm run migrate:up
+
+migrate-down:
+	cd migrate && npm run migrate:down
+
+migrate-create:
+	cd migrate && npm run migrate:create -- $(NAME)
+

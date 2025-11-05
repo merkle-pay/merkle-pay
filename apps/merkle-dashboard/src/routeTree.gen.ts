@@ -20,7 +20,9 @@ import { Route as authSignInImport } from './routes/(auth)/sign-in'
 import { Route as authOtpImport } from './routes/(auth)/otp'
 import { Route as auth500Import } from './routes/(auth)/500'
 import { Route as AuthenticatedPaymentsIndexImport } from './routes/_authenticated/payments/index'
-import { Route as AuthenticatedSettingsBusinessImport } from './routes/_authenticated/settings/business'
+import { Route as AuthenticatedBusinessesIndexImport } from './routes/_authenticated/businesses/index'
+import { Route as AuthenticatedSettingsEditBusinessImport } from './routes/_authenticated/settings/edit-business'
+import { Route as AuthenticatedSettingsCreateBusinessImport } from './routes/_authenticated/settings/create-business'
 
 // Create Virtual Routes
 
@@ -227,6 +229,13 @@ const AuthenticatedPaymentsIndexRoute = AuthenticatedPaymentsIndexImport.update(
   } as any,
 )
 
+const AuthenticatedBusinessesIndexRoute =
+  AuthenticatedBusinessesIndexImport.update({
+    id: '/businesses/',
+    path: '/businesses/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+
 const AuthenticatedSettingsProfileLazyRoute =
   AuthenticatedSettingsProfileLazyImport.update({
     id: '/profile',
@@ -282,10 +291,17 @@ const AuthenticatedSettingsAccountLazyRoute =
     ),
   )
 
-const AuthenticatedSettingsBusinessRoute =
-  AuthenticatedSettingsBusinessImport.update({
-    id: '/business',
-    path: '/business',
+const AuthenticatedSettingsEditBusinessRoute =
+  AuthenticatedSettingsEditBusinessImport.update({
+    id: '/edit-business',
+    path: '/edit-business',
+    getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
+  } as any)
+
+const AuthenticatedSettingsCreateBusinessRoute =
+  AuthenticatedSettingsCreateBusinessImport.update({
+    id: '/create-business',
+    path: '/create-business',
     getParentRoute: () => AuthenticatedSettingsRouteLazyRoute,
   } as any)
 
@@ -391,11 +407,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexImport
       parentRoute: typeof AuthenticatedRouteImport
     }
-    '/_authenticated/settings/business': {
-      id: '/_authenticated/settings/business'
-      path: '/business'
-      fullPath: '/settings/business'
-      preLoaderRoute: typeof AuthenticatedSettingsBusinessImport
+    '/_authenticated/settings/create-business': {
+      id: '/_authenticated/settings/create-business'
+      path: '/create-business'
+      fullPath: '/settings/create-business'
+      preLoaderRoute: typeof AuthenticatedSettingsCreateBusinessImport
+      parentRoute: typeof AuthenticatedSettingsRouteLazyImport
+    }
+    '/_authenticated/settings/edit-business': {
+      id: '/_authenticated/settings/edit-business'
+      path: '/edit-business'
+      fullPath: '/settings/edit-business'
+      preLoaderRoute: typeof AuthenticatedSettingsEditBusinessImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
     }
     '/_authenticated/settings/account': {
@@ -432,6 +455,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/profile'
       preLoaderRoute: typeof AuthenticatedSettingsProfileLazyImport
       parentRoute: typeof AuthenticatedSettingsRouteLazyImport
+    }
+    '/_authenticated/businesses/': {
+      id: '/_authenticated/businesses/'
+      path: '/businesses'
+      fullPath: '/businesses'
+      preLoaderRoute: typeof AuthenticatedBusinessesIndexImport
+      parentRoute: typeof AuthenticatedRouteImport
     }
     '/_authenticated/payments/': {
       id: '/_authenticated/payments/'
@@ -481,7 +511,8 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthenticatedSettingsRouteLazyRouteChildren {
-  AuthenticatedSettingsBusinessRoute: typeof AuthenticatedSettingsBusinessRoute
+  AuthenticatedSettingsCreateBusinessRoute: typeof AuthenticatedSettingsCreateBusinessRoute
+  AuthenticatedSettingsEditBusinessRoute: typeof AuthenticatedSettingsEditBusinessRoute
   AuthenticatedSettingsAccountLazyRoute: typeof AuthenticatedSettingsAccountLazyRoute
   AuthenticatedSettingsAppearanceLazyRoute: typeof AuthenticatedSettingsAppearanceLazyRoute
   AuthenticatedSettingsDisplayLazyRoute: typeof AuthenticatedSettingsDisplayLazyRoute
@@ -492,7 +523,10 @@ interface AuthenticatedSettingsRouteLazyRouteChildren {
 
 const AuthenticatedSettingsRouteLazyRouteChildren: AuthenticatedSettingsRouteLazyRouteChildren =
   {
-    AuthenticatedSettingsBusinessRoute: AuthenticatedSettingsBusinessRoute,
+    AuthenticatedSettingsCreateBusinessRoute:
+      AuthenticatedSettingsCreateBusinessRoute,
+    AuthenticatedSettingsEditBusinessRoute:
+      AuthenticatedSettingsEditBusinessRoute,
     AuthenticatedSettingsAccountLazyRoute:
       AuthenticatedSettingsAccountLazyRoute,
     AuthenticatedSettingsAppearanceLazyRoute:
@@ -514,6 +548,7 @@ const AuthenticatedSettingsRouteLazyRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteLazyRoute: typeof AuthenticatedSettingsRouteLazyRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedBusinessesIndexRoute: typeof AuthenticatedBusinessesIndexRoute
   AuthenticatedPaymentsIndexRoute: typeof AuthenticatedPaymentsIndexRoute
   AuthenticatedAppsIndexLazyRoute: typeof AuthenticatedAppsIndexLazyRoute
   AuthenticatedChatsIndexLazyRoute: typeof AuthenticatedChatsIndexLazyRoute
@@ -525,6 +560,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteLazyRoute:
     AuthenticatedSettingsRouteLazyRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedBusinessesIndexRoute: AuthenticatedBusinessesIndexRoute,
   AuthenticatedPaymentsIndexRoute: AuthenticatedPaymentsIndexRoute,
   AuthenticatedAppsIndexLazyRoute: AuthenticatedAppsIndexLazyRoute,
   AuthenticatedChatsIndexLazyRoute: AuthenticatedChatsIndexLazyRoute,
@@ -549,12 +585,14 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/settings/business': typeof AuthenticatedSettingsBusinessRoute
+  '/settings/create-business': typeof AuthenticatedSettingsCreateBusinessRoute
+  '/settings/edit-business': typeof AuthenticatedSettingsEditBusinessRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileLazyRoute
+  '/businesses': typeof AuthenticatedBusinessesIndexRoute
   '/payments': typeof AuthenticatedPaymentsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
@@ -575,12 +613,14 @@ export interface FileRoutesByTo {
   '/404': typeof errors404LazyRoute
   '/503': typeof errors503LazyRoute
   '/': typeof AuthenticatedIndexRoute
-  '/settings/business': typeof AuthenticatedSettingsBusinessRoute
+  '/settings/create-business': typeof AuthenticatedSettingsCreateBusinessRoute
+  '/settings/edit-business': typeof AuthenticatedSettingsEditBusinessRoute
   '/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileLazyRoute
+  '/businesses': typeof AuthenticatedBusinessesIndexRoute
   '/payments': typeof AuthenticatedPaymentsIndexRoute
   '/apps': typeof AuthenticatedAppsIndexLazyRoute
   '/chats': typeof AuthenticatedChatsIndexLazyRoute
@@ -605,12 +645,14 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500LazyRoute
   '/(errors)/503': typeof errors503LazyRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/settings/business': typeof AuthenticatedSettingsBusinessRoute
+  '/_authenticated/settings/create-business': typeof AuthenticatedSettingsCreateBusinessRoute
+  '/_authenticated/settings/edit-business': typeof AuthenticatedSettingsEditBusinessRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountLazyRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceLazyRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayLazyRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsLazyRoute
   '/_authenticated/settings/profile': typeof AuthenticatedSettingsProfileLazyRoute
+  '/_authenticated/businesses/': typeof AuthenticatedBusinessesIndexRoute
   '/_authenticated/payments/': typeof AuthenticatedPaymentsIndexRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexLazyRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexLazyRoute
@@ -635,12 +677,14 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/settings/business'
+    | '/settings/create-business'
+    | '/settings/edit-business'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/businesses'
     | '/payments'
     | '/apps'
     | '/chats'
@@ -660,12 +704,14 @@ export interface FileRouteTypes {
     | '/404'
     | '/503'
     | '/'
-    | '/settings/business'
+    | '/settings/create-business'
+    | '/settings/edit-business'
     | '/settings/account'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/businesses'
     | '/payments'
     | '/apps'
     | '/chats'
@@ -688,12 +734,14 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/'
-    | '/_authenticated/settings/business'
+    | '/_authenticated/settings/create-business'
+    | '/_authenticated/settings/edit-business'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/settings/profile'
+    | '/_authenticated/businesses/'
     | '/_authenticated/payments/'
     | '/_authenticated/apps/'
     | '/_authenticated/chats/'
@@ -762,6 +810,7 @@ export const routeTree = rootRoute
       "children": [
         "/_authenticated/settings",
         "/_authenticated/",
+        "/_authenticated/businesses/",
         "/_authenticated/payments/",
         "/_authenticated/apps/",
         "/_authenticated/chats/",
@@ -785,7 +834,8 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/settings/route.lazy.tsx",
       "parent": "/_authenticated",
       "children": [
-        "/_authenticated/settings/business",
+        "/_authenticated/settings/create-business",
+        "/_authenticated/settings/edit-business",
         "/_authenticated/settings/account",
         "/_authenticated/settings/appearance",
         "/_authenticated/settings/display",
@@ -819,8 +869,12 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/index.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/settings/business": {
-      "filePath": "_authenticated/settings/business.tsx",
+    "/_authenticated/settings/create-business": {
+      "filePath": "_authenticated/settings/create-business.tsx",
+      "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/settings/edit-business": {
+      "filePath": "_authenticated/settings/edit-business.tsx",
       "parent": "/_authenticated/settings"
     },
     "/_authenticated/settings/account": {
@@ -842,6 +896,10 @@ export const routeTree = rootRoute
     "/_authenticated/settings/profile": {
       "filePath": "_authenticated/settings/profile.lazy.tsx",
       "parent": "/_authenticated/settings"
+    },
+    "/_authenticated/businesses/": {
+      "filePath": "_authenticated/businesses/index.tsx",
+      "parent": "/_authenticated"
     },
     "/_authenticated/payments/": {
       "filePath": "_authenticated/payments/index.tsx",

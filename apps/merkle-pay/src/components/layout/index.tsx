@@ -1,14 +1,8 @@
 import styles from "./index.module.scss";
-import {
-  Layout as ArcoLayout,
-  Typography,
-  Link as ArcoLink,
-} from "@arco-design/web-react";
-
 import { useEffect } from "react";
 import { usePaymentStore } from "src/store/payment-store";
 import Image from "next/image";
-import NextLink from "next/link";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 // ! All props are from env variables
@@ -24,7 +18,6 @@ export const Layout = ({
   businessName: string;
   tokenOptions: {
     solana: string[];
-    tron: string[];
   };
   BLOCKCHAIN_OPTIONS: string[];
   returnUrl: string;
@@ -49,29 +42,29 @@ export const Layout = ({
   }, [router.isReady]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <ArcoLayout className={styles.layout}>
-      <ArcoLayout.Header className={styles.header}>
-        <NextLink href="/" className={styles.stylelessLink}>
+    <div className={styles.layout}>
+      <header className={styles.header}>
+        <Link href="/" className={styles.stylelessLink}>
           <Image src="/logo.png" alt="logo" width={64} height={64} />
-        </NextLink>
-        <Typography.Title heading={5} className={styles.title}>
+        </Link>
+        <h5 className={styles.title}>
           {businessNameFromEnv || businessNameFromUrl || "Merkle Pay"}
-        </Typography.Title>
-      </ArcoLayout.Header>
-      <ArcoLayout.Content className={styles.content}>
+        </h5>
+      </header>
+      <main className={styles.content}>
         {children}
-      </ArcoLayout.Content>
-      <ArcoLayout.Footer className={styles.footer}>
-        <Typography.Title heading={5}>
+      </main>
+      <footer className={styles.footer}>
+        <h5>
           Powered by{" "}
-          <ArcoLink href="https://merklepay.com" target="_blank">
+          <a href="https://merklepay.com" target="_blank" rel="noopener noreferrer">
             Merkle Pay
-          </ArcoLink>
-        </Typography.Title>
-        <Typography.Paragraph>
+          </a>
+        </h5>
+        <p>
           © 2025 Merkle Pay. All rights reserved.
-        </Typography.Paragraph>
-      </ArcoLayout.Footer>
-    </ArcoLayout>
+        </p>
+      </footer>
+    </div>
   );
 };

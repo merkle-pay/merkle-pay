@@ -12,7 +12,7 @@
 
 ---
 
-**轻松在 Solana、Base、SUI、TRON、Polygon、Arbitrum、Optimism 等稳定币支付——专为创作者、独立开发者和小企业打造。**
+**轻松在 Solana、Base、SUI、Polygon、Arbitrum、Optimism 等稳定币支付——专为创作者、独立开发者和小企业打造。**
 
 Merkle Pay 是一个非托管的网络平台，用户可以快速设置支付页面，以便在**多个区块链**上直接接收 USDT 和 USDC 等稳定币到自己的钱包。
 
@@ -34,7 +34,6 @@ Merkle Pay 旨在在高吞吐量、低费用的网络上提供无缝的支付体
 - ⏳ **Arbitrum One** (计划中)
 - ⏳ **Optimism** (计划中)
 - ◻️ **Sui** (未来考虑)
-- ◻️ **TRON** (未来考虑)
 
 _（根据开发进度和社区需求，可能会增加对其他链的支持。）_
 

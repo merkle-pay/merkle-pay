@@ -2,6 +2,7 @@ import { Outlet } from '@tanstack/react-router'
 import {
   IconBrowserCheck,
   IconCoin,
+  IconEdit,
   IconNotification,
   IconPalette,
   IconTool,
@@ -52,9 +53,14 @@ export default function Settings() {
 
 const sidebarNavItems = [
   {
-    title: 'Business',
+    title: 'Create Business',
     icon: <IconCoin size={18} />,
-    href: '/settings/business',
+    href: '/settings/create-business',
+  },
+  {
+    title: 'Edit Business',
+    icon: <IconEdit size={18} />,
+    href: '/settings/edit-business',
   },
   {
     title: 'Profile',

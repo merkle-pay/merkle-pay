@@ -1,6 +1,6 @@
 import { PaymentFormData } from "src/types/payment";
-import { PaymentStatus, prisma } from "../utils/prisma";
-import { PrismaClientKnownRequestError } from "../../prisma/client/runtime/library";
+import { Payment, PaymentStatus } from "../types/database";
+import { query, queryOne } from "../lib/db";
 
 export const createPaymentTableRecord = async ({
   paymentFormData,
@@ -10,37 +10,44 @@ export const createPaymentTableRecord = async ({
   paymentFormData: PaymentFormData;
   referencePublicKey: string;
   mpid: string;
-}) => {
-  const paymentTableRecord = await prisma.payment.create({
-    data: {
-      amount: paymentFormData.amount,
-      token: paymentFormData.token,
-      blockchain: paymentFormData.blockchain,
-      orderId: paymentFormData.orderId,
-      status: PaymentStatus.PENDING,
-      referencePublicKey: referencePublicKey,
-      recipient_address: paymentFormData.recipient_address,
+}): Promise<Payment> => {
+  const rows = await query<Payment>(
+    `INSERT INTO "Payment" (
+      amount, token, blockchain, "orderId", status, "referencePublicKey",
+      recipient_address, mpid, raw, business_name, "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    RETURNING *`,
+    [
+      paymentFormData.amount,
+      paymentFormData.token,
+      paymentFormData.blockchain,
+      paymentFormData.orderId,
+      PaymentStatus.PENDING,
+      referencePublicKey,
+      paymentFormData.recipient_address,
       mpid,
-      raw: paymentFormData,
-      business_name: paymentFormData.businessName,
-    },
-  });
-  return paymentTableRecord;
+      JSON.stringify(paymentFormData),
+      paymentFormData.businessName,
+    ]
+  );
+  return rows[0];
 };
 
-export const getPaymentByMpid = async (mpid: string) => {
-  const p = await prisma.payment.findUnique({
-    where: { mpid },
-  });
-  return p;
+export const getPaymentByMpid = async (mpid: string): Promise<Payment | null> => {
+  return queryOne<Payment>(
+    `SELECT * FROM "Payment" WHERE mpid = $1`,
+    [mpid]
+  );
 };
 
-export const updatePaymentTxId = async (mpid: string, txId: string) => {
-  const p = await prisma.payment.update({
-    where: { mpid },
-    data: { txId },
-  });
-  return p;
+export const updatePaymentTxId = async (
+  mpid: string,
+  txId: string
+): Promise<Payment | null> => {
+  return queryOne<Payment>(
+    `UPDATE "Payment" SET "txId" = $1, "updatedAt" = CURRENT_TIMESTAMP WHERE mpid = $2 RETURNING *`,
+    [txId, mpid]
+  );
 };
 
 export const updatePaymentStatus = async ({
@@ -49,17 +56,16 @@ export const updatePaymentStatus = async ({
 }: {
   mpid: string;
   status: PaymentStatus;
-}) => {
+}): Promise<Payment | null> => {
   try {
-    const p = await prisma.payment.update({
-      where: { mpid },
-      data: { status },
-    });
-    return p;
+    return queryOne<Payment>(
+      `UPDATE "Payment" SET status = $1, "updatedAt" = CURRENT_TIMESTAMP WHERE mpid = $2 RETURNING *`,
+      [status, mpid]
+    );
   } catch (error) {
     console.error("Error updating payment status:", error);
+    return null;
   }
-  return null;
 };
 
 export const updatePaymentTxIdIfNotSet = async ({
@@ -68,21 +74,22 @@ export const updatePaymentTxIdIfNotSet = async ({
 }: {
   mpid: string;
   txId: string;
-}) => {
+}): Promise<Payment | null> => {
   try {
-    const p = await prisma.payment.update({
-      where: { mpid, OR: [{ txId: null }, { txId: "" }] },
-      data: { txId },
-    });
-    return p;
-  } catch (error) {
-    if (
-      error instanceof PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
+    const result = await queryOne<Payment>(
+      `UPDATE "Payment" SET "txId" = $1, "updatedAt" = CURRENT_TIMESTAMP
+       WHERE mpid = $2 AND ("txId" IS NULL OR "txId" = '')
+       RETURNING *`,
+      [txId, mpid]
+    );
+
+    if (!result) {
       console.log(`Payment with mpid ${mpid} not found or txId already set.`);
       return null;
     }
+
+    return result;
+  } catch (error) {
     console.error("Error updating payment txId:", error);
     return null;
   }

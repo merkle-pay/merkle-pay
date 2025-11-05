@@ -3,8 +3,7 @@ import { WithSolanaPayQrCode } from "./with-qrcode";
 import { WithPhantomExtension } from "./with-phantom-extenstion";
 import { WithPhantomApp } from "./with-phantom-app";
 import { getPhantomProviders } from "src/utils/solana";
-import { CfTurnstileHandle } from "../cf-turnstile";
-import { Space } from "@arco-design/web-react";
+import { TurnstileInstance } from "@marsidev/react-turnstile";
 
 export const SolanaPaymentMethods = ({
   setAlertMessage,
@@ -20,13 +19,13 @@ export const SolanaPaymentMethods = ({
   goToUrl: (url: string) => void;
   isMobileDevice: boolean;
   APP_URL: string;
-  cfTurnstileRef: React.RefObject<CfTurnstileHandle | null>;
+  cfTurnstileRef: React.RefObject<TurnstileInstance | null>;
 }) => {
   const { phantomSolanaProvider } = getPhantomProviders();
   const { paymentFormData, urlForSolanaPayQrCode, paymentTableRecord } =
     usePaymentStore();
   return (
-    <Space direction="vertical" size={8} style={{ width: "100%" }}>
+    <div className="flex flex-col gap-2 w-full">
       <WithSolanaPayQrCode
         urlForSolanaPayQrCode={urlForSolanaPayQrCode}
         paymentTableRecord={paymentTableRecord}
@@ -49,6 +48,6 @@ export const SolanaPaymentMethods = ({
           cfTurnstileRef={cfTurnstileRef}
         />
       )}
-    </Space>
+    </div>
   );
 };

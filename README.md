@@ -12,7 +12,7 @@
 
 ---
 
-**Accept stablecoin payments on Solana, Base, SUI, TRON, Polygon, Arbitrum, Optimism and more with ease—built for creators, indie hackers, and small businesses.**
+**Accept stablecoin payments on Solana, Base, SUI, Polygon, Arbitrum, Optimism and more with ease—built for creators, indie hackers, and small businesses.**
 
 Merkle Pay is a non-custodial web platform enabling users to quickly set up payment pages for receiving stablecoins like USDT and USDC directly to their own wallets on **multiple blockchains**.
 
@@ -34,7 +34,6 @@ Merkle Pay aims to provide a seamless payment experience across high-throughput,
 - ⏳ **Arbitrum One** (Planned)
 - ⏳ **Optimism** (Planned)
 - ◻️ **Sui** (Future Consideration)
-- ◻️ **TRON** (Future Consideration)
 
 _(Support for additional chains may be added based on development progress and community demand.)_
 
@@ -112,38 +111,24 @@ Wallet compatibility ensures a smooth payment experience for your customers.
     _(Recommended to use make)_
 
     ```bash
-     # Using make (recommended)
     make i
-     # Or manually with pnpm
-    pnpm install
     ```
 
 3.  **Configure Environment Variables**
 
     ```bash
-     # you need two .env files for local development
-
-     # step 1: backend config
-    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-
-     # step 2: frontend dev flag
-    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
+    cp .example .env
     ```
 
 4.  **Database Setup & Migration**
 
     ```bash
-     # Navigate to the merkle-pay app directory first
-    cd apps/merkle-pay
-     # Generate Prisma client
-    make prisma-gen
      # Apply migration to database (password is 'yesyesyes')
-    make prisma-deploy
+    make pp-deploy
     ```
 
 5.  **Run Locally**
     ```bash
-     # In root directory
     make dev
     ```
 
@@ -168,18 +153,13 @@ Wallet compatibility ensures a smooth payment experience for your customers.
 2.  **Configure Environment Variables**
 
     ```bash
-     # edit .env file and add your production env vars
-    cp apps/merkle-pay/.env.example apps/merkle-pay/.env
-    cp apps/merkle-dashboard/.env.production.example apps/merkle-dashboard/.env.production
+    cp .env.example .env
     ```
 
 3.  **Build & Run with Docker Compose**
 
     ```bash
-     # Build images and start containers in detached mode
     make d-up
-     # To stop: make d-stop
-     # To view logs: make d-logs
     ```
 
 4.  **Recreate everything after git pull**

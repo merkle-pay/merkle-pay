@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 
 import styles from "./with-qrcode.module.scss";
 import clsx from "clsx";
-import { Button } from "@arco-design/web-react";
+import { Button } from "@/components/ui/button";
 import QRCodeStyling from "@solana/qr-code-styling";
 
 import { logoSvg } from "src/utils/logo";
@@ -56,9 +56,8 @@ export const WithSolanaPayQrCode = ({
   return (
     <>
       <Button
-        type="primary"
-        size="large"
-        long
+        size="lg"
+        className="w-full"
         onClick={() => {
           generateQrCode();
           setIsExpanded(!isExpanded);
