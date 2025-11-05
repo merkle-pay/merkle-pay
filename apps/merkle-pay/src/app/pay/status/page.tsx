@@ -1,6 +1,6 @@
 import { getPaymentByMpid, updatePaymentTxId } from "src/services/payment";
 import { SETTLED_TX_STATUSES } from "src/utils/solana";
-import PaymentStatusClient from "./payment-status-client";
+import { PaymentStatus } from "../../../components/pay-status";
 
 type PageProps = {
   searchParams: Promise<{ mpid?: string; txId?: string; txid?: string }>;
@@ -16,7 +16,7 @@ export default async function PaymentStatusPage({ searchParams }: PageProps) {
   // Validate params
   if (!mpid || (!!txIdFromUrl && typeof txIdFromUrl !== "string")) {
     return (
-      <PaymentStatusClient
+      <PaymentStatus
         status={null}
         mpid={null}
         txId={null}
@@ -36,7 +36,7 @@ export default async function PaymentStatusPage({ searchParams }: PageProps) {
     (!!payment.txId && !!txIdFromUrl && payment.txId !== txIdFromUrl)
   ) {
     return (
-      <PaymentStatusClient
+      <PaymentStatus
         status={null}
         mpid={mpid}
         txId={null}
@@ -55,7 +55,7 @@ export default async function PaymentStatusPage({ searchParams }: PageProps) {
   const needPolling = !SETTLED_TX_STATUSES.has(payment.status);
 
   return (
-    <PaymentStatusClient
+    <PaymentStatus
       status={payment.status}
       mpid={mpid}
       txId={payment.txId ?? null}

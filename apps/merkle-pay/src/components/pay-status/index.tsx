@@ -2,7 +2,7 @@
 
 import { SETTLED_TX_STATUSES, MAX_TRY_STATUS } from "src/utils/solana";
 import { useEffect, useState, useRef } from "react";
-import { PaymentStatus } from "src/types/database";
+import { PaymentStatus as PaymentStatusType } from "src/types/database";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { fetchPaymentStatusQuery } from "src/queries/payment";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Props = {
-  status: PaymentStatus | null;
+  status: PaymentStatusType | null;
   mpid: string | null;
   txId: string | null;
   error: string | null;
@@ -27,7 +27,7 @@ type Props = {
   turnstileSiteKey: string;
 };
 
-export default function PaymentStatusClient({
+export function PaymentStatus({
   status: initialStatus,
   mpid,
   txId: initialTxId,
@@ -36,7 +36,7 @@ export default function PaymentStatusClient({
   turnstileSiteKey,
 }: Props) {
   const [status, setStatus] = useState<{
-    value: PaymentStatus | null;
+    value: PaymentStatusType | null;
     error: string | null;
     isFetching: boolean;
   }>({
@@ -145,7 +145,7 @@ export default function PaymentStatusClient({
     };
   }, [mpid, needPolling, status.value, txId]);
 
-  const getStatusColor = (status: PaymentStatus | null) => {
+  const getStatusColor = (status: PaymentStatusType | null) => {
     if (!status) return "secondary";
     switch (status) {
       case "CONFIRMED":
