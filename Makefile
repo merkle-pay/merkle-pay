@@ -139,3 +139,9 @@ migrate-down:
 migrate-create:
 	cd migrate && npm run migrate:create -- $(NAME)
 
+push:
+	@if [ "$$(git branch --show-current)" != "main" ]; then \
+		echo "Error: Not on main branch. Current branch: $$(git branch --show-current)"; \
+		exit 1; \
+	fi
+	git push origin main && git push --tags
