@@ -1,9 +1,11 @@
 import type { QueryClient } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
 	Scripts,
+	useRouteContext,
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
@@ -26,11 +28,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
+	const { queryClient } = useRouteContext({ from: "__root__" });
 	return (
-		<>
+		<QueryClientProvider client={queryClient}>
 			<Outlet />
 			<Toaster position="top-center" richColors />
-		</>
+		</QueryClientProvider>
 	);
 }
 
