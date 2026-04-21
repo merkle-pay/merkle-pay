@@ -26,6 +26,7 @@ export interface DbOrder {
 	customer_id: string | null;
 	created_by_staff_id: string | null;
 	mpid: string;
+	merchant_order_id: string | null;
 	reference_public_key: string;
 	chain: Chain;
 	token: string;
@@ -42,6 +43,7 @@ export interface DbOrder {
 export async function insertOrder(params: {
 	businessId: string;
 	mpid: string;
+	merchantOrderId: string | null;
 	referencePublicKey: string;
 	chain: Chain;
 	token: string;
@@ -51,13 +53,14 @@ export async function insertOrder(params: {
 }): Promise<DbOrder> {
 	const row = await queryOne<DbOrder>(
 		`INSERT INTO orders
-		   (business_id, mpid, reference_public_key, chain, token, amount,
-		    memo, expires_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		   (business_id, mpid, merchant_order_id, reference_public_key,
+		    chain, token, amount, memo, expires_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		 RETURNING *`,
 		[
 			params.businessId,
 			params.mpid,
+			params.merchantOrderId,
 			params.referencePublicKey,
 			params.chain,
 			params.token,
@@ -74,6 +77,25 @@ export async function getOrderByMpid(mpid: string): Promise<DbOrder | null> {
 	return queryOne<DbOrder>(
 		`SELECT * FROM orders WHERE mpid = $1 LIMIT 1`,
 		[mpid],
+	);
+}
+
+// Look up the current live order (if any) for a given (business, merchant ref).
+// Live = not terminally failed. Used by /api/order/init to give idempotent
+// behavior: same merchant ref + live order -> reuse; settled as paid -> reject;
+// terminally failed -> allow a new one.
+export async function getLiveOrderByMerchantRef(params: {
+	businessId: string;
+	merchantOrderId: string;
+}): Promise<DbOrder | null> {
+	return queryOne<DbOrder>(
+		`SELECT * FROM orders
+		 WHERE business_id = $1
+		   AND merchant_order_id = $2
+		   AND status NOT IN ('EXPIRED','FAILED','CANCELLED','REFUNDED')
+		 ORDER BY created_at DESC
+		 LIMIT 1`,
+		[params.businessId, params.merchantOrderId],
 	);
 }
 

@@ -21,13 +21,14 @@ async function fetchBusiness(slug: string): Promise<BusinessResp> {
 	return (await res.json()) as BusinessResp;
 }
 
-// URL-param schema. All optional except `business`.
+// URL-param schema. `business` and `orderId` are required on the merchant-
+// supplied link; the rest are editable pre-fills.
 const searchSchema = z.object({
 	business: z.string().optional(),
+	orderId: z.string().optional(),
 	amount: z.coerce.number().positive().optional(),
 	token: z.string().optional(),
 	blockchain: z.literal("solana").optional().default("solana"),
-	orderId: z.string().optional(),
 	payer: z.string().optional(),
 	message: z.string().optional(),
 	returnUrl: z.string().url().optional(),
@@ -41,27 +42,36 @@ export const Route = createFileRoute("/pay/")({
 function PayPage() {
 	const search = Route.useSearch();
 
-	// Business is required — bail early if missing.
-	if (!search.business) {
+	// Business and orderId are both required on the merchant link.
+	if (!search.business || !search.orderId) {
 		return (
 			<main className="mx-auto max-w-lg px-6 py-16">
-				<h1 className="text-2xl font-semibold">Missing business</h1>
+				<h1 className="text-2xl font-semibold">Invalid pay link</h1>
 				<p className="mt-2 text-sm text-gray-500">
-					This link is missing the <code>?business=</code> query parameter.
-					Every Merkle Pay link must identify the merchant by slug.
+					This link is missing one or more required parameters:
+					<code className="ml-1">business</code> (merchant slug) and
+					<code className="ml-1">orderId</code> (merchant's order reference).
 				</p>
 			</main>
 		);
 	}
 
-	return <PayForm businessSlug={search.business} search={search} />;
+	return (
+		<PayForm
+			businessSlug={search.business}
+			merchantOrderId={search.orderId}
+			search={search}
+		/>
+	);
 }
 
 function PayForm({
 	businessSlug,
+	merchantOrderId,
 	search,
 }: {
 	businessSlug: string;
+	merchantOrderId: string;
 	search: z.infer<typeof searchSchema>;
 }) {
 	const navigate = useNavigate();
@@ -115,10 +125,10 @@ function PayForm({
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					business: businessSlug,
+					orderId: merchantOrderId,
 					amount: amt,
 					token,
 					blockchain: "solana",
-					orderId: search.orderId,
 					payer: payer || undefined,
 					message: message || undefined,
 					returnUrl: search.returnUrl,
@@ -126,10 +136,13 @@ function PayForm({
 			});
 			const body = (await res.json()) as {
 				code: number;
-				data: { mpid: string } | null;
+				data: { mpid?: string; status?: string } | null;
 				message: string;
 			};
-			if (res.ok && body.code === 200 && body.data?.mpid) {
+			// 200 = fresh order (or reused live one). 409 = already paid — still
+			// land the customer on the status page so they see the confirmation.
+			if (body.data?.mpid && (body.code === 200 || body.code === 409)) {
+				if (body.code === 409) toast.info(body.message);
 				navigate({
 					to: "/pay/$mpid",
 					params: { mpid: body.data.mpid },

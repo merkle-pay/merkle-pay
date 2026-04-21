@@ -43,6 +43,7 @@ export const Route = createFileRoute("/api/order/$mpid")({
 					code: 200,
 					data: {
 						mpid: order.mpid,
+						merchant_order_id: order.merchant_order_id,
 						chain: order.chain,
 						token: order.token,
 						amount: order.amount,

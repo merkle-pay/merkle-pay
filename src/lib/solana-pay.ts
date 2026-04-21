@@ -33,7 +33,8 @@ export function buildSolanaPayUrl(
 		reference: new PublicKey(order.reference_public_key),
 		label: business.name,
 		message: `Merkle Pay ${order.mpid}`,
-		memo: order.memo ?? undefined,
+		// On-chain memo = merchant's order reference, required on every order.
+		memo: order.merchant_order_id,
 	});
 	return url.toString();
 }

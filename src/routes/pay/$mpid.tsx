@@ -1,4 +1,3 @@
-import { createQROptions } from "@solana/pay";
 import QRCodeStyling from "@solana/qr-code-styling";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -11,6 +10,7 @@ const searchSchema = z.object({
 
 type OrderView = {
 	mpid: string;
+	merchant_order_id: string;
 	chain: string;
 	token: string;
 	amount: string;
@@ -128,7 +128,8 @@ function PayOrderView({
 				Pay {order.business.name}
 			</h1>
 			<p className="mt-1 text-sm text-gray-500">
-				{order.amount} {order.token} · order <code>{order.mpid}</code>
+				{order.amount} {order.token} · order{" "}
+				<code>{order.merchant_order_id}</code>
 			</p>
 
 			<div className="mt-8 rounded-lg border border-gray-200 p-6">
@@ -178,6 +179,9 @@ function StatusBadge({ status }: { status: string }) {
 
 const QR_SIZE = 320;
 
+// Solana Pay QR styling defaults, inlined so we don't have to import
+// @solana/pay (which pulls in Node Buffer) on the client. Matches the
+// output of @solana/pay's createQROptions(url, size).
 function QrBlock({ solanaPayUrl }: { solanaPayUrl: string }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 
@@ -185,12 +189,19 @@ function QrBlock({ solanaPayUrl }: { solanaPayUrl: string }) {
 		const el = containerRef.current;
 		if (!el) return;
 		el.innerHTML = "";
-		// createQROptions from @solana/pay produces the styling defaults Solana
-		// wallets expect; we then point the centered image at /logo.svg which
-		// is served statically from public/.
-		const options = createQROptions(solanaPayUrl, QR_SIZE);
-		options.image = "/logo.svg";
-		const qr = new QRCodeStyling(options);
+		const qr = new QRCodeStyling({
+			type: "svg",
+			width: QR_SIZE,
+			height: QR_SIZE,
+			data: solanaPayUrl,
+			margin: 16,
+			image: "/logo.svg",
+			backgroundOptions: { color: "white" },
+			dotsOptions: { type: "extra-rounded", color: "black" },
+			cornersSquareOptions: { type: "extra-rounded", color: "black" },
+			cornersDotOptions: { type: "square", color: "black" },
+			imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 0 },
+		});
 		qr.append(el);
 	}, [solanaPayUrl]);
 
