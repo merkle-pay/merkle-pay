@@ -1,7 +1,8 @@
+import { createQROptions } from "@solana/pay";
+import QRCodeStyling from "@solana/qr-code-styling";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import QRCode from "qrcode";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { z } from "zod";
 
 const searchSchema = z.object({
@@ -175,37 +176,30 @@ function StatusBadge({ status }: { status: string }) {
 	);
 }
 
+const QR_SIZE = 320;
+
 function QrBlock({ solanaPayUrl }: { solanaPayUrl: string }) {
-	const [dataUrl, setDataUrl] = useState<string | null>(null);
-	const [error, setError] = useState<string | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		let cancelled = false;
-		QRCode.toDataURL(solanaPayUrl, { errorCorrectionLevel: "M", width: 320 })
-			.then((url) => {
-				if (!cancelled) setDataUrl(url);
-			})
-			.catch((e) => {
-				if (!cancelled) setError(String(e));
-			});
-		return () => {
-			cancelled = true;
-		};
+		const el = containerRef.current;
+		if (!el) return;
+		el.innerHTML = "";
+		// createQROptions from @solana/pay produces the styling defaults Solana
+		// wallets expect; we then point the centered image at /logo.svg which
+		// is served statically from public/.
+		const options = createQROptions(solanaPayUrl, QR_SIZE);
+		options.image = "/logo.svg";
+		const qr = new QRCodeStyling(options);
+		qr.append(el);
 	}, [solanaPayUrl]);
 
-	if (error) {
-		return <div className="text-red-600 text-sm">QR render failed: {error}</div>;
-	}
-	if (!dataUrl) {
-		return (
-			<div className="flex h-80 items-center justify-center text-gray-400">
-				Rendering QR…
-			</div>
-		);
-	}
 	return (
-		<div className="flex justify-center">
-			<img src={dataUrl} alt="Solana Pay QR code" width={320} height={320} />
-		</div>
+		<div
+			ref={containerRef}
+			aria-label="Solana Pay QR code"
+			className="mx-auto"
+			style={{ width: QR_SIZE, height: QR_SIZE }}
+		/>
 	);
 }
