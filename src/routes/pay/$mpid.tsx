@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { z } from "zod";
+import { PayWithPhantomExtension } from "#/components/pay-solana/pay-with-phantom-extension";
 
 const searchSchema = z.object({
 	returnUrl: z.string().url().optional(),
@@ -19,6 +20,9 @@ type OrderView = {
 	expires_at: string;
 	business: { name: string; slug: string };
 	pay_url: string;
+	recipient_address: string;
+	reference_public_key: string;
+	spl_mint: string | null;
 };
 
 type OrderResp = {
@@ -138,6 +142,18 @@ function PayOrderView({
 					Scan from another device with Phantom, Solflare, or any Solana Pay
 					wallet
 				</p>
+			</div>
+
+			<div className="mt-4 space-y-2">
+				<PayWithPhantomExtension
+					recipientAddress={order.recipient_address}
+					referencePublicKey={order.reference_public_key}
+					payUrl={order.pay_url}
+					token={order.token}
+					amount={Number(order.amount)}
+					merchantOrderId={order.merchant_order_id}
+					splMint={order.spl_mint}
+				/>
 			</div>
 
 			<div className="mt-6 flex items-center gap-3 text-sm">
