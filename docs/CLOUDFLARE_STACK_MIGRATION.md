@@ -131,6 +131,37 @@ merkle-pay/
 - `@solana/web3.js`, `@solana/spl-token`, `@solana/pay` — expected to work on Workers with `nodejs_compat`, but spike early to catch Buffer / crypto edges
 - Phantom deeplink encryption (`tweetnacl`) — pure JS, fine on Workers
 
+## Pay flow (URL-driven)
+
+Payment links are **URL-param-driven**, not dashboard-created. A merchant (or any external system) constructs a link and embeds it in their checkout / invoice / message. No API keys, no server-to-server call.
+
+```
+/pay
+  ?business=<slug>          # REQUIRED, unique businesses.slug (not UUID)
+  &amount=<number>          # pre-fill, customer-editable
+  &token=USDT               # pre-fill, customer-editable (must be in business's supported list on submit)
+  &blockchain=solana        # currently always solana
+  &orderId=<merchant-ref>   # merchant's external order reference, stored as-is
+  &payer=<name-or-email>    # optional, customer-editable
+  &message=<note>           # optional, customer-editable
+  &returnUrl=<url>          # where to redirect after payment
+```
+
+Rules:
+
+- **`recipient_address` is NEVER in the URL.** The server looks up the payout wallet from `businesses.chain_config.<chain>.payout` using the slug. Any client-supplied `recipient_address` / `payout` key is rejected. This is the single most important security invariant in the pay flow.
+- **Business slug is the only merchant identifier in public URLs.** UUIDs (`business_id`) stay internal.
+- **Customer-editable fields:** `amount`, `token`, `payer`, `message`. Wrong amount is the customer's fault — no server-side guardrail against underpayment beyond status tracking.
+- **Server-validated on submit:** `token` must be in `chain_config.<chain>.tokens`, `business` slug must exist, `amount > 0`.
+
+Order creation happens on form submit, not on link visit:
+
+1. Customer opens the link → form pre-fills from `searchParams`
+2. Customer confirms / edits → `POST /api/order/init`
+3. Server: validate, look up business, generate `mpid` + `reference_public_key`, INSERT `orders` row with `status='PENDING'`, return `{ mpid }`
+4. Redirect to `/pay/:mpid` → renders Solana Pay QR + polls status
+5. On `CONFIRMED` / `FINALIZED` → redirect to `returnUrl`
+
 ## Data model (greenfield)
 
 The current schema is centered on `Payment`. The new product language is **Order** and **Customer**, so the schema is reshaped rather than carried over verbatim.
