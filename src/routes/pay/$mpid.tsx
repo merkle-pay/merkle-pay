@@ -135,7 +135,8 @@ function PayOrderView({
 			<div className="mt-8 rounded-lg border border-gray-200 p-6">
 				<QrBlock solanaPayUrl={order.pay_url} />
 				<p className="mt-4 text-center text-xs text-gray-500">
-					Scan with Phantom, Solflare, or any Solana Pay wallet
+					Scan from another device with Phantom, Solflare, or any Solana Pay
+					wallet
 				</p>
 			</div>
 
