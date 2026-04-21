@@ -18,10 +18,13 @@ For detailed information on specific topics, see the following documents in the 
 
 - ✅ Extracted detailed documentation into focused docs/ files
 - ✅ Removed `apps/merkle-server` - consolidated all blockchain logic into merkle-pay app
+- ✅ Removed all Prisma references - fully migrated to direct SQL via node-postgres
 - ✅ Implemented Server Component + Client Component pattern for data fetching
+- ✅ Refactored `PaymentStatusClient` into a `PaymentStatus` component
 - ✅ Fixed middleware CORS handling for same-origin requests (App Router compatibility)
 - ✅ Updated type definitions for payment status API responses to include `txId`
 - ✅ Improved UI consistency with Shadcn/UI card-based layouts across payment pages
+- Current root version: `0.35.3`. Recent commits reflect a cleanup phase (removing legacy Pages Router files, Prisma, merkle-server).
 
 ## High-Level Architecture
 
@@ -33,10 +36,18 @@ merkle-pay/
 │   ├── merkle-pay          # Next.js payment form & API backend (port 8888)
 │   └── merkle-dashboard    # Vite/React admin dashboard (port 9999)
 ├── packages/               # Shared libraries (currently empty structure)
+├── migrate/                # SQL migration runner + migrations/*.sql
+│   └── migrations/20250704000000000_initial_schema.sql
+├── docs/                   # Topic-focused documentation (8 files)
+├── archive/                # Archived release artifacts (0.33.0, 0.34.0, ...)
 ├── caddy/                  # Reverse proxy/SSL termination
 ├── compose.yml             # Docker Compose orchestration
-└── .env                    # Environment configuration
+├── Makefile                # dev / build / d-up targets
+├── pnpm-workspace.yaml     # Workspaces: apps/*, packages/*
+└── .env / .env.example     # Environment configuration
 ```
+
+> **Note on migrations:** SQL migration files live at **monorepo root** under `migrate/migrations/`, run by the `merkle-migrate` container in `compose.yml`. The `apps/merkle-pay/src/database/migrations/` directory exists but is currently empty — don't put new migrations there.
 
 **Tech Stack Summary:**
 
