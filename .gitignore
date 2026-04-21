@@ -46,5 +46,21 @@ next-env.d.ts
 # ai
 .kiro/
 
+# vite / tanstack start build output
+/dist
+/.tanstack
+src/routeTree.gen.ts
+
+# cloudflare
+/.wrangler
+.dev.vars
+
+# lingui compiled catalogs
+src/locales/*.js
+src/locales/*.mjs
+
+# node-pg-migrate journal
+/migrations/.journal
+
 
 

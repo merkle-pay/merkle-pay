@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+	--font-sans:
+		ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+	@apply bg-white text-gray-900 antialiased;
+}

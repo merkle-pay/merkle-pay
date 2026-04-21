@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "merkle-pay",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "vars": {
+    // Public, non-sensitive config only. Secrets go through `wrangler secret put`.
+    "JWT_ISSUER": "Merkle Pay",
+    "NEXT_PUBLIC_BLOCKCHAIN_OPTIONS": "solana",
+    "NEXT_PUBLIC_SOLANA_TOKEN_OPTIONS": "USDT,USDC,SOL",
+    "NEXT_PUBLIC_SOLANA_RPC_ENDPOINT": "https://api.mainnet-beta.solana.com"
+    // NEXT_PUBLIC_TURNSTILE_SITE_KEY is public, set via `vars` when ready
+  },
+  "observability": {
+    "enabled": true
+  }
+  // Required secrets (provision via `wrangler secret put <NAME>`):
+  //   DATABASE_URL           Neon connection string (pooler, sslmode=require)
+  //   JWT_SECRET             32+ bytes of random, used to sign boss/staff tokens
+  //   TURNSTILE_SECRET_KEY   Cloudflare Turnstile server-side verification key
+}

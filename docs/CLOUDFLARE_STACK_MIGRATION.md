@@ -172,7 +172,7 @@ Staff accounts are always created from inside the dashboard by the boss; there i
 
 Status state machine stays the same: `PENDING → PROCESSED → CONFIRMED → FINALIZED` plus `EXPIRED / FAILED / CANCELLED / REFUNDED`.
 
-Since there's no production data, migrations can start from a clean `0001_initial.sql` — no need to port existing rows or preserve old column names.
+Since there's no production data, migrations start from a clean `<ms-timestamp>_initial.sql` (node-pg-migrate convention — `Date.now()` at creation time).
 
 ## Migration phases
 
