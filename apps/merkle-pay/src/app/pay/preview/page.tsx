@@ -23,6 +23,7 @@ export default function PaymentPreviewPage() {
   } = usePaymentStore();
 
   const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const [turnstileReady, setTurnstileReady] = useState(false);
 
   const router = useRouter();
 
@@ -79,6 +80,14 @@ export default function PaymentPreviewPage() {
   }
 
   const handleConfirmPayment = async () => {
+    if (!turnstileReady) {
+      setAlertMessage({
+        type: "error",
+        value: "Security check is still loading, please wait a moment and try again",
+      });
+      return;
+    }
+
     const success = await createPaymentTableRecord();
 
     if (success) {
@@ -151,7 +160,6 @@ export default function PaymentPreviewPage() {
         setPaymentTableRecord(paymentTableRecord);
         setUrlForSolanaPayQrCode(urlForSolanaPayQrCode ?? null);
         setReferencePublicKeyString(referencePublicKeyString ?? null);
-        console.log("1", 1);
         return true;
       }
 
@@ -217,6 +225,10 @@ export default function PaymentPreviewPage() {
         options={{
           size: "flexible",
         }}
+        onBeforeTurnstileRender={() => setTurnstileReady(false)}
+        onSuccess={() => setTurnstileReady(true)}
+        onError={() => setTurnstileReady(false)}
+        onExpire={() => setTurnstileReady(false)}
       />
 
       <div className="flex gap-4">
@@ -228,8 +240,8 @@ export default function PaymentPreviewPage() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <Button disabled={isLoading} onClick={handleConfirmPayment}>
-          {isLoading ? "Loading..." : "Confirm Payment"}
+        <Button disabled={isLoading || !turnstileReady} onClick={handleConfirmPayment}>
+          {isLoading ? "Loading..." : turnstileReady ? "Confirm Payment" : "Loading security check..."}
         </Button>
       </div>
     </div>

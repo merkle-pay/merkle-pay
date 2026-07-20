@@ -1,6 +1,7 @@
 import { PaymentFormData } from "src/types/payment";
 import { Payment, PaymentStatus } from "../types/database";
 import { query, queryOne } from "../lib/db";
+import { logger } from "../utils/logger";
 
 export const createPaymentTableRecord = async ({
   paymentFormData,
@@ -63,7 +64,7 @@ export const updatePaymentStatus = async ({
       [status, mpid]
     );
   } catch (error) {
-    console.error("Error updating payment status:", error);
+    logger.error({ err: error }, "Error updating payment status");
     return null;
   }
 };
@@ -84,13 +85,13 @@ export const updatePaymentTxIdIfNotSet = async ({
     );
 
     if (!result) {
-      console.log(`Payment with mpid ${mpid} not found or txId already set.`);
+      logger.info({ mpid }, "Payment not found or txId already set");
       return null;
     }
 
     return result;
   } catch (error) {
-    console.error("Error updating payment txId:", error);
+    logger.error({ err: error }, "Error updating payment txId");
     return null;
   }
 };

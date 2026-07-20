@@ -21,6 +21,7 @@ import { PaymentStatus } from "../types/database";
 import type { Payment as PaymentTableRecord } from "../types/database";
 import { PaymentFormData } from "src/types/payment";
 import { PhantomSolanaProvider } from "src/types/global";
+import { logger } from "../utils/logger";
 
 import { z } from "zod";
 
@@ -216,9 +217,7 @@ export const sendSolanaPaymentWithPhantomExtension = async ({
           lamports: lamports,
         })
       );
-      console.log(
-        `Prepared SOL transfer: ${lamports} lamports to ${recipient_address}`
-      );
+      logger.debug({ lamports, recipient_address }, "Prepared SOL transfer");
     } else {
       // SPL Token Transfer
       const { mint, decimals } = SplTokens[token as keyof typeof SplTokens];
@@ -253,9 +252,7 @@ export const sendSolanaPaymentWithPhantomExtension = async ({
           TOKEN_PROGRAM_ID // Token program ID
         )
       );
-      console.log(
-        `Prepared token transfer: ${tokenAmount} ${token} to ${recipient_address}`
-      );
+      logger.debug({ tokenAmount, token, recipient_address }, "Prepared token transfer");
     }
 
     // 5. --- Create Transaction ---
@@ -265,16 +262,16 @@ export const sendSolanaPaymentWithPhantomExtension = async ({
     // 6. --- Fetch Blockhash ---
     const { blockhash } = await connection.getLatestBlockhash("confirmed");
     transaction.recentBlockhash = blockhash;
-    console.log(`Using blockhash: ${blockhash}`);
+    logger.debug({ blockhash }, "Using blockhash");
 
     // 7. --- Sign and Send ---
-    console.log("Requesting signature and sending transaction...");
+    logger.debug("Requesting signature and sending transaction...");
     const { signature }: { signature: TransactionSignature } =
       await phantomSolanaProvider!.signAndSendTransaction(transaction);
-    console.log(`Transaction submitted with signature: ${signature}`);
+    logger.debug({ signature }, "Transaction submitted with signature");
 
     // 8. --- Confirmation (Optional but kept for immediate feedback) ---
-    console.log("Waiting for transaction confirmation...");
+    logger.debug("Waiting for transaction confirmation...");
     const signatureResult = await connection.confirmTransaction(
       {
         signature,
