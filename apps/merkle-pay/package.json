@@ -61,6 +61,8 @@
     "postcss": "catalog:pay",
     "pg": "catalog:pay",
     "@types/pg": "catalog:pay",
+    "pino": "catalog:pay",
+    "pino-pretty": "catalog:pay",
     "qrcode.react": "catalog:pay",
     "react": "catalog:pay",
     "react-day-picker": "catalog:pay",

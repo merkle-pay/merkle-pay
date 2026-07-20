@@ -15,10 +15,12 @@ import {
 } from "@solana/web3.js";
 
 import {
+  MERKLE_PAY_EXPIRE_TIME,
   REQUIRED_CONFIRMATION_LEVEL,
   SETTLED_TX_STATUSES,
   SOLANA_RPC_ENDPOINT,
 } from "src/utils/solana";
+import { logger } from "src/utils/logger";
 
 // ! bug: sometimes, txId cannot be updated to db, even if it's found on chain and the status is confirmed
 export async function GET(request: NextRequest) {
@@ -92,6 +94,21 @@ const validatePayment = async (mpid: string | null) => {
       data: { status: payment.status },
       message: `Payment is already ${payment.status}`,
     };
+  } else {
+    // Check for payment expiry (issue #6)
+    const createdAt = new Date(payment.createdAt).getTime();
+    const now = Date.now();
+    if (now - createdAt > MERKLE_PAY_EXPIRE_TIME) {
+      await updatePaymentStatus({
+        mpid: payment.mpid,
+        status: PaymentStatus.EXPIRED,
+      });
+      result = {
+        code: 200,
+        data: { status: PaymentStatus.EXPIRED },
+        message: `Payment ${payment.mpid} has expired`,
+      };
+    }
   }
 
   return {
@@ -124,16 +141,14 @@ const findTransactionStatusOnChain = async ({
   // --- Try fetching by known txId first ---
   if (signature) {
     try {
-      console.log(
-        `Attempting to fetch transaction by known txId: ${signature}`
-      );
+      logger.debug({ signature }, "Attempting to fetch transaction by known txId");
       tx = await connection.getParsedTransaction(signature, {
         commitment: REQUIRED_CONFIRMATION_LEVEL,
         maxSupportedTransactionVersion: 0,
       });
     } catch (error) {
       // Errors fetching tx details are often transient or indicate the tx might not exist/be confirmed yet
-      console.error("Error fetching transaction details by txId:", error);
+      logger.error({ err: error }, "Error fetching transaction details by txId");
       // Don't return a 500 yet, let's try the reference key method if txId fetch failed
       signature = null; // Clear signature so we attempt lookup by reference key
       tx = null; // Reset tx
@@ -142,13 +157,13 @@ const findTransactionStatusOnChain = async ({
 
   // --- If txId wasn't available or fetching by txId failed/returned null, try by reference key ---
   if (!tx && referencePublicKeyString) {
-    console.log("Fetching signatures by reference key...");
+    logger.debug("Fetching signatures by reference key...");
     const referencePublicKey = new PublicKey(referencePublicKeyString);
     let signatures: ConfirmedSignatureInfo[] = [];
     try {
       signatures = await connection.getSignaturesForAddress(
         referencePublicKey,
-        { limit: 1 }, // Fetch the most recent signature
+        { limit: 10 }, // Fetch multiple signatures to handle multiple scans of the same QR code
         REQUIRED_CONFIRMATION_LEVEL
       );
     } catch (error) {
@@ -162,31 +177,36 @@ const findTransactionStatusOnChain = async ({
     }
 
     if (signatures.length > 0) {
-      try {
-        const signatureInfo = signatures[0];
-        signature = signatureInfo.signature;
-        tx = await connection.getParsedTransaction(signature, {
-          commitment: REQUIRED_CONFIRMATION_LEVEL,
-          maxSupportedTransactionVersion: 0,
-        });
-        // Update payment record with the txId if it wasn't set before
-        if (tx && !txIdFromDb) {
-          console.log(`Updating payment mpid ${mpid} with txId: ${signature}`);
-          // Use signature here because tx.transaction.signatures[0] might differ if it's a different tx type
-          await updatePaymentTxIdIfNotSet({
-            mpid: mpid,
-            txId: signature,
+      for (const signatureInfo of signatures) {
+        if (result) break;
+        try {
+          signature = signatureInfo.signature;
+          const candidateTx = await connection.getParsedTransaction(signature, {
+            commitment: REQUIRED_CONFIRMATION_LEVEL,
+            maxSupportedTransactionVersion: 0,
           });
-        }
-      } catch (error) {
+          if (candidateTx) {
+            tx = candidateTx;
+            // Update payment record with the txId if it wasn't set before
+            if (!txIdFromDb) {
+              logger.info({ mpid, signature }, "Updating payment with txId");
+              await updatePaymentTxIdIfNotSet({
+                mpid: mpid,
+                txId: signature,
+              });
+            }
+            break;
+          }
+        } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
         // If fetching the tx details fails here, it's a server-side issue
-        result = {
-          code: 500,
-          data: null,
-          message: `Failed to query transaction details by found signature: ${errorMessage}`,
-        };
+          result = {
+            code: 500,
+            data: null,
+            message: `Failed to query transaction details by found signature: ${errorMessage}`,
+          };
+        }
       }
     } else {
       // do nothing
